@@ -73,17 +73,25 @@ public class EatFood extends Behavior<Villager> {
         villager.stopUsingItem();
         villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         
-        if (!this.foodToEat.isEmpty()) {
-            FoodProperties foodProperties = this.foodToEat.getFoodProperties(villager);
-            if (foodProperties != null) {
-                villager.getFoodData().eat(foodProperties.getNutrition(), foodProperties.getSaturationModifier());
-                
-                SimpleContainer inventory = villager.getInventory();
-                ItemStack inventoryItem = inventory.getItem(0);
-                if (!inventoryItem.isEmpty() && inventoryItem.is(this.foodToEat.getItem())) {
-                    inventoryItem.shrink(1);
-                }
-            }
+        if (this.foodToEat.isEmpty()) {
+            this.foodToEat = ItemStack.EMPTY;
+            this.eatingTime = 0;
+            return;
+        }
+        
+        FoodProperties foodProperties = this.foodToEat.getFoodProperties(villager);
+        if (foodProperties == null) {
+            this.foodToEat = ItemStack.EMPTY;
+            this.eatingTime = 0;
+            return;
+        }
+        
+        villager.getFoodData().eat(foodProperties.getNutrition(), foodProperties.getSaturationModifier());
+        
+        SimpleContainer inventory = villager.getInventory();
+        ItemStack inventoryItem = inventory.getItem(0);
+        if (!inventoryItem.isEmpty() && inventoryItem.is(this.foodToEat.getItem())) {
+            inventoryItem.shrink(1);
         }
         
         this.foodToEat = ItemStack.EMPTY;
@@ -94,14 +102,16 @@ public class EatFood extends Behavior<Villager> {
         SimpleContainer inventory = villager.getInventory();
         ItemStack item = inventory.getItem(0);
         
-        if (!item.isEmpty()) {
-            FoodProperties foodProperties = item.getFoodProperties(villager);
-            if (foodProperties != null) {
-                return item;
-            }
+        if (item.isEmpty()) {
+            return ItemStack.EMPTY;
         }
         
-        return ItemStack.EMPTY;
+        FoodProperties foodProperties = item.getFoodProperties(villager);
+        if (foodProperties == null) {
+            return ItemStack.EMPTY;
+        }
+        
+        return item;
     }
     
     private void playEatingSound(ServerLevel level, Villager villager) {
