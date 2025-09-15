@@ -51,8 +51,7 @@ public class EatFood extends Behavior<Villager> {
         this.eatingTime = 0;
         villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, this.foodToEat.copy());
         villager.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
-        villager.playSound(SoundEvents.GENERIC_EAT, 0.5F + 0.5F * level.random.nextInt(2), 
-            (level.random.nextFloat() - level.random.nextFloat()) * 0.2F + 1.0F);
+        playEatingSound(level, villager);
     }
     
     @Override
@@ -65,8 +64,7 @@ public class EatFood extends Behavior<Villager> {
         this.eatingTime++;
         
         if (this.eatingTime % 4 == 0) {
-            villager.playSound(SoundEvents.GENERIC_EAT, 0.5F + 0.5F * level.random.nextInt(2),
-                (level.random.nextFloat() - level.random.nextFloat()) * 0.2F + 1.0F);
+            playEatingSound(level, villager);
         }
     }
     
@@ -83,7 +81,7 @@ public class EatFood extends Behavior<Villager> {
                 SimpleContainer inventory = villager.getInventory();
                 ItemStack inventoryItem = inventory.getItem(0);
                 if (!inventoryItem.isEmpty() && inventoryItem.is(this.foodToEat.getItem())) {
-                    inventory.setItem(0, ItemStack.EMPTY);
+                    inventoryItem.shrink(1);
                 }
             }
         }
@@ -104,5 +102,10 @@ public class EatFood extends Behavior<Villager> {
         }
         
         return ItemStack.EMPTY;
+    }
+    
+    private void playEatingSound(ServerLevel level, Villager villager) {
+        villager.playSound(SoundEvents.GENERIC_EAT, 0.5F + 0.5F * level.random.nextInt(2),
+            (level.random.nextFloat() - level.random.nextFloat()) * 0.2F + 1.0F);
     }
 }
