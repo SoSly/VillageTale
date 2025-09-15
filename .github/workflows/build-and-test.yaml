@@ -1,0 +1,52 @@
+name: Build & Test
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - README.md
+      - LICENSE
+      - ".github/**/*"
+  pull_request:
+    branches:
+      - '**'
+    paths-ignore:
+      - README.md
+      - LICENSE
+      - ".github/**/*"
+jobs:
+  run:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: 17
+
+      - name: Validate Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Setup Gradle
+        run: chmod u+x ./gradlew && ./gradlew build
+
+      - name: Test JAR with GameTest Server
+        run: ./gradlew runGameTestServer
+        timeout-minutes: 20
+        env:
+          CM_RELEASE: false
+          CM_SEMVER_VERSION: ${{ needs.vars.outputs.version }}
+          CM_BUILD_NUM: ${{ needs.vars.outputs.build }}
+          GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-data
+          path: run/gametest
