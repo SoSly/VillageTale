@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.sosly.villageworks.command.VillageWorksCommand;
 import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.registry.EntityTypes;
+import org.sosly.villageworks.registry.MemoryModuleTypes;
 
 @Mod(VillageWorks.MOD_ID)
 public class VillageWorks {
@@ -25,6 +26,7 @@ public class VillageWorks {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         EntityTypes.register(modEventBus);
+        MemoryModuleTypes.register(modEventBus);
 
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::onEntityAttributeCreation);

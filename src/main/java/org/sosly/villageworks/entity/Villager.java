@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.entity.ai.behavior.VillagerGoalPackages;
+import org.sosly.villageworks.registry.MemoryModuleTypes;
 
 import javax.annotation.Nullable;
 
@@ -50,7 +51,10 @@ public class Villager extends PathfinderMob {
         MemoryModuleType.HURT_BY_ENTITY,
         MemoryModuleType.NEAREST_HOSTILE,
         MemoryModuleType.LAST_SLEPT,
-        MemoryModuleType.LAST_WOKEN
+        MemoryModuleType.LAST_WOKEN,
+        MemoryModuleTypes.CAN_EAT.get(),
+        MemoryModuleTypes.IS_HUNGRY.get(),
+        MemoryModuleTypes.IS_STARVING.get()
     );
 
     private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
