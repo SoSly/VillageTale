@@ -11,6 +11,8 @@ public class VillageWorksCommand {
             .requires(source -> source.hasPermission(2));
 
         AssignCommand.register(vwCommand);
+        ExhaustCommand.register(vwCommand);
+        HungerCommand.register(vwCommand);
 
         dispatcher.register(vwCommand);
     }

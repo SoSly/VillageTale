@@ -28,11 +28,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villageworks.VillageWorks;
+import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.entity.ai.behavior.VillagerGoalPackages;
 
 import javax.annotation.Nullable;
 
 public class Villager extends PathfinderMob {
+    private final LivingEntityFoodData foodData;
+    
     private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
         MemoryModuleType.HOME,
         MemoryModuleType.NEAREST_LIVING_ENTITIES,
@@ -59,6 +62,7 @@ public class Villager extends PathfinderMob {
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
+        this.foodData = new LivingEntityFoodData();
         ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         this.getNavigation().setCanFloat(true);
         this.setCanPickUpLoot(true);
@@ -114,17 +118,20 @@ public class Villager extends PathfinderMob {
         this.level().getProfiler().push("villageWorksVillagerBrain");
         this.getBrain().tick((ServerLevel) this.level(), this);
         this.level().getProfiler().pop();
+        this.foodData.tick(this);
         super.customServerAiStep();
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        this.foodData.addAdditionalSaveData(tag);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        this.foodData.readAdditionalSaveData(tag);
         if (this.level() instanceof ServerLevel) {
             this.refreshBrain((ServerLevel) this.level());
         }
@@ -182,6 +189,10 @@ public class Villager extends PathfinderMob {
         return this.brain.getMemory(MemoryModuleType.HOME)
             .map(GlobalPos::pos)
             .orElse(null);
+    }
+
+    public LivingEntityFoodData getFoodData() {
+        return this.foodData;
     }
 
     private BlockPos getBedHeadPosition(BlockPos bedPos) {
