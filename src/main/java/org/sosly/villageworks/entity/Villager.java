@@ -142,22 +142,18 @@ public class Villager extends PathfinderMob {
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         this.foodData.addAdditionalSaveData(tag);
-        ItemStack inventoryItem = this.inventory.getItem(0);
-        if (!inventoryItem.isEmpty()) {
-            CompoundTag itemTag = new CompoundTag();
-            inventoryItem.save(itemTag);
-            tag.put("InventoryItem", itemTag);
-        }
+        CompoundTag inventoryTag = new CompoundTag();
+        ContainerHelper.saveAllItems(inventoryTag, this.inventory);
+        tag.put("Inventory", inventoryTag);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.foodData.readAdditionalSaveData(tag);
-        if (tag.contains("InventoryItem")) {
-            CompoundTag itemTag = tag.getCompound("InventoryItem");
-            ItemStack inventoryItem = ItemStack.of(itemTag);
-            this.inventory.setItem(0, inventoryItem);
+        if (tag.contains("Inventory")) {
+            CompoundTag inventoryTag = tag.getCompound("Inventory");
+            ContainerHelper.loadAllItems(inventoryTag, this.inventory);
         }
         if (this.level() instanceof ServerLevel) {
             this.refreshBrain((ServerLevel) this.level());
