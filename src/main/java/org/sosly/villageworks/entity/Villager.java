@@ -229,23 +229,29 @@ public class Villager extends PathfinderMob {
     public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         
-        if (!itemStack.isEmpty() && this.inventory.getItem(0).isEmpty()) {
-            FoodProperties foodProperties = itemStack.getFoodProperties(this);
-            if (foodProperties != null && foodProperties.getSaturationModifier() > 0) {
-                ItemStack singleItem = itemStack.copy();
-                singleItem.setCount(1);
-                this.inventory.setItem(0, singleItem);
-                
-                if (!player.getAbilities().instabuild) {
-                    itemStack.shrink(1);
-                }
-                
-                this.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
-                return InteractionResult.SUCCESS;
-            }
+        if (itemStack.isEmpty()) {
+            return InteractionResult.PASS;
         }
         
-        return InteractionResult.PASS;
+        if (!this.inventory.getItem(0).isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        
+        FoodProperties foodProperties = itemStack.getFoodProperties(this);
+        if (foodProperties == null || foodProperties.getSaturationModifier() <= 0) {
+            return InteractionResult.PASS;
+        }
+        
+        ItemStack singleItem = itemStack.copy();
+        singleItem.setCount(1);
+        this.inventory.setItem(0, singleItem);
+        
+        if (!player.getAbilities().instabuild) {
+            itemStack.shrink(1);
+        }
+        
+        this.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -261,12 +267,15 @@ public class Villager extends PathfinderMob {
 
     private BlockPos getBedHeadPosition(BlockPos bedPos) {
         BlockState blockState = this.level().getBlockState(bedPos);
-        if (blockState.getBlock() instanceof BedBlock) {
-            BedPart bedPart = blockState.getValue(BedBlock.PART);
-            if (bedPart == BedPart.FOOT) {
-                return bedPos.relative(blockState.getValue(BedBlock.FACING));
-            }
+        if (!(blockState.getBlock() instanceof BedBlock)) {
+            return bedPos;
         }
-        return bedPos;
+        
+        BedPart bedPart = blockState.getValue(BedBlock.PART);
+        if (bedPart != BedPart.FOOT) {
+            return bedPos;
+        }
+        
+        return bedPos.relative(blockState.getValue(BedBlock.FACING));
     }
 }

@@ -25,15 +25,17 @@ public class VillagerPanicTrigger extends Behavior<Villager> {
     
     @Override
     protected void start(ServerLevel level, Villager villager, long gameTime) {
-        if (isHurt(villager) || hasHostile(villager)) {
-            Brain<Villager> brain = villager.getBrain();
-            if (!brain.isActive(Activity.PANIC)) {
-                brain.eraseMemory(MemoryModuleType.PATH);
-                brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-                brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
-            }
-            brain.setActiveActivityIfPossible(Activity.PANIC);
+        if (!isHurt(villager) && !hasHostile(villager)) {
+            return;
         }
+        
+        Brain<Villager> brain = villager.getBrain();
+        if (!brain.isActive(Activity.PANIC)) {
+            brain.eraseMemory(MemoryModuleType.PATH);
+            brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+            brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
+        }
+        brain.setActiveActivityIfPossible(Activity.PANIC);
     }
     
     private static boolean isHurt(Villager villager) {
