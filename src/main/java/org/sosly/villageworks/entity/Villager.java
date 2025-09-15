@@ -30,7 +30,6 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
@@ -142,18 +141,22 @@ public class Villager extends PathfinderMob {
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         this.foodData.addAdditionalSaveData(tag);
-        CompoundTag inventoryTag = new CompoundTag();
-        ContainerHelper.saveAllItems(inventoryTag, this.inventory);
-        tag.put("Inventory", inventoryTag);
+        ItemStack inventoryItem = this.inventory.getItem(0);
+        if (!inventoryItem.isEmpty()) {
+            CompoundTag itemTag = new CompoundTag();
+            inventoryItem.save(itemTag);
+            tag.put("InventoryItem", itemTag);
+        }
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.foodData.readAdditionalSaveData(tag);
-        if (tag.contains("Inventory")) {
-            CompoundTag inventoryTag = tag.getCompound("Inventory");
-            ContainerHelper.loadAllItems(inventoryTag, this.inventory);
+        if (tag.contains("InventoryItem")) {
+            CompoundTag itemTag = tag.getCompound("InventoryItem");
+            ItemStack inventoryItem = ItemStack.of(itemTag);
+            this.inventory.setItem(0, inventoryItem);
         }
         if (this.level() instanceof ServerLevel) {
             this.refreshBrain((ServerLevel) this.level());

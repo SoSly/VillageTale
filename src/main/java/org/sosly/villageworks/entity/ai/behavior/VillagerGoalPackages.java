@@ -28,6 +28,7 @@ public class VillagerGoalPackages {
             Pair.of(0, VillagerPanicTrigger.create()),
             Pair.of(1, (BehaviorControl<? super Villager>) new MoveToTargetSink()),
             Pair.of(1, WakeUp.create()),
+            Pair.of(2, (BehaviorControl<? super Villager>) new EatFood()),
             Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
         );
     }
