@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - A new `Villager` entity that is the basis of the mod
 - Hunger system for villagers using `LivingEntityFoodData`
-- Hunger awareness system for villagers (foundation for future food-seeking behaviors)
+- Hunger awareness system for villagers (automatically detects hunger states for AI behaviors)
 - `/vw assign` command to set villager homes
 - `/vw exhaust` command to add exhaustion to villagers for testing
 - `/vw hunger` command to display villager food stats

@@ -31,6 +31,7 @@ import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.entity.ai.behavior.VillagerGoalPackages;
 import org.sosly.villageworks.registry.MemoryModuleTypes;
+import org.sosly.villageworks.registry.SensorTypes;
 
 import javax.annotation.Nullable;
 
@@ -61,7 +62,8 @@ public class Villager extends PathfinderMob {
         SensorType.NEAREST_LIVING_ENTITIES,
         SensorType.NEAREST_PLAYERS,
         SensorType.HURT_BY,
-        SensorType.VILLAGER_HOSTILES
+        SensorType.VILLAGER_HOSTILES,
+        SensorTypes.HUNGER.get()
     );
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
