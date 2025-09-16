@@ -13,6 +13,7 @@ public class VillageWorksCommand {
         AssignCommand.register(vwCommand);
         ExhaustCommand.register(vwCommand);
         HungerCommand.register(vwCommand);
+        VillageCommand.register(vwCommand);
 
         dispatcher.register(vwCommand);
     }

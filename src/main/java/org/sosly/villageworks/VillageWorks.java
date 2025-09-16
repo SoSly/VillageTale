@@ -31,8 +31,6 @@ public class VillageWorks {
         MemoryModuleTypes.register(modEventBus);
         SensorTypes.register(modEventBus);
 
-        Capabilities.register();
-
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::onEntityAttributeCreation);
 
