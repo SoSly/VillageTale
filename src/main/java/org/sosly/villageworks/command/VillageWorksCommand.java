@@ -14,6 +14,7 @@ public class VillageWorksCommand {
         ExhaustCommand.register(vwCommand);
         HungerCommand.register(vwCommand);
         VillageCommand.register(vwCommand);
+        VillagerCommand.register(vwCommand);
         ZoneCommand.register(vwCommand);
 
         dispatcher.register(vwCommand);

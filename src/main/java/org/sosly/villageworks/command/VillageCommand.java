@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.data.VillageData;
 
@@ -189,6 +190,14 @@ public class VillageCommand {
                                         ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
                     source.sendSuccess(() ->
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
+                    
+                    LevelChunk chunk = level.getChunk(townHall.x, townHall.z);
+                    var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+                    if (villageCapability != null) {
+                        int villagerCount = villageCapability.getVillagerIds().size();
+                        source.sendSuccess(() ->
+                            Component.literal("Villagers: " + villagerCount), false);
+                    }
 
                     return 1;
                 })
@@ -242,6 +251,14 @@ public class VillageCommand {
                                         ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
                     source.sendSuccess(() ->
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
+                    
+                    LevelChunk chunk = level.getChunk(townHall.x, townHall.z);
+                    var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+                    if (villageCapability != null) {
+                        int villagerCount = villageCapability.getVillagerIds().size();
+                        source.sendSuccess(() ->
+                            Component.literal("Villagers: " + villagerCount), false);
+                    }
                     
                     return 1;
                 })

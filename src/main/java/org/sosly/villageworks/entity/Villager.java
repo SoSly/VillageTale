@@ -19,6 +19,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -29,6 +30,8 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,8 +41,13 @@ import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.entity.ai.behavior.VillagerGoalPackages;
 import org.sosly.villageworks.entity.ai.SensorTypes;
+import org.sosly.villageworks.capability.Capabilities;
+import org.sosly.villageworks.capability.village.VillageCapability;
+import org.sosly.villageworks.data.VillageData;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.UUID;
 
 public class Villager extends PathfinderMob {
     private final LivingEntityFoodData foodData;
@@ -62,7 +70,8 @@ public class Villager extends PathfinderMob {
         MemoryModuleType.LAST_WOKEN,
         MemoryModuleTypes.CAN_EAT.get(),
         MemoryModuleTypes.IS_HUNGRY.get(),
-        MemoryModuleTypes.IS_STARVING.get()
+        MemoryModuleTypes.IS_STARVING.get(),
+        MemoryModuleTypes.VILLAGE.get()
     );
 
     private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
@@ -146,6 +155,11 @@ public class Villager extends PathfinderMob {
             inventoryItem.save(itemTag);
             tag.put("InventoryItem", itemTag);
         }
+
+        Optional<UUID> villageId = this.brain.getMemory(MemoryModuleTypes.VILLAGE.get());
+        if (villageId.isPresent()) {
+            tag.putString("VillageId", villageId.get().toString());
+        }
     }
 
     @Override
@@ -157,6 +171,12 @@ public class Villager extends PathfinderMob {
             ItemStack inventoryItem = ItemStack.of(itemTag);
             this.inventory.setItem(0, inventoryItem);
         }
+
+        if (tag.contains("VillageId")) {
+            UUID villageId = UUID.fromString(tag.getString("VillageId"));
+            this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
+        }
+
         if (this.level() instanceof ServerLevel) {
             this.refreshBrain((ServerLevel) this.level());
         }
@@ -173,6 +193,12 @@ public class Villager extends PathfinderMob {
     @Override
     public boolean removeWhenFarAway(double distance) {
         return false;
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason reason) {
+        clearVillage();
+        super.remove(reason);
     }
 
     @Override
@@ -214,6 +240,97 @@ public class Villager extends PathfinderMob {
         return this.brain.getMemory(MemoryModuleType.HOME)
             .map(GlobalPos::pos)
             .orElse(null);
+    }
+
+    public Optional<UUID> getVillage() {
+        return this.brain.getMemory(MemoryModuleTypes.VILLAGE.get());
+    }
+
+    public void setVillage(UUID villageId) {
+        if (villageId == null) {
+            clearVillage();
+            return;
+        }
+
+        Optional<UUID> currentVillageId = getVillage();
+        if (currentVillageId.isPresent() && currentVillageId.get().equals(villageId)) {
+            return;
+        }
+
+        if (!(this.level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        var villages = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
+            return;
+        }
+
+        if (currentVillageId.isPresent()) {
+            VillageData oldVillage = villages.getVillageById(currentVillageId.get());
+            if (oldVillage == null) {
+                return;
+            }
+
+            ChunkPos oldTownHallPos = oldVillage.getTownHallPos();
+            LevelChunk oldChunk = serverLevel.getChunk(oldTownHallPos.x, oldTownHallPos.z);
+            var oldVillageCapability = oldChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+            if (oldVillageCapability == null) {
+                return;
+            }
+
+            oldVillageCapability.removeVillager(this.getUUID());
+        }
+
+        VillageData newVillage = villages.getVillageById(villageId);
+        if (newVillage == null) {
+            return;
+        }
+
+        ChunkPos newTownHallPos = newVillage.getTownHallPos();
+        LevelChunk newChunk = serverLevel.getChunk(newTownHallPos.x, newTownHallPos.z);
+        var newVillageCapability = newChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (newVillageCapability == null) {
+            return;
+        }
+
+        newVillageCapability.assignVillager(this.getUUID());
+        this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
+        VillageWorks.LOGGER.info("Villager {} assigned to village {}", this.getUUID(), villageId);
+    }
+
+    public void clearVillage() {
+        Optional<UUID> currentVillageId = getVillage();
+        if (currentVillageId.isEmpty()) {
+            return;
+        }
+
+        if (!(this.level() instanceof ServerLevel serverLevel)) {
+            this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
+            return;
+        }
+
+        var manager = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (manager == null) {
+            this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
+            return;
+        }
+
+        VillageData village = manager.getVillageById(currentVillageId.get());
+        if (village == null) {
+            this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
+            return;
+        }
+
+        ChunkPos townHallPos = village.getTownHallPos();
+        LevelChunk chunk = serverLevel.getChunk(townHallPos.x, townHallPos.z);
+        var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (villageCapability != null) {
+            villageCapability.removeVillager(this.getUUID());
+        }
+
+        this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
+        VillageWorks.LOGGER.info("Villager {} village assignment cleared", this.getUUID());
     }
 
     public LivingEntityFoodData getFoodData() {
