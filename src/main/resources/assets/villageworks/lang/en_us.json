@@ -3,5 +3,6 @@
   "villageworks.zone.none": "Zone",
   "villageworks.zone.storage": "Storage Zone",
   "villageworks.zone.townhall": "Town Hall Zone",
-  "villageworks.zone.home": "Home Zone"
+  "villageworks.zone.home": "Home Zone",
+  "villageworks.zone.numbered": "%s #%d"
 }

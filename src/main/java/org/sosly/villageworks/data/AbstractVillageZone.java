@@ -13,11 +13,15 @@ public abstract class AbstractVillageZone implements IVillageZone {
     private final int id;
     private String name;
 
-    public AbstractVillageZone(ZoneType type, int id, String name) {
-        this.uuid = UUID.randomUUID();
+    public AbstractVillageZone(UUID uuid, ZoneType type, int id, String name) {
+        this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
         this.type = Objects.requireNonNull(type, "Zone type cannot be null");
         this.id = id;
         this.name = name;
+    }
+
+    public AbstractVillageZone(ZoneType type, int id, String name) {
+        this(UUID.randomUUID(), type, id, name);
     }
 
     @Override
@@ -33,7 +37,7 @@ public abstract class AbstractVillageZone implements IVillageZone {
         
         String translationKey = "villageworks.zone." + type.name().toLowerCase();
         String zoneName = Component.translatable(translationKey).getString();
-        return zoneName + " #" + id;
+        return Component.translatable("villageworks.zone.numbered", zoneName, id).getString();
     }
 
     @Override
