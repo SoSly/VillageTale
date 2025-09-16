@@ -12,15 +12,17 @@ import java.util.*;
 public class VillageCapability implements IVillageCapability {
     
     private final UUID villageId;
-    private final ChunkPos townHallPos;
+    private final BlockPos townHallPos;
+    private final ChunkPos villageStartingChunk;
     private final List<IVillageZone> zones;
     private final Set<UUID> villagerIds;
     private final Map<UUID, Permission> playerPermissions;
     private WeakReference<LevelChunk> ownerChunk;
     
-    public VillageCapability(UUID villageId, ChunkPos townHallPos) {
+    public VillageCapability(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk) {
         this.villageId = villageId;
         this.townHallPos = townHallPos;
+        this.villageStartingChunk = villageStartingChunk;
         this.zones = new ArrayList<>();
         this.villagerIds = new HashSet<>();
         this.playerPermissions = new HashMap<>();
@@ -33,8 +35,13 @@ public class VillageCapability implements IVillageCapability {
     }
     
     @Override
-    public ChunkPos getTownHallPos() {
+    public BlockPos getTownHallPos() {
         return townHallPos;
+    }
+    
+    @Override
+    public ChunkPos getVillageStartingChunk() {
+        return villageStartingChunk;
     }
     
     @Override

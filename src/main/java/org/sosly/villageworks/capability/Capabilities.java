@@ -40,12 +40,19 @@ public class Capabilities {
     public static void onAttachCapabilities(AttachCapabilitiesEvent<LevelChunk> event) {
         LevelChunk chunk = event.getObject();
 
-        if (!isVillageCenter(chunk)) {
+        var villagesCapability = chunk.getLevel().getCapability(VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability == null) {
+            return;
+        }
+        
+        var villageData = villagesCapability.getVillageAt(chunk.getPos());
+        if (villageData == null || !chunk.getPos().equals(villageData.getVillageStartingChunk())) {
             return;
         }
 
-        UUID villageId = UUID.randomUUID();
-        VillageProvider provider = new VillageProvider(villageId, chunk.getPos());
+        UUID villageId = villageData.getVillageId();
+        BlockPos townHallPos = villageData.getTownHallPos();
+        VillageProvider provider = new VillageProvider(villageId, townHallPos, chunk.getPos());
 
         provider.getCapability(VILLAGE_CAPABILITY, null)
             .ifPresent(cap -> {
@@ -71,11 +78,5 @@ public class Capabilities {
             });
 
         event.addCapability(VILLAGES_CAPABILITY_KEY, provider);
-    }
-
-    private static boolean isVillageCenter(LevelChunk chunk) {
-        return chunk.getLevel().getCapability(VILLAGES_CAPABILITY)
-            .map(villagesCapability -> villagesCapability.getVillageAt(chunk.getPos()) != null)
-            .orElse(false);
     }
 }

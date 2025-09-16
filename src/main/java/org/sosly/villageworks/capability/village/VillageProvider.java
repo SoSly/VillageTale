@@ -1,5 +1,6 @@
 package org.sosly.villageworks.capability.village;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -22,8 +23,8 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
     private final VillageCapability capability;
     private final LazyOptional<IVillageCapability> lazyOptional;
 
-    public VillageProvider(UUID villageId, ChunkPos townHallPos) {
-        this.capability = new VillageCapability(villageId, townHallPos);
+    public VillageProvider(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk) {
+        this.capability = new VillageCapability(villageId, townHallPos, villageStartingChunk);
         this.lazyOptional = LazyOptional.of(() -> capability);
     }
 
@@ -41,7 +42,8 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
         CompoundTag tag = new CompoundTag();
 
         tag.putString("VillageId", capability.getVillageId().toString());
-        tag.putLong("TownHallPos", capability.getTownHallPos().toLong());
+        tag.putLong("TownHallPos", capability.getTownHallPos().asLong());
+        tag.putLong("VillageStartingChunk", capability.getVillageStartingChunk().toLong());
 
         ListTag villagerList = new ListTag();
         for (UUID villagerId : capability.getVillagerIds()) {

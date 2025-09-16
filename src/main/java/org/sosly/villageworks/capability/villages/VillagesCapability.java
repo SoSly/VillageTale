@@ -1,5 +1,6 @@
 package org.sosly.villageworks.capability.villages;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
@@ -35,7 +36,7 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
     @Override
-    public UUID createVillage(ChunkPos townHallPos, String villageName, int squadius) {
+    public UUID createVillage(BlockPos townHallPos, String villageName, int squadius) {
         if (townHallPos == null || villageName == null || villageName.trim().isEmpty()) {
             return null;
         }
@@ -49,7 +50,8 @@ public class VillagesCapability implements IVillagesCapability {
         }
 
         UUID villageId = UUID.randomUUID();
-        VillageData newVillage = new VillageData(villageId, townHallPos, villageName, squadius);
+        ChunkPos villageStartingChunk = new ChunkPos(townHallPos);
+        VillageData newVillage = new VillageData(villageId, townHallPos, villageStartingChunk, villageName, squadius);
 
         int minDistance = 30;
         for (VillageData existingVillage : villages.values()) {

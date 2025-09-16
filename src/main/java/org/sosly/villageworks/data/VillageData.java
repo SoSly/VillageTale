@@ -9,14 +9,15 @@ import java.util.UUID;
 public class VillageData {
     
     private final UUID villageId;
-    private final ChunkPos townHallPos;
+    private final BlockPos townHallPos;
+    private final ChunkPos villageStartingChunk;
     private final int squadius;
     private final String villageName;
-    private BlockPos townHallBlockPos;
     
-    public VillageData(UUID villageId, ChunkPos townHallPos, String villageName, int squadius) {
+    public VillageData(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk, String villageName, int squadius) {
         this.villageId = villageId;
         this.townHallPos = townHallPos;
+        this.villageStartingChunk = villageStartingChunk;
         this.villageName = villageName;
         this.squadius = squadius;
     }
@@ -25,8 +26,12 @@ public class VillageData {
         return villageId;
     }
     
-    public ChunkPos getTownHallPos() {
+    public BlockPos getTownHallPos() {
         return townHallPos;
+    }
+    
+    public ChunkPos getVillageStartingChunk() {
+        return villageStartingChunk;
     }
     
     public String getVillageName() {
@@ -37,21 +42,15 @@ public class VillageData {
         return squadius;
     }
     
-    public BlockPos getTownHallBlockPos() {
-        return townHallBlockPos;
-    }
-    
-    public void setTownHallBlockPos(BlockPos pos) {
-        this.townHallBlockPos = pos;
-    }
     
     public boolean containsChunk(ChunkPos pos) {
         if (pos == null) {
             return false;
         }
         
-        int centerX = townHallPos.x;
-        int centerZ = townHallPos.z;
+        ChunkPos centerChunk = new ChunkPos(townHallPos);
+        int centerX = centerChunk.x;
+        int centerZ = centerChunk.z;
         
         return pos.x >= centerX - squadius &&
                pos.x <= centerX + squadius &&
@@ -68,15 +67,18 @@ public class VillageData {
             return false;
         }
         
-        int thisMinX = townHallPos.x - squadius - minDistance;
-        int thisMaxX = townHallPos.x + squadius + minDistance;
-        int thisMinZ = townHallPos.z - squadius - minDistance;
-        int thisMaxZ = townHallPos.z + squadius + minDistance;
+        ChunkPos thisChunk = new ChunkPos(townHallPos);
+        ChunkPos otherChunk = new ChunkPos(other.townHallPos);
         
-        int otherMinX = other.townHallPos.x - other.squadius;
-        int otherMaxX = other.townHallPos.x + other.squadius;
-        int otherMinZ = other.townHallPos.z - other.squadius;
-        int otherMaxZ = other.townHallPos.z + other.squadius;
+        int thisMinX = thisChunk.x - squadius - minDistance;
+        int thisMaxX = thisChunk.x + squadius + minDistance;
+        int thisMinZ = thisChunk.z - squadius - minDistance;
+        int thisMaxZ = thisChunk.z + squadius + minDistance;
+        
+        int otherMinX = otherChunk.x - other.squadius;
+        int otherMaxX = otherChunk.x + other.squadius;
+        int otherMinZ = otherChunk.z - other.squadius;
+        int otherMaxZ = otherChunk.z + other.squadius;
         
         return thisMinX <= otherMaxX && thisMaxX >= otherMinX &&
                thisMinZ <= otherMaxZ && thisMaxZ >= otherMinZ;
@@ -85,32 +87,28 @@ public class VillageData {
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putString("VillageId", villageId.toString());
-        tag.putLong("TownHallPos", townHallPos.toLong());
+        tag.putLong("TownHallPos", townHallPos.asLong());
+        tag.putLong("VillageStartingChunk", villageStartingChunk.toLong());
         tag.putString("VillageName", villageName);
         tag.putInt("Squadius", squadius);
-        if (townHallBlockPos != null) {
-            tag.putLong("TownHallBlockPos", townHallBlockPos.asLong());
-        }
         return tag;
     }
     
     public static VillageData deserializeNBT(CompoundTag tag) {
         if (!tag.contains("VillageId") || !tag.contains("TownHallPos") ||
-            !tag.contains("VillageName") || !tag.contains("Squadius")) {
+            !tag.contains("VillageStartingChunk") || !tag.contains("VillageName") || 
+            !tag.contains("Squadius")) {
             return null;
         }
         
         try {
             UUID villageId = UUID.fromString(tag.getString("VillageId"));
-            ChunkPos townHallPos = new ChunkPos(tag.getLong("TownHallPos"));
+            BlockPos townHallPos = BlockPos.of(tag.getLong("TownHallPos"));
+            ChunkPos villageStartingChunk = new ChunkPos(tag.getLong("VillageStartingChunk"));
             String villageName = tag.getString("VillageName");
             int squadius = tag.getInt("Squadius");
             
-            VillageData data = new VillageData(villageId, townHallPos, villageName, squadius);
-            if (tag.contains("TownHallBlockPos")) {
-                data.setTownHallBlockPos(BlockPos.of(tag.getLong("TownHallBlockPos")));
-            }
-            return data;
+            return new VillageData(villageId, townHallPos, villageStartingChunk, villageName, squadius);
         } catch (IllegalArgumentException e) {
             return null;
         }

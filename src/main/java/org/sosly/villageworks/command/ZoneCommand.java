@@ -227,8 +227,8 @@ public class ZoneCommand {
                         return 0;
                     }
 
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {
@@ -295,8 +295,8 @@ public class ZoneCommand {
                         return 0;
                     }
 
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {
@@ -338,8 +338,8 @@ public class ZoneCommand {
                         return 0;
                     }
 
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {
@@ -389,8 +389,8 @@ public class ZoneCommand {
                         return 0;
                     }
 
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {
@@ -449,8 +449,8 @@ public class ZoneCommand {
                         return 0;
                     }
 
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {
@@ -492,8 +492,8 @@ public class ZoneCommand {
                         return 0;
                     }
 
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {
@@ -530,25 +530,28 @@ public class ZoneCommand {
                     return 0;
                 }
 
-                ChunkPos townHallPos = village.getTownHallPos();
-                LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                ChunkPos villageChunk = village.getVillageStartingChunk();
+                LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
-                return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                    .map(villageCapability -> {
-                        try {
-                            IVillageZone zone = factory.createZone(level);
-                            villageCapability.addZone(zone);
+                var capability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+                if (capability == null) {
+                    source.sendFailure(Component.literal("Village capability not found at chunk " + villageChunk + 
+                        ". The chunk may need to be reloaded. Try leaving and re-entering the area."));
+                    return 0;
+                }
+                
+                try {
+                    IVillageZone zone = factory.createZone(level);
+                    capability.addZone(zone);
 
-                            source.sendSuccess(() ->
-                                Component.literal("Created zone '" + zone.getName() + "' with UUID: " + zone.getUUID()), true);
-                            return 1;
+                    source.sendSuccess(() ->
+                        Component.literal("Created zone '" + zone.getName() + "' with UUID: " + zone.getUUID()), true);
+                    return 1;
 
-                        } catch (Exception e) {
-                            source.sendFailure(Component.literal("Failed to create zone: " + e.getMessage()));
-                            return 0;
-                        }
-                    })
-                    .orElse(0);
+                } catch (Exception e) {
+                    source.sendFailure(Component.literal("Failed to create zone: " + e.getMessage()));
+                    return 0;
+                }
             })
             .orElse(0);
     }
@@ -561,8 +564,8 @@ public class ZoneCommand {
                     return 1;
                 }
 
-                ChunkPos townHallPos = village.getTownHallPos();
-                LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                ChunkPos villageChunk = village.getVillageStartingChunk();
+                LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
 
                 return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                     .map(villageCapability -> {

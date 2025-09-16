@@ -26,9 +26,14 @@ public interface IVillageCapability {
     UUID getVillageId();
     
     /**
-     * @return Position of the chunk containing the Town Hall
+     * @return Position of the Town Hall block
      */
-    ChunkPos getTownHallPos();
+    BlockPos getTownHallPos();
+    
+    /**
+     * @return Position of the chunk where this village capability is stored
+     */
+    ChunkPos getVillageStartingChunk();
     
     /**
      * @return All zones within this village

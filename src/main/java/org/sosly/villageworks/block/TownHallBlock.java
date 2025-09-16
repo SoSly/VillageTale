@@ -101,9 +101,10 @@ public class TownHallBlock extends BaseEntityBlock {
         }
         
         VillageData village = villagesCapability.getVillageById(townHall.getVillageId());
-        if (village != null && pos.equals(village.getTownHallBlockPos())) {
-            village.setTownHallBlockPos(null);
-            VillageWorks.LOGGER.info("Cleared town hall position for village {} at {}", 
+        if (village != null && pos.equals(village.getTownHallPos())) {
+            // Remove the entire village when its town hall is destroyed
+            villagesCapability.removeVillage(townHall.getVillageId());
+            VillageWorks.LOGGER.info("Removed village {} after town hall destruction at {}", 
                 village.getVillageName(), pos);
         }
     }

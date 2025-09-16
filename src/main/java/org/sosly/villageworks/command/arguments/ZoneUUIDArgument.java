@@ -56,8 +56,8 @@ public class ZoneUUIDArgument {
                         return Suggestions.empty();
                     }
                     
-                    ChunkPos townHallPos = village.getTownHallPos();
-                    LevelChunk chunk = level.getChunk(townHallPos.x, townHallPos.z);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
                     
                     return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
                         .map(villageCapability -> {

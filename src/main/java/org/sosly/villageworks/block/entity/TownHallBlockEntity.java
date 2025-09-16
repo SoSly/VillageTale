@@ -58,19 +58,13 @@ public class TownHallBlockEntity extends BlockEntity {
     }
 
     private void handleExistingVillage(ServerLevel level, VillageData village, Player player) {
-        if (village.getTownHallBlockPos() == null) {
-            VillageWorks.LOGGER.info("Town Hall placed at {} for existing village {}",
-                worldPosition, village.getVillageName());
-            village.setTownHallBlockPos(worldPosition);
-            setVillageId(village.getVillageId());
-            return;
-        }
-
+        BlockPos existingTownHall = village.getTownHallPos();
+        
         VillageWorks.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}",
-            worldPosition, village.getVillageName(), village.getTownHallBlockPos());
+            worldPosition, village.getVillageName(), existingTownHall);
         if (player != null) {
             player.sendSystemMessage(Component.translatable("villageworks.townhall.already_exists",
-                village.getVillageName(), village.getTownHallBlockPos().toShortString()));
+                village.getVillageName(), existingTownHall.toShortString()));
         }
         level.destroyBlock(worldPosition, true);
     }
@@ -81,7 +75,7 @@ public class TownHallBlockEntity extends BlockEntity {
             ? Component.translatable("villageworks.village.default_name", player.getName().getString()).getString()
             : "Village_" + System.currentTimeMillis();
 
-        UUID newVillageId = villagesCapability.createVillage(chunkPos, villageName, 3);
+        UUID newVillageId = villagesCapability.createVillage(worldPosition, villageName, 3);
 
         if (newVillageId == null) {
             VillageWorks.LOGGER.error("Failed to create village at {} - likely too close to another village", worldPosition);
@@ -93,10 +87,6 @@ public class TownHallBlockEntity extends BlockEntity {
         }
 
         setVillageId(newVillageId);
-        VillageData newVillage = villagesCapability.getVillageById(newVillageId);
-        if (newVillage != null) {
-            newVillage.setTownHallBlockPos(worldPosition);
-        }
         VillageWorks.LOGGER.info("Created village {} at {} with ID {} and town hall at {}",
             villageName, chunkPos, newVillageId, worldPosition);
     }

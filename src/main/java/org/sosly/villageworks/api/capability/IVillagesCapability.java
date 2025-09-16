@@ -1,5 +1,6 @@
 package org.sosly.villageworks.api.capability;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import org.sosly.villageworks.data.VillageData;
 
@@ -21,12 +22,12 @@ public interface IVillagesCapability {
 
     /**
      * Creates a new village with the specified parameters.
-     * @param townHallPos Chunk position for the village center
+     * @param townHallPos Block position for the town hall
      * @param villageName Unique name for the village
      * @param squadius Square radius in chunks (1-16)
      * @return UUID of created village, or null if creation failed
      */
-    UUID createVillage(ChunkPos townHallPos, String villageName, int squadius);
+    UUID createVillage(BlockPos townHallPos, String villageName, int squadius);
 
     /**
      * Removes a village by its unique identifier.

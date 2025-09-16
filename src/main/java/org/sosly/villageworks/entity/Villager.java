@@ -272,8 +272,8 @@ public class Villager extends PathfinderMob {
                 return;
             }
 
-            ChunkPos oldTownHallPos = oldVillage.getTownHallPos();
-            LevelChunk oldChunk = serverLevel.getChunk(oldTownHallPos.x, oldTownHallPos.z);
+            ChunkPos oldVillageChunk = oldVillage.getVillageStartingChunk();
+            LevelChunk oldChunk = serverLevel.getChunk(oldVillageChunk.x, oldVillageChunk.z);
             var oldVillageCapability = oldChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
             if (oldVillageCapability == null) {
                 return;
@@ -287,8 +287,8 @@ public class Villager extends PathfinderMob {
             return;
         }
 
-        ChunkPos newTownHallPos = newVillage.getTownHallPos();
-        LevelChunk newChunk = serverLevel.getChunk(newTownHallPos.x, newTownHallPos.z);
+        ChunkPos newVillageChunk = newVillage.getVillageStartingChunk();
+        LevelChunk newChunk = serverLevel.getChunk(newVillageChunk.x, newVillageChunk.z);
         var newVillageCapability = newChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
         if (newVillageCapability == null) {
             return;
@@ -322,8 +322,8 @@ public class Villager extends PathfinderMob {
             return;
         }
 
-        ChunkPos townHallPos = village.getTownHallPos();
-        LevelChunk chunk = serverLevel.getChunk(townHallPos.x, townHallPos.z);
+        ChunkPos villageChunk = village.getVillageStartingChunk();
+        LevelChunk chunk = serverLevel.getChunk(villageChunk.x, villageChunk.z);
         var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
         if (villageCapability != null) {
             villageCapability.removeVillager(this.getUUID());

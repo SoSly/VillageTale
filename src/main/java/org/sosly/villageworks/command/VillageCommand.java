@@ -59,11 +59,10 @@ public class VillageCommand {
 
             ServerLevel level = source.getLevel();
             BlockPos pos = entity.blockPosition();
-            ChunkPos chunkPos = new ChunkPos(pos);
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    UUID villageId = manager.createVillage(chunkPos, villageName, squadius);
+                    UUID villageId = manager.createVillage(pos, villageName, squadius);
                     if (villageId == null) {
                         source.sendFailure(Component.literal("Failed to create village"));
                         return 0;
@@ -132,10 +131,12 @@ public class VillageCommand {
                         Component.literal("Villages in " + level.dimension().location() + ":"), false);
 
                     for (VillageData village : villages) {
-                        ChunkPos pos = village.getTownHallPos();
+                        BlockPos townHall = village.getTownHallPos();
+                        ChunkPos chunkPos = new ChunkPos(townHall);
                         source.sendSuccess(() ->
                             Component.literal("- " + village.getVillageName() +
-                                            " at chunk (" + pos.x + ", " + pos.z + ") " +
+                                            " at block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
+                                            "chunk (" + chunkPos.x + ", " + chunkPos.z + ") " +
                                             "squadius " + village.getSquadius()), false);
                     }
 
@@ -172,26 +173,29 @@ public class VillageCommand {
                         return 1;
                     }
 
-                    ChunkPos townHall = village.getTownHallPos();
+                    BlockPos townHall = village.getTownHallPos();
+                    ChunkPos townHallChunk = new ChunkPos(townHall);
+                    ChunkPos villageChunk = village.getVillageStartingChunk();
                     int squadius = village.getSquadius();
-                    int minX = townHall.x - squadius;
-                    int maxX = townHall.x + squadius;
-                    int minZ = townHall.z - squadius;
-                    int maxZ = townHall.z + squadius;
+                    int minX = townHallChunk.x - squadius;
+                    int maxX = townHallChunk.x + squadius;
+                    int minZ = townHallChunk.z - squadius;
+                    int maxZ = townHallChunk.z + squadius;
 
                     source.sendSuccess(() ->
                         Component.literal("Village: " + village.getVillageName()), false);
                     source.sendSuccess(() ->
                         Component.literal("UUID: " + village.getVillageId().toString()), false);
                     source.sendSuccess(() ->
-                        Component.literal("Town Hall: chunk (" + townHall.x + ", " + townHall.z + ")"), false);
+                        Component.literal("Town Hall: block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
+                                        "chunk (" + townHallChunk.x + ", " + townHallChunk.z + ")"), false);
                     source.sendSuccess(() ->
                         Component.literal("Squadius: " + squadius + " (covers " +
                                         ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
                     source.sendSuccess(() ->
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
                     
-                    LevelChunk chunk = level.getChunk(townHall.x, townHall.z);
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
                     var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
                     if (villageCapability != null) {
                         int villagerCount = villageCapability.getVillagerIds().size();
@@ -233,26 +237,29 @@ public class VillageCommand {
                     
                     final VillageData villageData = village;
                     
-                    ChunkPos townHall = villageData.getTownHallPos();
+                    BlockPos townHall = villageData.getTownHallPos();
+                    ChunkPos townHallChunk = new ChunkPos(townHall);
+                    ChunkPos villageChunk = villageData.getVillageStartingChunk();
                     int squadius = villageData.getSquadius();
-                    int minX = townHall.x - squadius;
-                    int maxX = townHall.x + squadius;
-                    int minZ = townHall.z - squadius;
-                    int maxZ = townHall.z + squadius;
+                    int minX = townHallChunk.x - squadius;
+                    int maxX = townHallChunk.x + squadius;
+                    int minZ = townHallChunk.z - squadius;
+                    int maxZ = townHallChunk.z + squadius;
                     
                     source.sendSuccess(() ->
                         Component.literal("Village: " + villageData.getVillageName()), false);
                     source.sendSuccess(() ->
                         Component.literal("UUID: " + villageData.getVillageId().toString()), false);
                     source.sendSuccess(() ->
-                        Component.literal("Town Hall: chunk (" + townHall.x + ", " + townHall.z + ")"), false);
+                        Component.literal("Town Hall: block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
+                                        "chunk (" + townHallChunk.x + ", " + townHallChunk.z + ")"), false);
                     source.sendSuccess(() ->
                         Component.literal("Squadius: " + squadius + " (covers " +
                                         ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
                     source.sendSuccess(() ->
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
                     
-                    LevelChunk chunk = level.getChunk(townHall.x, townHall.z);
+                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
                     var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
                     if (villageCapability != null) {
                         int villagerCount = villageCapability.getVillagerIds().size();
