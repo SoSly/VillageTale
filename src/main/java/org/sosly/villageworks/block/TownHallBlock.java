@@ -80,22 +80,32 @@ public class TownHallBlock extends BaseEntityBlock {
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock()) && !level.isClientSide) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof TownHallBlockEntity townHall && townHall.getVillageId() != null) {
-                if (level instanceof ServerLevel serverLevel) {
-                    serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).ifPresent(villagesCapability -> {
-                        VillageData village = villagesCapability.getVillageById(townHall.getVillageId());
-                        if (village != null && pos.equals(village.getTownHallBlockPos())) {
-                            village.setTownHallBlockPos(null);
-                            VillageWorks.LOGGER.info("Cleared town hall position for village {} at {}", 
-                                village.getVillageName(), pos);
-                        }
-                    });
-                }
-            }
-        }
         super.onRemove(state, level, pos, newState, isMoving);
+        
+        if (state.is(newState.getBlock()) || level.isClientSide) {
+            return;
+        }
+        
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (!(blockEntity instanceof TownHallBlockEntity townHall)) {
+            return;
+        }
+        
+        if (townHall.getVillageId() == null || !(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        
+        var villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability == null) {
+            return;
+        }
+        
+        VillageData village = villagesCapability.getVillageById(townHall.getVillageId());
+        if (village != null && pos.equals(village.getTownHallBlockPos())) {
+            village.setTownHallBlockPos(null);
+            VillageWorks.LOGGER.info("Cleared town hall position for village {} at {}", 
+                village.getVillageName(), pos);
+        }
     }
 
     @Override

@@ -58,21 +58,21 @@ public class TownHallBlockEntity extends BlockEntity {
     }
 
     private void handleExistingVillage(ServerLevel level, VillageData village, Player player) {
-        if (village.getTownHallBlockPos() != null) {
-            VillageWorks.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}",
-                worldPosition, village.getVillageName(), village.getTownHallBlockPos());
-            if (player != null) {
-                player.sendSystemMessage(Component.translatable("villageworks.townhall.already_exists",
-                    village.getVillageName(), village.getTownHallBlockPos().toShortString()));
-            }
-            level.destroyBlock(worldPosition, true);
+        if (village.getTownHallBlockPos() == null) {
+            VillageWorks.LOGGER.info("Town Hall placed at {} for existing village {}",
+                worldPosition, village.getVillageName());
+            village.setTownHallBlockPos(worldPosition);
+            setVillageId(village.getVillageId());
             return;
         }
 
-        VillageWorks.LOGGER.info("Town Hall placed at {} for existing village {}",
-            worldPosition, village.getVillageName());
-        village.setTownHallBlockPos(worldPosition);
-        setVillageId(village.getVillageId());
+        VillageWorks.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}",
+            worldPosition, village.getVillageName(), village.getTownHallBlockPos());
+        if (player != null) {
+            player.sendSystemMessage(Component.translatable("villageworks.townhall.already_exists",
+                village.getVillageName(), village.getTownHallBlockPos().toShortString()));
+        }
+        level.destroyBlock(worldPosition, true);
     }
 
     private void createNewVillage(ServerLevel level, ChunkPos chunkPos, Player player,
