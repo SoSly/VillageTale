@@ -28,16 +28,6 @@ public class VillageCapability implements IVillageCapability {
     }
     
     @Override
-    public BlockPos getTownHallPos() {
-        return null; // This should come from VillagesCapability
-    }
-    
-    @Override
-    public ChunkPos getVillageStartingChunk() {
-        return null; // This should come from VillagesCapability
-    }
-    
-    @Override
     public List<IVillageZone> getZones() {
         if (state == null) {
             return Collections.emptyList();
