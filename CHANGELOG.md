@@ -16,3 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/vw assign` command to set villager homes
 - `/vw exhaust` command to add exhaustion to villagers for testing
 - `/vw hunger` command to display villager food stats
+- Custom `villageworks:storage_containers` block tag enables datapack creators to define which blocks villagers recognize as storage containers
