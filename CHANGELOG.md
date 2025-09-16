@@ -24,3 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Town Hall block that automatically creates a village when placed
 - Villages are automatically named after the player who places the Town Hall
 - Villages require a minimum distance of 30 chunks between each other
+- Zone system for defining functional areas within villages
+- Four zone shapes: AABB (rectangular), Radius (circular), BlockPos (single block), and Path (connected points)
+- Zone types: STORAGE (finds chests/barrels), TOWNHALL (finds town hall blocks), HOME (finds beds), NONE (no POI scanning)
+- `/vw zone create` commands for all zone shapes with tab completion for zone types
+- `/vw zone delete <zoneUUID>` command to remove zones with UUID tab completion
+- `/vw zone rename <zoneUUID> <name>` command to rename zones
+- `/vw zone info <zoneUUID>` command showing zone bounds, type, and discovered POIs with block names
+- `/vw zone list` command to display all zones in a village
+- `/vw zone path add/clear` commands for managing path zone points
+- Tab completion for village UUIDs and zone UUIDs in all zone commands
+- Support for relative coordinates (`~ ~ ~`) in zone creation commands
+- Automatic POI (Point of Interest) detection and caching within zones

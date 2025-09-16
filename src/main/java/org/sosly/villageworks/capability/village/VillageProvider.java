@@ -11,6 +11,7 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import org.sosly.villageworks.api.capability.IVillageCapability;
 import org.sosly.villageworks.capability.Capabilities;
+import org.sosly.villageworks.data.zones.ZoneFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -98,8 +99,17 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
             }
         }
 
-        // TODO: Deserialize zones when zone factory/registry is implemented
-        // Need a way to create zone instances from ZoneType enum
+        // Deserialize zones
+        if (tag.contains("Zones", Tag.TAG_LIST)) {
+            ListTag zoneList = tag.getList("Zones", Tag.TAG_COMPOUND);
+            for (int i = 0; i < zoneList.size(); i++) {
+                CompoundTag zoneTag = zoneList.getCompound(i);
+                var zone = ZoneFactory.deserializeFromNBT(zoneTag);
+                if (zone != null) {
+                    capability.addZoneWithoutDirty(zone);
+                }
+            }
+        }
     }
 
     public void invalidate() {

@@ -1,11 +1,15 @@
-package org.sosly.villageworks.data;
+package org.sosly.villageworks.data.zones;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import org.sosly.villageworks.api.data.IVillageZone;
+import org.sosly.villageworks.api.data.ZoneShape;
 import org.sosly.villageworks.api.data.ZoneType;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractVillageZone implements IVillageZone {
@@ -35,7 +39,7 @@ public abstract class AbstractVillageZone implements IVillageZone {
         if (name != null) {
             return name;
         }
-        
+
         String translationKey = "villageworks.zone." + type.name().toLowerCase();
         String zoneName = Component.translatable(translationKey).getString();
         return Component.translatable("villageworks.zone.numbered", zoneName, id).getString();
@@ -50,7 +54,16 @@ public abstract class AbstractVillageZone implements IVillageZone {
     public ZoneType getType() {
         return type;
     }
-    
+
+    @Override
+    public abstract ZoneShape getShape();
+
+    @Override
+    public abstract boolean containsPosition(BlockPos pos);
+
+    @Override
+    public abstract Optional<List<BlockPos>> getPOIs();
+
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
@@ -62,7 +75,7 @@ public abstract class AbstractVillageZone implements IVillageZone {
         }
         return tag;
     }
-    
+
     @Override
     public void deserializeNBT(CompoundTag tag) {
         if (tag.contains("Name")) {

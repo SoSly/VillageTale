@@ -39,7 +39,50 @@ public class VillageCapability implements IVillageCapability {
     
     @Override
     public List<IVillageZone> getZones() {
-        return new ArrayList<>(zones);
+        return new ModifiableZoneList(zones, this::markDirty);
+    }
+    
+    private static class ModifiableZoneList extends ArrayList<IVillageZone> {
+        private final Runnable onModify;
+        
+        public ModifiableZoneList(List<IVillageZone> zones, Runnable onModify) {
+            super(zones);
+            this.onModify = onModify;
+        }
+        
+        @Override
+        public IVillageZone set(int index, IVillageZone element) {
+            IVillageZone result = super.set(index, element);
+            onModify.run();
+            return result;
+        }
+        
+        @Override
+        public boolean add(IVillageZone zone) {
+            boolean result = super.add(zone);
+            if (result) onModify.run();
+            return result;
+        }
+        
+        @Override
+        public void add(int index, IVillageZone element) {
+            super.add(index, element);
+            onModify.run();
+        }
+        
+        @Override
+        public IVillageZone remove(int index) {
+            IVillageZone result = super.remove(index);
+            onModify.run();
+            return result;
+        }
+        
+        @Override
+        public boolean remove(Object o) {
+            boolean result = super.remove(o);
+            if (result) onModify.run();
+            return result;
+        }
     }
     
     @Override
@@ -50,6 +93,14 @@ public class VillageCapability implements IVillageCapability {
         
         zones.add(zone);
         markDirty();
+    }
+    
+    public void addZoneWithoutDirty(IVillageZone zone) {
+        if (zone == null) {
+            return;
+        }
+        
+        zones.add(zone);
     }
     
     @Override
@@ -145,7 +196,7 @@ public class VillageCapability implements IVillageCapability {
         this.ownerChunk = new WeakReference<>(chunk);
     }
     
-    private void markDirty() {
+    public void markDirty() {
         LevelChunk chunk = ownerChunk.get();
         if (chunk != null) {
             chunk.setUnsaved(true);
