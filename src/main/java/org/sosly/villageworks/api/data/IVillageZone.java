@@ -1,6 +1,7 @@
 package org.sosly.villageworks.api.data;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,4 +46,23 @@ public interface IVillageZone {
      * @return Optional containing POI list, or empty for NONE type zones
      */
     Optional<List<BlockPos>> getPOIs();
+    
+    /**
+     * Checks if the specified position is within this zone's boundaries.
+     * @param pos Block position to check
+     * @return true if position is within zone boundaries
+     */
+    boolean containsPosition(BlockPos pos);
+    
+    /**
+     * Serializes this zone's data to NBT for persistence.
+     * @return CompoundTag containing all zone data
+     */
+    CompoundTag serializeNBT();
+    
+    /**
+     * Deserializes zone data from NBT.
+     * @param tag CompoundTag containing zone data
+     */
+    void deserializeNBT(CompoundTag tag);
 }

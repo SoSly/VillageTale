@@ -12,6 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.sosly.villageworks.command.VillageWorksCommand;
 import org.sosly.villageworks.entity.Villager;
+import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.registry.EntityTypes;
 import org.sosly.villageworks.registry.MemoryModuleTypes;
 import org.sosly.villageworks.registry.SensorTypes;
@@ -29,6 +30,8 @@ public class VillageWorks {
         EntityTypes.register(modEventBus);
         MemoryModuleTypes.register(modEventBus);
         SensorTypes.register(modEventBus);
+
+        Capabilities.register();
 
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::onEntityAttributeCreation);

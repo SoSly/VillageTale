@@ -1,5 +1,6 @@
 package org.sosly.villageworks.data;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneType;
@@ -48,5 +49,24 @@ public abstract class AbstractVillageZone implements IVillageZone {
     @Override
     public ZoneType getType() {
         return type;
+    }
+    
+    @Override
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("UUID", uuid.toString());
+        tag.putByte("Type", (byte) type.ordinal());
+        tag.putShort("Id", (short) id);
+        if (name != null) {
+            tag.putString("Name", name);
+        }
+        return tag;
+    }
+    
+    @Override
+    public void deserializeNBT(CompoundTag tag) {
+        if (tag.contains("Name")) {
+            this.name = tag.getString("Name");
+        }
     }
 }
