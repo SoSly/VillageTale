@@ -10,6 +10,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
+import org.sosly.villageworks.block.BlockTypes;
+import org.sosly.villageworks.block.entity.BlockEntityTypes;
 import org.sosly.villageworks.command.VillageWorksCommand;
 import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.capability.Capabilities;
@@ -27,6 +29,8 @@ public class VillageWorks {
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        BlockTypes.register(modEventBus);
+        BlockEntityTypes.register(modEventBus);
         EntityTypes.register(modEventBus);
         MemoryModuleTypes.register(modEventBus);
         SensorTypes.register(modEventBus);

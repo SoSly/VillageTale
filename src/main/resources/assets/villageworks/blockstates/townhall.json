@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "villageworks:block/townhall"
+    },
+    "facing=south": {
+      "model": "villageworks:block/townhall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "villageworks:block/townhall",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "villageworks:block/townhall",
+      "y": 90
+    }
+  }
+}

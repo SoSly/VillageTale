@@ -1,5 +1,6 @@
 package org.sosly.villageworks.data;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 
@@ -11,6 +12,7 @@ public class VillageData {
     private final ChunkPos townHallPos;
     private final int squadius;
     private final String villageName;
+    private BlockPos townHallBlockPos;
     
     public VillageData(UUID villageId, ChunkPos townHallPos, String villageName, int squadius) {
         this.villageId = villageId;
@@ -35,6 +37,14 @@ public class VillageData {
         return squadius;
     }
     
+    public BlockPos getTownHallBlockPos() {
+        return townHallBlockPos;
+    }
+    
+    public void setTownHallBlockPos(BlockPos pos) {
+        this.townHallBlockPos = pos;
+    }
+    
     public boolean containsChunk(ChunkPos pos) {
         if (pos == null) {
             return false;
@@ -50,14 +60,18 @@ public class VillageData {
     }
     
     public boolean overlaps(VillageData other) {
+        return overlaps(other, 0);
+    }
+    
+    public boolean overlaps(VillageData other, int minDistance) {
         if (other == null) {
             return false;
         }
         
-        int thisMinX = townHallPos.x - squadius;
-        int thisMaxX = townHallPos.x + squadius;
-        int thisMinZ = townHallPos.z - squadius;
-        int thisMaxZ = townHallPos.z + squadius;
+        int thisMinX = townHallPos.x - squadius - minDistance;
+        int thisMaxX = townHallPos.x + squadius + minDistance;
+        int thisMinZ = townHallPos.z - squadius - minDistance;
+        int thisMaxZ = townHallPos.z + squadius + minDistance;
         
         int otherMinX = other.townHallPos.x - other.squadius;
         int otherMaxX = other.townHallPos.x + other.squadius;
@@ -74,6 +88,9 @@ public class VillageData {
         tag.putLong("TownHallPos", townHallPos.toLong());
         tag.putString("VillageName", villageName);
         tag.putInt("Squadius", squadius);
+        if (townHallBlockPos != null) {
+            tag.putLong("TownHallBlockPos", townHallBlockPos.asLong());
+        }
         return tag;
     }
     
@@ -89,7 +106,11 @@ public class VillageData {
             String villageName = tag.getString("VillageName");
             int squadius = tag.getInt("Squadius");
             
-            return new VillageData(villageId, townHallPos, villageName, squadius);
+            VillageData data = new VillageData(villageId, townHallPos, villageName, squadius);
+            if (tag.contains("TownHallBlockPos")) {
+                data.setTownHallBlockPos(BlockPos.of(tag.getLong("TownHallBlockPos")));
+            }
+            return data;
         } catch (IllegalArgumentException e) {
             return null;
         }

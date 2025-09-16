@@ -1,5 +1,6 @@
 package org.sosly.villageworks.capability;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.api.capability.IVillageCapability;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
+import org.sosly.villageworks.block.BlockTypes;
 import org.sosly.villageworks.capability.villages.VillagesCapability;
 import org.sosly.villageworks.capability.villages.VillagesProvider;
 import org.sosly.villageworks.capability.village.VillageCapability;
@@ -38,7 +40,7 @@ public class Capabilities {
     public static void onAttachCapabilities(AttachCapabilitiesEvent<LevelChunk> event) {
         LevelChunk chunk = event.getObject();
 
-        if (!containsTownHall(chunk)) {
+        if (!isVillageCenter(chunk)) {
             return;
         }
 
@@ -71,9 +73,9 @@ public class Capabilities {
         event.addCapability(VILLAGES_CAPABILITY_KEY, provider);
     }
 
-    private static boolean containsTownHall(LevelChunk chunk) {
-        // TODO: Implement Town Hall detection logic
-        // This should scan the chunk for Town Hall blocks
-        return false;
+    private static boolean isVillageCenter(LevelChunk chunk) {
+        return chunk.getLevel().getCapability(VILLAGES_CAPABILITY)
+            .map(villagesCapability -> villagesCapability.getVillageAt(chunk.getPos()) != null)
+            .orElse(false);
     }
 }

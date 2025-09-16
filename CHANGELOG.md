@@ -21,3 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/vw village list` command to display all villages in current dimension
 - `/vw village info [name|uuid]` command to show village information and boundaries
 - Custom `villageworks:storage_containers` block tag enables datapack creators to define which blocks villagers recognize as storage containers
+- Town Hall block that automatically creates a village when placed
+- Villages are automatically named after the player who places the Town Hall
+- Villages require a minimum distance of 30 chunks between each other

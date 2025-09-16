@@ -1,0 +1,104 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"bottom": "block/dark_oak_planks",
+		"base": "villageworks:block/townhall_runner",
+		"front": "villageworks:block/townhall_front",
+		"particle": "villageworks:block/townhall_sides",
+		"sides": "villageworks:block/townhall_sides",
+		"top": "villageworks:block/townhall_top"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [5, 2, 16],
+			"faces": {
+				"north": {"uv": [11, 14, 16, 16], "texture": "#bottom", "cullface": "north"},
+				"east": {"uv": [0, 6, 16, 8], "texture": "#base", "cullface": "east"},
+				"south": {"uv": [0, 6, 5, 8], "texture": "#bottom", "cullface": "south"},
+				"west": {"uv": [0, 6, 16, 8], "texture": "#bottom", "cullface": "west"},
+				"up": {"uv": [11, 0, 16, 16], "rotation": 180, "texture": "#bottom"},
+				"down": {"uv": [0, 0, 5, 16], "texture": "#bottom", "cullface": "down"}
+			}
+		},
+		{
+			"from": [5, 0, -0.2],
+			"to": [11, 2.2, 4],
+			"faces": {
+				"north": {"uv": [5, 14, 11, 16], "texture": "#base", "cullface": "north"},
+				"east": {"uv": [12, 6, 16, 8], "texture": "#base", "cullface": "east"},
+				"south": {"uv": [5, 6, 11, 8], "texture": "#base", "cullface": "south"},
+				"west": {"uv": [0, 6, 4, 8], "texture": "#base", "cullface": "west"},
+				"up": {"uv": [5, 12, 11, 16], "rotation": 180, "texture": "#base"},
+				"down": {"uv": [5, 12, 11, 16], "texture": "#bottom", "cullface": "down"}
+			}
+		},
+		{
+			"from": [5, 0, 4],
+			"to": [11, 2, 16],
+			"faces": {
+				"north": {"uv": [5, 14, 11, 16], "texture": "#base", "cullface": "north"},
+				"east": {"uv": [0, 6, 12, 8], "texture": "#base", "cullface": "east"},
+				"south": {"uv": [5, 6, 11, 8], "texture": "#bottom", "cullface": "south"},
+				"west": {"uv": [4, 6, 16, 8], "texture": "#base", "cullface": "west"},
+				"up": {"uv": [5, 0, 11, 12], "rotation": 180, "texture": "#bottom"},
+				"down": {"uv": [5, 0, 11, 12], "texture": "#bottom", "cullface": "down"}
+			}
+		},
+		{
+			"from": [5, 0, 4],
+			"to": [11, 0, 16],
+			"faces": {
+				"north": {"uv": [5, 14, 11, 14], "texture": "#base", "cullface": "north"},
+				"east": {"uv": [0, 6, 12, 6], "texture": "#base", "cullface": "east"},
+				"south": {"uv": [5, 6, 11, 6], "texture": "#base", "cullface": "south"},
+				"west": {"uv": [4, 6, 16, 6], "texture": "#base", "cullface": "west"},
+				"up": {"uv": [5, 0, 11, 12], "rotation": 180, "texture": "#base"},
+				"down": {"uv": [5, 0, 11, 12], "texture": "#bottom", "cullface": "down"}
+			}
+		},
+		{
+			"from": [11, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 14, 5, 16], "texture": "#bottom", "cullface": "north"},
+				"east": {"uv": [0, 6, 16, 8], "texture": "#bottom", "cullface": "east"},
+				"south": {"uv": [11, 6, 16, 8], "texture": "#bottom", "cullface": "south"},
+				"west": {"uv": [0, 6, 16, 8], "texture": "#base", "cullface": "west"},
+				"up": {"uv": [0, 0, 5, 16], "rotation": 180, "texture": "#bottom"},
+				"down": {"uv": [11, 0, 16, 16], "texture": "#bottom", "cullface": "down"}
+			}
+		},
+		{
+			"from": [4, 2, 4],
+			"to": [12, 15, 12],
+			"faces": {
+				"north": {"uv": [0, 0, 8, 13], "texture": "#front"},
+				"east": {"uv": [2, 16, 15, 8], "rotation": 90, "texture": "#sides"},
+				"south": {"uv": [8, 3, 16, 16], "texture": "#front"},
+				"west": {"uv": [2, 8, 15, 16], "rotation": 90, "texture": "#sides"}
+			}
+		},
+		{
+			"from": [0.0125, 12, 3],
+			"to": [15.9875, 16, 16],
+			"rotation": {"angle": -22.5, "axis": "x", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 4], "texture": "#sides"},
+				"east": {"uv": [0, 4, 13, 8], "texture": "#sides"},
+				"south": {"uv": [0, 4, 16, 8], "texture": "#sides"},
+				"west": {"uv": [0, 4, 13, 8], "texture": "#sides"},
+				"up": {"uv": [0, 1, 16, 14], "rotation": 180, "texture": "#top"},
+				"down": {"uv": [0, 0, 16, 13], "texture": "#missing"}
+			}
+		}
+	],
+	"display": {
+		"firstperson_righthand": {
+			"rotation": [0, 135, 0],
+			"scale": [0.4, 0.4, 0.4]
+		}
+	}
+}

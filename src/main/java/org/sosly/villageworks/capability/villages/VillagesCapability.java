@@ -51,15 +51,15 @@ public class VillagesCapability implements IVillagesCapability {
         UUID villageId = UUID.randomUUID();
         VillageData newVillage = new VillageData(villageId, townHallPos, villageName, squadius);
 
+        int minDistance = 30;
         for (VillageData existingVillage : villages.values()) {
-            if (existingVillage.overlaps(newVillage)) {
+            if (existingVillage.overlaps(newVillage, minDistance)) {
                 return null;
             }
         }
 
         villages.put(villageId, newVillage);
         villagesByName.put(villageName, villageId);
-        markDirty();
 
         return villageId;
     }
@@ -76,7 +76,6 @@ public class VillagesCapability implements IVillagesCapability {
         }
 
         villagesByName.remove(village.getVillageName());
-        markDirty();
         return true;
     }
 
@@ -129,9 +128,6 @@ public class VillagesCapability implements IVillagesCapability {
         this.ownerLevel = new WeakReference<>(level);
     }
 
-    private void markDirty() {
-        // Level capabilities are automatically saved
-    }
 
     public void loadVillage(VillageData village) {
         if (village == null) {
