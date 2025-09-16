@@ -43,7 +43,7 @@ import org.sosly.villageworks.entity.ai.behavior.VillagerGoalPackages;
 import org.sosly.villageworks.entity.ai.SensorTypes;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.capability.village.VillageCapability;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -267,7 +267,7 @@ public class Villager extends PathfinderMob {
         }
 
         if (currentVillageId.isPresent()) {
-            VillageData oldVillage = villages.getVillageById(currentVillageId.get());
+            VillageInfo oldVillage = villages.getVillageById(currentVillageId.get());
             if (oldVillage == null) {
                 return;
             }
@@ -282,7 +282,7 @@ public class Villager extends PathfinderMob {
             oldVillageCapability.removeVillager(this.getUUID());
         }
 
-        VillageData newVillage = villages.getVillageById(villageId);
+        VillageInfo newVillage = villages.getVillageById(villageId);
         if (newVillage == null) {
             return;
         }
@@ -316,7 +316,7 @@ public class Villager extends PathfinderMob {
             return;
         }
 
-        VillageData village = manager.getVillageById(currentVillageId.get());
+        VillageInfo village = manager.getVillageById(currentVillageId.get());
         if (village == null) {
             this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
             return;

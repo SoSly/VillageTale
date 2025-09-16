@@ -45,21 +45,12 @@ public class Capabilities {
             return;
         }
         
-        var villageData = villagesCapability.getVillageAt(chunk.getPos());
-        if (villageData == null || !chunk.getPos().equals(villageData.getVillageStartingChunk())) {
-            return;
+        VillageProvider provider = new VillageProvider();
+
+        var villageCap = provider.getCapability(VILLAGE_CAPABILITY, null).orElse(null);
+        if (villageCap instanceof VillageCapability impl) {
+            impl.setOwnerChunk(chunk);
         }
-
-        UUID villageId = villageData.getVillageId();
-        BlockPos townHallPos = villageData.getTownHallPos();
-        VillageProvider provider = new VillageProvider(villageId, townHallPos, chunk.getPos());
-
-        provider.getCapability(VILLAGE_CAPABILITY, null)
-            .ifPresent(cap -> {
-                if (cap instanceof VillageCapability impl) {
-                    impl.setOwnerChunk(chunk);
-                }
-            });
 
         event.addCapability(VILLAGE_CAPABILITY_KEY, provider);
     }
@@ -70,12 +61,10 @@ public class Capabilities {
 
         VillagesProvider provider = new VillagesProvider();
 
-        provider.getCapability(VILLAGES_CAPABILITY, null)
-            .ifPresent(cap -> {
-                if (cap instanceof VillagesCapability impl) {
-                    impl.setOwnerLevel(level);
-                }
-            });
+        var villagesCap = provider.getCapability(VILLAGES_CAPABILITY, null).orElse(null);
+        if (villagesCap instanceof VillagesCapability impl) {
+            impl.setOwnerLevel(level);
+        }
 
         event.addCapability(VILLAGES_CAPABILITY_KEY, provider);
     }

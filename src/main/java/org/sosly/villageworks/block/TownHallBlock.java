@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.block.entity.TownHallBlockEntity;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 public class TownHallBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -100,7 +100,7 @@ public class TownHallBlock extends BaseEntityBlock {
             return;
         }
         
-        VillageData village = villagesCapability.getVillageById(townHall.getVillageId());
+        VillageInfo village = villagesCapability.getVillageById(townHall.getVillageId());
         if (village != null && pos.equals(village.getTownHallPos())) {
             // Remove the entire village when its town hall is destroyed
             villagesCapability.removeVillage(townHall.getVillageId());

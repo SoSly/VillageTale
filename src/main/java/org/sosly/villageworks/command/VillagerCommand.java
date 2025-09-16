@@ -10,10 +10,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.capability.village.VillageCapability;
 import org.sosly.villageworks.command.arguments.VillageUUIDArgument;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 import org.sosly.villageworks.entity.Villager;
 
 import java.util.Collection;
@@ -74,39 +75,38 @@ public class VillagerCommand {
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             ServerLevel level = context.getSource().getLevel();
             
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        context.getSource().sendFailure(Component.literal("Village " + villageId + " not found"));
-                        return 0;
-                    }
+            IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+            if (villages == null) {
+                context.getSource().sendFailure(Component.literal("Villages capability not found"));
+                return 0;
+            }
 
-                    int assignedCount = 0;
-                    for (Entity entity : entities) {
-                        if (entity instanceof Villager villager) {
-                            villager.setVillage(villageId);
-                            assignedCount++;
-                        }
-                    }
+            VillageInfo village = villages.getVillageById(villageId);
+            if (village == null) {
+                context.getSource().sendFailure(Component.literal("Village " + villageId + " not found"));
+                return 0;
+            }
 
-                    if (assignedCount == 0) {
-                        context.getSource().sendFailure(Component.literal("No villagers found in selection"));
-                        return 0;
-                    }
+            int assignedCount = 0;
+            for (Entity entity : entities) {
+                if (entity instanceof Villager villager) {
+                    villager.setVillage(villageId);
+                    assignedCount++;
+                }
+            }
 
-                    final int finalAssignedCount = assignedCount;
-                    final UUID finalVillageId = villageId;
-                    context.getSource().sendSuccess(() ->
-                        Component.literal(String.format("Assigned %d villager(s) to village %s",
-                            finalAssignedCount, finalVillageId)), true);
+            if (assignedCount == 0) {
+                context.getSource().sendFailure(Component.literal("No villagers found in selection"));
+                return 0;
+            }
 
-                    return assignedCount;
-                })
-                .orElseGet(() -> {
-                    context.getSource().sendFailure(Component.literal("Villages capability not available"));
-                    return 0;
-                });
+            final int finalAssignedCount = assignedCount;
+            final UUID finalVillageId = villageId;
+            context.getSource().sendSuccess(() ->
+                Component.literal(String.format("Assigned %d villager(s) to village %s",
+                    finalAssignedCount, finalVillageId)), true);
+
+            return assignedCount;
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to assign village: " + e.getMessage()));

@@ -13,13 +13,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
+import org.sosly.villageworks.api.capability.IVillageCapability;
+import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneType;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.command.arguments.VillageUUIDArgument;
 import org.sosly.villageworks.command.arguments.ZoneTypeArgument;
 import org.sosly.villageworks.command.arguments.ZoneUUIDArgument;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 import org.sosly.villageworks.data.zones.PathVillageZone;
 import org.sosly.villageworks.data.zones.ZoneFactory;
 
@@ -28,6 +30,32 @@ import java.util.List;
 import java.util.UUID;
 
 public class ZoneCommand {
+
+    private static IVillageCapability getVillageCapability(CommandSourceStack source, UUID villageId) {
+        ServerLevel level = source.getLevel();
+        
+        IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
+            source.sendFailure(Component.literal("Villages capability not found"));
+            return null;
+        }
+
+        VillageInfo village = villages.getVillageById(villageId);
+        if (village == null) {
+            source.sendFailure(Component.literal("Village not found"));
+            return null;
+        }
+
+        ChunkPos villageChunk = village.getVillageStartingChunk();
+        LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
+        IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (villageCapability == null) {
+            source.sendFailure(Component.literal("Village capability not found"));
+            return null;
+        }
+        
+        return villageCapability;
+    }
 
     public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
         parentCommand.then(Commands.literal("zone")
@@ -219,32 +247,20 @@ public class ZoneCommand {
 
             ServerLevel level = source.getLevel();
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village not found"));
-                        return 0;
-                    }
+            IVillageCapability villageCapability = getVillageCapability(source, villageId);
+            if (villageCapability == null) {
+                return 0;
+            }
 
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            boolean removed = villageCapability.removeZone(zoneId);
-                            if (removed) {
-                                source.sendSuccess(() ->
-                                    Component.literal("Deleted zone " + zoneId), true);
-                                return 1;
-                            } else {
-                                source.sendFailure(Component.literal("Zone not found in village"));
-                                return 0;
-                            }
-                        })
-                        .orElse(0);
-                })
-                .orElse(0);
+            boolean removed = villageCapability.removeZone(zoneId);
+            if (removed) {
+                source.sendSuccess(() ->
+                    Component.literal("Deleted zone " + zoneId), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.literal("Zone not found in village"));
+                return 0;
+            }
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to delete zone: " + e.getMessage()));
@@ -289,7 +305,7 @@ public class ZoneCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
+                    VillageInfo village = manager.getVillageById(villageId);
                     if (village == null) {
                         source.sendFailure(Component.literal("Village not found"));
                         return 0;
@@ -332,7 +348,7 @@ public class ZoneCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
+                    VillageInfo village = manager.getVillageById(villageId);
                     if (village == null) {
                         source.sendFailure(Component.literal("Village not found"));
                         return 0;
@@ -383,7 +399,7 @@ public class ZoneCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
+                    VillageInfo village = manager.getVillageById(villageId);
                     if (village == null) {
                         source.sendFailure(Component.literal("Village not found"));
                         return 0;
@@ -443,7 +459,7 @@ public class ZoneCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
+                    VillageInfo village = manager.getVillageById(villageId);
                     if (village == null) {
                         source.sendFailure(Component.literal("Village not found"));
                         return 0;
@@ -486,7 +502,7 @@ public class ZoneCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
+                    VillageInfo village = manager.getVillageById(villageId);
                     if (village == null) {
                         source.sendFailure(Component.literal("Village not found"));
                         return 0;
@@ -524,7 +540,7 @@ public class ZoneCommand {
 
         return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
             .map(manager -> {
-                VillageData village = manager.getVillageById(villageId);
+                VillageInfo village = manager.getVillageById(villageId);
                 if (village == null) {
                     source.sendFailure(Component.literal("Village not found"));
                     return 0;
@@ -559,7 +575,7 @@ public class ZoneCommand {
     private static int getNextZoneId(ServerLevel level, UUID villageId) {
         return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
             .map(manager -> {
-                VillageData village = manager.getVillageById(villageId);
+                VillageInfo village = manager.getVillageById(villageId);
                 if (village == null) {
                     return 1;
                 }

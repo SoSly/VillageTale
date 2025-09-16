@@ -12,8 +12,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.sosly.villageworks.api.capability.IVillageCapability;
+import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.capability.village.VillageCapability;
+import org.sosly.villageworks.data.VillageInfo;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -60,21 +63,30 @@ public class VillageCommand {
             ServerLevel level = source.getLevel();
             BlockPos pos = entity.blockPosition();
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    UUID villageId = manager.createVillage(pos, villageName, squadius);
-                    if (villageId == null) {
-                        source.sendFailure(Component.literal("Failed to create village"));
-                        return 0;
-                    }
+            IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+            if (villages == null) {
+                source.sendFailure(Component.literal("Village not found"));
+                return 0;
+            }
 
-                    source.sendSuccess(() ->
-                        Component.literal("Created village '" + villageName + "' with squadius " + squadius +
-                                        " (covers " + ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), true);
-                    return 1;
-                })
-                .orElse(0);
+            UUID villageId = villages.createVillage(pos, villageName, squadius);
+            if (villageId == null) {
+                source.sendFailure(Component.literal("Village creation failed"));
+                return 0;
+            }
 
+            ChunkPos chunkPos = new ChunkPos(pos);
+            IVillageCapability cap = level.getChunk(chunkPos.x, chunkPos.z).getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+            if (cap == null) {
+                source.sendFailure(Component.literal("Village creation failed"));
+                return 0;
+            }
+            ((VillageCapability) cap).initializeVillage(villageId);
+
+            source.sendSuccess(() ->
+                    Component.literal("Created village '" + villageName + "' with squadius " + squadius +
+                            " (covers " + ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), true);
+            return 1;
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to create village: " + e.getMessage()));
             return 0;
@@ -89,7 +101,7 @@ public class VillageCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageByName(villageName);
+                    VillageInfo village = manager.getVillageByName(villageName);
                     if (village == null) {
                         source.sendFailure(Component.literal("Village '" + villageName + "' not found"));
                         return 0;
@@ -119,7 +131,7 @@ public class VillageCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    Collection<VillageData> villages = manager.getVillages();
+                    Collection<VillageInfo> villages = manager.getVillages();
 
                     if (villages.isEmpty()) {
                         source.sendSuccess(() ->
@@ -130,7 +142,7 @@ public class VillageCommand {
                     source.sendSuccess(() ->
                         Component.literal("Villages in " + level.dimension().location() + ":"), false);
 
-                    for (VillageData village : villages) {
+                    for (VillageInfo village : villages) {
                         BlockPos townHall = village.getTownHallPos();
                         ChunkPos chunkPos = new ChunkPos(townHall);
                         source.sendSuccess(() ->
@@ -165,7 +177,7 @@ public class VillageCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village = manager.getVillageAt(chunkPos);
+                    VillageInfo village = manager.getVillageAt(chunkPos);
 
                     if (village == null) {
                         source.sendSuccess(() ->
@@ -194,7 +206,7 @@ public class VillageCommand {
                                         ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
                     source.sendSuccess(() ->
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
-                    
+
                     LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
                     var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
                     if (villageCapability != null) {
@@ -212,31 +224,31 @@ public class VillageCommand {
             return 0;
         }
     }
-    
+
     private static int showVillageInfoByName(CommandContext<CommandSourceStack> context) {
         try {
             CommandSourceStack source = context.getSource();
             String villageIdentifier = StringArgumentType.getString(context, "village");
             ServerLevel level = source.getLevel();
-            
+
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    VillageData village;
-                    
+                    VillageInfo village;
+
                     try {
                         UUID villageId = UUID.fromString(villageIdentifier);
                         village = manager.getVillageById(villageId);
                     } catch (IllegalArgumentException e) {
                         village = manager.getVillageByName(villageIdentifier);
                     }
-                    
+
                     if (village == null) {
                         source.sendFailure(Component.literal("Village '" + villageIdentifier + "' not found"));
                         return 0;
                     }
-                    
-                    final VillageData villageData = village;
-                    
+
+                    final VillageInfo villageData = village;
+
                     BlockPos townHall = villageData.getTownHallPos();
                     ChunkPos townHallChunk = new ChunkPos(townHall);
                     ChunkPos villageChunk = villageData.getVillageStartingChunk();
@@ -245,7 +257,7 @@ public class VillageCommand {
                     int maxX = townHallChunk.x + squadius;
                     int minZ = townHallChunk.z - squadius;
                     int maxZ = townHallChunk.z + squadius;
-                    
+
                     source.sendSuccess(() ->
                         Component.literal("Village: " + villageData.getVillageName()), false);
                     source.sendSuccess(() ->
@@ -258,7 +270,7 @@ public class VillageCommand {
                                         ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
                     source.sendSuccess(() ->
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
-                    
+
                     LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
                     var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
                     if (villageCapability != null) {
@@ -266,11 +278,11 @@ public class VillageCommand {
                         source.sendSuccess(() ->
                             Component.literal("Villagers: " + villagerCount), false);
                     }
-                    
+
                     return 1;
                 })
                 .orElse(0);
-                
+
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to show village info: " + e.getMessage()));
             return 0;

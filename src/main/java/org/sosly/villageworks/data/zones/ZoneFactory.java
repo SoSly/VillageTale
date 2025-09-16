@@ -1,6 +1,7 @@
 package org.sosly.villageworks.data.zones;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -95,9 +96,6 @@ public class ZoneFactory {
             IVillageZone zone = createZone(shape, uuid, type, id, name);
             zone.deserializeNBT(tag);
 
-            if (!(zone instanceof AbstractVillageZone abstractZone)) {
-                return zone;
-            }
             if (!tag.contains("Level")) {
                 return zone;
             }
@@ -106,12 +104,13 @@ public class ZoneFactory {
             ResourceLocation dimensionId = new ResourceLocation(levelKey);
             ResourceKey<Level> levelResourceKey = ResourceKey.create(Registries.DIMENSION, dimensionId);
 
-            Level level = Minecraft.getInstance().level.getServer().getLevel(levelResourceKey);
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            Level level = server != null ? server.getLevel(levelResourceKey) : null;
             if (level == null) {
                 return zone;
             }
 
-            abstractZone.setLevel(level);
+            zone.setLevel(level);
             return zone;
 
         } catch (Exception e) {

@@ -8,10 +8,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
 import org.sosly.villageworks.VillageWorks;
+import org.sosly.villageworks.api.capability.IVillageCapability;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.capability.village.VillageCapability;
+import org.sosly.villageworks.data.VillageInfo;
 
 import java.util.UUID;
 
@@ -40,14 +43,15 @@ public class TownHallBlockEntity extends BlockEntity {
 
         ChunkPos chunkPos = new ChunkPos(worldPosition);
 
-        serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).ifPresent(villagesCapability ->
-            handleVillageSetup(serverLevel, chunkPos, player, villagesCapability)
-        );
+        IVillagesCapability villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability != null) {
+            handleVillageSetup(serverLevel, chunkPos, player, villagesCapability);
+        }
     }
 
     private void handleVillageSetup(ServerLevel level, ChunkPos chunkPos, Player player,
                                    IVillagesCapability villagesCapability) {
-        VillageData existingVillage = villagesCapability.getVillageAt(chunkPos);
+        VillageInfo existingVillage = villagesCapability.getVillageAt(chunkPos);
 
         if (existingVillage != null) {
             handleExistingVillage(level, existingVillage, player);
@@ -57,9 +61,9 @@ public class TownHallBlockEntity extends BlockEntity {
         createNewVillage(level, chunkPos, player, villagesCapability);
     }
 
-    private void handleExistingVillage(ServerLevel level, VillageData village, Player player) {
+    private void handleExistingVillage(ServerLevel level, VillageInfo village, Player player) {
         BlockPos existingTownHall = village.getTownHallPos();
-        
+
         VillageWorks.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}",
             worldPosition, village.getVillageName(), existingTownHall);
         if (player != null) {
@@ -87,6 +91,13 @@ public class TownHallBlockEntity extends BlockEntity {
         }
 
         setVillageId(newVillageId);
+
+        IVillageCapability cap = level.getChunk(chunkPos.x, chunkPos.z).getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (cap == null) {
+            return;
+        }
+        ((VillageCapability) cap).initializeVillage(newVillageId);
+
         VillageWorks.LOGGER.info("Created village {} at {} with ID {} and town hall at {}",
             villageName, chunkPos, newVillageId, worldPosition);
     }

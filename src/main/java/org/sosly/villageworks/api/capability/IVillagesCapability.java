@@ -2,7 +2,7 @@ package org.sosly.villageworks.api.capability;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -18,7 +18,7 @@ public interface IVillagesCapability {
      * @param pos Chunk position to check
      * @return Village containing the chunk, or null if no village found
      */
-    VillageData getVillageAt(ChunkPos pos);
+    VillageInfo getVillageAt(ChunkPos pos);
 
     /**
      * Creates a new village with the specified parameters.
@@ -47,19 +47,19 @@ public interface IVillagesCapability {
     /**
      * @return All villages in this dimension
      */
-    Collection<VillageData> getVillages();
+    Collection<VillageInfo> getVillages();
 
     /**
      * Finds a village by its unique identifier.
      * @param villageId UUID to search for
      * @return Village with matching UUID, or null if not found
      */
-    VillageData getVillageById(UUID villageId);
+    VillageInfo getVillageById(UUID villageId);
 
     /**
      * Finds a village by its name.
      * @param villageName Name to search for
      * @return Village with matching name, or null if not found
      */
-    VillageData getVillageByName(String villageName);
+    VillageInfo getVillageByName(String villageName);
 }

@@ -13,9 +13,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.sosly.villageworks.api.capability.IVillageCapability;
+import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,28 +51,29 @@ public class ZoneUUIDArgument {
             
             ServerLevel level = context.getSource().getLevel();
             
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageData village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        return Suggestions.empty();
-                    }
-                    
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-                    
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            List<IVillageZone> zones = villageCapability.getZones();
-                            Collection<String> zoneUUIDs = zones.stream()
-                                .map(zone -> zone.getUUID().toString())
-                                .collect(Collectors.toList());
-                            
-                            return SharedSuggestionProvider.suggest(zoneUUIDs, builder);
-                        })
-                        .orElse(Suggestions.empty());
-                })
-                .orElse(Suggestions.empty());
+            IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+            if (villages == null) {
+                return Suggestions.empty();
+            }
+
+            VillageInfo village = villages.getVillageById(villageId);
+            if (village == null) {
+                return Suggestions.empty();
+            }
+            
+            ChunkPos villageChunk = village.getVillageStartingChunk();
+            LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
+            IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+            if (villageCapability == null) {
+                return Suggestions.empty();
+            }
+
+            List<IVillageZone> zones = villageCapability.getZones();
+            Collection<String> zoneUUIDs = zones.stream()
+                .map(zone -> zone.getUUID().toString())
+                .collect(Collectors.toList());
+            
+            return SharedSuggestionProvider.suggest(zoneUUIDs, builder);
         } catch (Exception e) {
             return Suggestions.empty();
         }

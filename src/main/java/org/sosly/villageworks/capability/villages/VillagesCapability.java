@@ -4,14 +4,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class VillagesCapability implements IVillagesCapability {
 
-    private final Map<UUID, VillageData> villages;
+    private final Map<UUID, VillageInfo> villages;
     private final Map<String, UUID> villagesByName;
     private WeakReference<Level> ownerLevel;
 
@@ -22,12 +22,12 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
     @Override
-    public VillageData getVillageAt(ChunkPos pos) {
+    public VillageInfo getVillageAt(ChunkPos pos) {
         if (pos == null) {
             return null;
         }
 
-        for (VillageData village : villages.values()) {
+        for (VillageInfo village : villages.values()) {
             if (village.containsChunk(pos)) {
                 return village;
             }
@@ -51,10 +51,10 @@ public class VillagesCapability implements IVillagesCapability {
 
         UUID villageId = UUID.randomUUID();
         ChunkPos villageStartingChunk = new ChunkPos(townHallPos);
-        VillageData newVillage = new VillageData(villageId, townHallPos, villageStartingChunk, villageName, squadius);
+        VillageInfo newVillage = new VillageInfo(villageId, townHallPos, villageStartingChunk, villageName, squadius);
 
         int minDistance = 30;
-        for (VillageData existingVillage : villages.values()) {
+        for (VillageInfo existingVillage : villages.values()) {
             if (existingVillage.overlaps(newVillage, minDistance)) {
                 return null;
             }
@@ -72,7 +72,7 @@ public class VillagesCapability implements IVillagesCapability {
             return false;
         }
 
-        VillageData village = villages.remove(villageId);
+        VillageInfo village = villages.remove(villageId);
         if (village == null) {
             return false;
         }
@@ -87,7 +87,7 @@ public class VillagesCapability implements IVillagesCapability {
             return false;
         }
 
-        for (VillageData village : villages.values()) {
+        for (VillageInfo village : villages.values()) {
             if (excludeVillageId != null && village.getVillageId().equals(excludeVillageId)) {
                 continue;
             }
@@ -100,12 +100,12 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
     @Override
-    public Collection<VillageData> getVillages() {
+    public Collection<VillageInfo> getVillages() {
         return new ArrayList<>(villages.values());
     }
 
     @Override
-    public VillageData getVillageById(UUID villageId) {
+    public VillageInfo getVillageById(UUID villageId) {
         if (villageId == null) {
             return null;
         }
@@ -113,7 +113,7 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
     @Override
-    public VillageData getVillageByName(String villageName) {
+    public VillageInfo getVillageByName(String villageName) {
         if (villageName == null || villageName.trim().isEmpty()) {
             return null;
         }
@@ -131,7 +131,7 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
 
-    public void loadVillage(VillageData village) {
+    public void loadVillage(VillageInfo village) {
         if (village == null) {
             return;
         }

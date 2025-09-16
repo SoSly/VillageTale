@@ -6,7 +6,7 @@ import net.minecraft.world.level.ChunkPos;
 
 import java.util.UUID;
 
-public class VillageData {
+public class VillageInfo {
     
     private final UUID villageId;
     private final BlockPos townHallPos;
@@ -14,7 +14,7 @@ public class VillageData {
     private final int squadius;
     private final String villageName;
     
-    public VillageData(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk, String villageName, int squadius) {
+    public VillageInfo(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk, String villageName, int squadius) {
         this.villageId = villageId;
         this.townHallPos = townHallPos;
         this.villageStartingChunk = villageStartingChunk;
@@ -58,11 +58,11 @@ public class VillageData {
                pos.z <= centerZ + squadius;
     }
     
-    public boolean overlaps(VillageData other) {
+    public boolean overlaps(VillageInfo other) {
         return overlaps(other, 0);
     }
     
-    public boolean overlaps(VillageData other, int minDistance) {
+    public boolean overlaps(VillageInfo other, int minDistance) {
         if (other == null) {
             return false;
         }
@@ -94,7 +94,7 @@ public class VillageData {
         return tag;
     }
     
-    public static VillageData deserializeNBT(CompoundTag tag) {
+    public static VillageInfo deserializeNBT(CompoundTag tag) {
         if (!tag.contains("VillageId") || !tag.contains("TownHallPos") ||
             !tag.contains("VillageStartingChunk") || !tag.contains("VillageName") || 
             !tag.contains("Squadius")) {
@@ -108,7 +108,7 @@ public class VillageData {
             String villageName = tag.getString("VillageName");
             int squadius = tag.getInt("Squadius");
             
-            return new VillageData(villageId, townHallPos, villageStartingChunk, villageName, squadius);
+            return new VillageInfo(villageId, townHallPos, villageStartingChunk, villageName, squadius);
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -123,7 +123,7 @@ public class VillageData {
             return false;
         }
         
-        VillageData other = (VillageData) obj;
+        VillageInfo other = (VillageInfo) obj;
         return villageId.equals(other.villageId);
     }
     

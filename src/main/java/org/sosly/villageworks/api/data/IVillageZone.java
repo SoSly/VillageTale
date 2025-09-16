@@ -46,6 +46,12 @@ public interface IVillageZone {
     Level getLevel();
     
     /**
+     * Sets the level this zone exists in.
+     * @param level The level to set, must not be null
+     */
+    void setLevel(Level level);
+    
+    /**
      * Returns type-specific points of interest within this zone.
      * Results are cached and only rescanned when zone boundaries change.
      * 

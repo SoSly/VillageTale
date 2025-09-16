@@ -23,8 +23,8 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
     private final VillageCapability capability;
     private final LazyOptional<IVillageCapability> lazyOptional;
 
-    public VillageProvider(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk) {
-        this.capability = new VillageCapability(villageId, townHallPos, villageStartingChunk);
+    public VillageProvider() {
+        this.capability = new VillageCapability();
         this.lazyOptional = LazyOptional.of(() -> capability);
     }
 
@@ -39,11 +39,13 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public CompoundTag serializeNBT() {
+        if (!capability.hasVillage()) {
+            return new CompoundTag();
+        }
+        
         CompoundTag tag = new CompoundTag();
 
         tag.putString("VillageId", capability.getVillageId().toString());
-        tag.putLong("TownHallPos", capability.getTownHallPos().asLong());
-        tag.putLong("VillageStartingChunk", capability.getVillageStartingChunk().toLong());
 
         ListTag villagerList = new ListTag();
         for (UUID villagerId : capability.getVillagerIds()) {
@@ -71,6 +73,10 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
         if (!tag.hasUUID("VillageId") && !tag.contains("VillageId", Tag.TAG_STRING)) {
             return;
         }
+        
+        UUID villageId = UUID.fromString(tag.getString("VillageId"));
+        
+        capability.initializeVillage(villageId);
 
         // Deserialize villager IDs
         if (tag.contains("VillagerIds", Tag.TAG_LIST)) {

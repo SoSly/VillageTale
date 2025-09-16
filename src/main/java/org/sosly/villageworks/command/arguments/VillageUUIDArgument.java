@@ -11,8 +11,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -41,15 +42,16 @@ public class VillageUUIDArgument {
     public static CompletableFuture<Suggestions> suggest(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         ServerLevel level = context.getSource().getLevel();
         
-        return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-            .map(manager -> {
-                Collection<VillageData> villages = manager.getVillages();
-                Collection<String> villageUUIDs = villages.stream()
-                    .map(village -> village.getVillageId().toString())
-                    .collect(Collectors.toList());
-                
-                return SharedSuggestionProvider.suggest(villageUUIDs, builder);
-            })
-            .orElse(Suggestions.empty());
+        IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
+            return Suggestions.empty();
+        }
+
+        Collection<VillageInfo> villageInfos = villages.getVillages();
+        Collection<String> villageUUIDs = villageInfos.stream()
+            .map(village -> village.getVillageId().toString())
+            .collect(Collectors.toList());
+        
+        return SharedSuggestionProvider.suggest(villageUUIDs, builder);
     }
 }

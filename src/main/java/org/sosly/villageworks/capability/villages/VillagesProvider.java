@@ -9,7 +9,7 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.data.VillageData;
+import org.sosly.villageworks.data.VillageInfo;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,7 +38,7 @@ public class VillagesProvider implements ICapabilitySerializable<CompoundTag> {
         CompoundTag tag = new CompoundTag();
 
         ListTag villageList = new ListTag();
-        for (VillageData village : capability.getVillages()) {
+        for (VillageInfo village : capability.getVillages()) {
             villageList.add(village.serializeNBT());
         }
         tag.put("Villages", villageList);
@@ -55,7 +55,7 @@ public class VillagesProvider implements ICapabilitySerializable<CompoundTag> {
         ListTag villageList = tag.getList("Villages", Tag.TAG_COMPOUND);
         for (int i = 0; i < villageList.size(); i++) {
             CompoundTag villageTag = villageList.getCompound(i);
-            VillageData village = VillageData.deserializeNBT(villageTag);
+            VillageInfo village = VillageInfo.deserializeNBT(villageTag);
             if (village != null) {
                 capability.loadVillage(village);
             }

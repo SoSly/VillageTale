@@ -5,48 +5,44 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villageworks.api.capability.IVillageCapability;
 import org.sosly.villageworks.api.data.IVillageZone;
+import org.sosly.villageworks.data.VillageState;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
+import javax.annotation.Nullable;
 
 public class VillageCapability implements IVillageCapability {
     
-    private final UUID villageId;
-    private final BlockPos townHallPos;
-    private final ChunkPos villageStartingChunk;
-    private final List<IVillageZone> zones;
-    private final Set<UUID> villagerIds;
-    private final Map<UUID, Permission> playerPermissions;
+    @Nullable
+    private VillageState state;
     private WeakReference<LevelChunk> ownerChunk;
     
-    public VillageCapability(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk) {
-        this.villageId = villageId;
-        this.townHallPos = townHallPos;
-        this.villageStartingChunk = villageStartingChunk;
-        this.zones = new ArrayList<>();
-        this.villagerIds = new HashSet<>();
-        this.playerPermissions = new HashMap<>();
+    public VillageCapability() {
+        this.state = null;
         this.ownerChunk = new WeakReference<>(null);
     }
     
     @Override
     public UUID getVillageId() {
-        return villageId;
+        return state != null ? state.getVillageId() : null;
     }
     
     @Override
     public BlockPos getTownHallPos() {
-        return townHallPos;
+        return null; // This should come from VillagesCapability
     }
     
     @Override
     public ChunkPos getVillageStartingChunk() {
-        return villageStartingChunk;
+        return null; // This should come from VillagesCapability
     }
     
     @Override
     public List<IVillageZone> getZones() {
-        return new ModifiableZoneList(zones, this::markDirty);
+        if (state == null) {
+            return Collections.emptyList();
+        }
+        return new ModifiableZoneList(state.getZones(), this::markDirty);
     }
     
     private static class ModifiableZoneList extends ArrayList<IVillageZone> {
@@ -94,29 +90,29 @@ public class VillageCapability implements IVillageCapability {
     
     @Override
     public void addZone(IVillageZone zone) {
-        if (zone == null) {
+        if (zone == null || state == null) {
             return;
         }
         
-        zones.add(zone);
+        state.addZone(zone);
         markDirty();
     }
     
     public void addZoneWithoutDirty(IVillageZone zone) {
-        if (zone == null) {
+        if (zone == null || state == null) {
             return;
         }
         
-        zones.add(zone);
+        state.addZone(zone);
     }
     
     @Override
     public boolean removeZone(UUID zoneId) {
-        if (zoneId == null) {
+        if (zoneId == null || state == null) {
             return false;
         }
         
-        boolean removed = zones.removeIf(zone -> zoneId.equals(zone.getUUID()));
+        boolean removed = state.getZones().removeIf(zone -> zoneId.equals(zone.getUUID()));
         if (removed) {
             markDirty();
         }
@@ -125,11 +121,11 @@ public class VillageCapability implements IVillageCapability {
     
     @Override
     public IVillageZone getZoneAt(BlockPos pos) {
-        if (pos == null) {
+        if (pos == null || state == null) {
             return null;
         }
         
-        for (IVillageZone zone : zones) {
+        for (IVillageZone zone : state.getZones()) {
             if (zone.containsPosition(pos)) {
                 return zone;
             }
@@ -139,27 +135,31 @@ public class VillageCapability implements IVillageCapability {
     
     @Override
     public Set<UUID> getVillagerIds() {
-        return new HashSet<>(villagerIds);
+        if (state == null) {
+            return Collections.emptySet();
+        }
+        return new HashSet<>(state.getVillagerIds());
     }
     
     @Override
     public void assignVillager(UUID villagerId) {
-        if (villagerId == null) {
+        if (villagerId == null || state == null) {
             return;
         }
         
-        if (villagerIds.add(villagerId)) {
+        if (!state.getVillagerIds().contains(villagerId)) {
+            state.addVillager(villagerId);
             markDirty();
         }
     }
     
     @Override
     public boolean removeVillager(UUID villagerId) {
-        if (villagerId == null) {
+        if (villagerId == null || state == null) {
             return false;
         }
         
-        boolean removed = villagerIds.remove(villagerId);
+        boolean removed = state.removeVillager(villagerId);
         if (removed) {
             markDirty();
         }
@@ -168,21 +168,25 @@ public class VillageCapability implements IVillageCapability {
     
     @Override
     public Map<UUID, Permission> getPlayerPermissions() {
-        return new HashMap<>(playerPermissions);
+        if (state == null) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<>(state.getPlayerPermissions());
     }
     
     @Override
     public void setPlayerPermission(UUID playerId, Permission permission) {
-        if (playerId == null || permission == null) {
+        if (playerId == null || permission == null || state == null) {
             return;
         }
         
         if (permission == Permission.NONE) {
-            if (playerPermissions.remove(playerId) != null) {
+            if (state.removePlayerPermission(playerId)) {
                 markDirty();
             }
         } else {
-            Permission oldPermission = playerPermissions.put(playerId, permission);
+            Permission oldPermission = state.getPlayerPermission(playerId);
+            state.setPlayerPermission(playerId, permission);
             if (!permission.equals(oldPermission)) {
                 markDirty();
             }
@@ -191,12 +195,21 @@ public class VillageCapability implements IVillageCapability {
     
     @Override
     public boolean hasPermission(UUID playerId, Permission required) {
-        if (playerId == null || required == null) {
+        if (playerId == null || required == null || state == null) {
             return false;
         }
         
-        Permission playerPermission = playerPermissions.getOrDefault(playerId, Permission.NONE);
+        Permission playerPermission = state.getPlayerPermissions().getOrDefault(playerId, Permission.NONE);
         return playerPermission.ordinal() >= required.ordinal();
+    }
+    
+    public void initializeVillage(UUID villageId) {
+        this.state = new VillageState(villageId);
+        markDirty();
+    }
+    
+    public boolean hasVillage() {
+        return state != null;
     }
     
     public void setOwnerChunk(LevelChunk chunk) {
