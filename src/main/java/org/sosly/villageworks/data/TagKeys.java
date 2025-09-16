@@ -1,4 +1,4 @@
-package org.sosly.villageworks.registry;
+package org.sosly.villageworks.data;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;

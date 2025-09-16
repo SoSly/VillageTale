@@ -1,11 +1,10 @@
-package org.sosly.villageworks.renderer;
+package org.sosly.villageworks.renderer.entity;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.resources.ResourceLocation;
-import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.entity.Villager;
 
 public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villager>> {

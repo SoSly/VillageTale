@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.sosly.villageworks.command.VillageWorksCommand;
 import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.capability.Capabilities;
-import org.sosly.villageworks.registry.EntityTypes;
-import org.sosly.villageworks.registry.MemoryModuleTypes;
-import org.sosly.villageworks.registry.SensorTypes;
+import org.sosly.villageworks.entity.EntityTypes;
+import org.sosly.villageworks.entity.MemoryModuleTypes;
+import org.sosly.villageworks.entity.ai.SensorTypes;
 
 @Mod(VillageWorks.MOD_ID)
 public class VillageWorks {

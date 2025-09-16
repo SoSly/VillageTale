@@ -37,15 +37,14 @@ import org.jetbrains.annotations.NotNull;
 import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.entity.ai.behavior.VillagerGoalPackages;
-import org.sosly.villageworks.registry.MemoryModuleTypes;
-import org.sosly.villageworks.registry.SensorTypes;
+import org.sosly.villageworks.entity.ai.SensorTypes;
 
 import javax.annotation.Nullable;
 
 public class Villager extends PathfinderMob {
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
-    
+
     private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
         MemoryModuleType.HOME,
         MemoryModuleType.NEAREST_LIVING_ENTITIES,
@@ -228,28 +227,28 @@ public class Villager extends PathfinderMob {
     @Override
     public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        
+
         if (itemStack.isEmpty()) {
             return InteractionResult.PASS;
         }
-        
+
         if (!this.inventory.getItem(0).isEmpty()) {
             return InteractionResult.PASS;
         }
-        
+
         FoodProperties foodProperties = itemStack.getFoodProperties(this);
         if (foodProperties == null || foodProperties.getSaturationModifier() <= 0) {
             return InteractionResult.PASS;
         }
-        
+
         ItemStack singleItem = itemStack.copy();
         singleItem.setCount(1);
         this.inventory.setItem(0, singleItem);
-        
+
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
-        
+
         this.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
         return InteractionResult.SUCCESS;
     }
@@ -257,7 +256,7 @@ public class Villager extends PathfinderMob {
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int looting, boolean recentlyHit) {
         super.dropCustomDeathLoot(damageSource, looting, recentlyHit);
-        
+
         ItemStack inventoryItem = this.inventory.getItem(0);
         if (!inventoryItem.isEmpty()) {
             ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), inventoryItem);
@@ -270,12 +269,12 @@ public class Villager extends PathfinderMob {
         if (!(blockState.getBlock() instanceof BedBlock)) {
             return bedPos;
         }
-        
+
         BedPart bedPart = blockState.getValue(BedBlock.PART);
         if (bedPart != BedPart.FOOT) {
             return bedPos;
         }
-        
+
         return bedPos.relative(blockState.getValue(BedBlock.FACING));
     }
 }
