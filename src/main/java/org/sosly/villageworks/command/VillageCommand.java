@@ -62,16 +62,6 @@ public class VillageCommand {
 
             return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .map(manager -> {
-                    if (manager.getVillageByName(villageName) != null) {
-                        source.sendFailure(Component.literal("Village '" + villageName + "' already exists"));
-                        return 0;
-                    }
-
-                    if (!manager.canClaimChunk(chunkPos, null)) {
-                        source.sendFailure(Component.literal("Cannot create village here - overlaps with existing village"));
-                        return 0;
-                    }
-
                     UUID villageId = manager.createVillage(chunkPos, villageName, squadius);
                     if (villageId == null) {
                         source.sendFailure(Component.literal("Failed to create village"));
@@ -232,19 +222,19 @@ public class VillageCommand {
                         return 0;
                     }
                     
-                    final VillageData finalVillage = village;
+                    final VillageData villageData = village;
                     
-                    ChunkPos townHall = finalVillage.getTownHallPos();
-                    int squadius = finalVillage.getSquadius();
+                    ChunkPos townHall = villageData.getTownHallPos();
+                    int squadius = villageData.getSquadius();
                     int minX = townHall.x - squadius;
                     int maxX = townHall.x + squadius;
                     int minZ = townHall.z - squadius;
                     int maxZ = townHall.z + squadius;
                     
                     source.sendSuccess(() ->
-                        Component.literal("Village: " + finalVillage.getVillageName()), false);
+                        Component.literal("Village: " + villageData.getVillageName()), false);
                     source.sendSuccess(() ->
-                        Component.literal("UUID: " + finalVillage.getVillageId().toString()), false);
+                        Component.literal("UUID: " + villageData.getVillageId().toString()), false);
                     source.sendSuccess(() ->
                         Component.literal("Town Hall: chunk (" + townHall.x + ", " + townHall.z + ")"), false);
                     source.sendSuccess(() ->

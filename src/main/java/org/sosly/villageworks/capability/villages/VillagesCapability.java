@@ -51,10 +51,6 @@ public class VillagesCapability implements IVillagesCapability {
         UUID villageId = UUID.randomUUID();
         VillageData newVillage = new VillageData(villageId, townHallPos, villageName, squadius);
 
-        if (!canClaimChunk(townHallPos, null)) {
-            return null;
-        }
-
         for (VillageData existingVillage : villages.values()) {
             if (existingVillage.overlaps(newVillage)) {
                 return null;
