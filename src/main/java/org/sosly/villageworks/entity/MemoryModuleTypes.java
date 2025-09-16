@@ -1,7 +1,6 @@
 package org.sosly.villageworks.entity;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -9,9 +8,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villageworks.VillageWorks;
 
+import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
-import java.nio.ByteBuffer;
 
 public class MemoryModuleTypes {
     public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
