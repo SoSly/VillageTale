@@ -88,10 +88,12 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
                 try {
                     UUID playerId = UUID.fromString(playerIdStr);
                     byte permissionOrdinal = permissionsTag.getByte(playerIdStr);
-                    IVillageCapability.Permission permission = IVillageCapability.Permission.values()[permissionOrdinal];
-                    capability.setPlayerPermission(playerId, permission);
-                } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
-                    // Skip invalid UUIDs or permission values
+                    if (permissionOrdinal >= 0 && permissionOrdinal < IVillageCapability.Permission.values().length) {
+                        IVillageCapability.Permission permission = IVillageCapability.Permission.values()[permissionOrdinal];
+                        capability.setPlayerPermission(playerId, permission);
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Skip invalid UUIDs
                 }
             }
         }
