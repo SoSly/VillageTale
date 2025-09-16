@@ -2,6 +2,7 @@ package org.sosly.villageworks.api.data;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,11 @@ public interface IVillageZone {
      * @return Functional type determining zone behavior and POI scanning
      */
     ZoneType getType();
+    
+    /**
+     * @return The level this zone exists in
+     */
+    Level getLevel();
     
     /**
      * Returns type-specific points of interest within this zone.

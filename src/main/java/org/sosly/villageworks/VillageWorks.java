@@ -1,6 +1,7 @@
 package org.sosly.villageworks;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;

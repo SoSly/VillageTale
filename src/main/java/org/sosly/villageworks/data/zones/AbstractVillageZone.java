@@ -3,6 +3,7 @@ package org.sosly.villageworks.data.zones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneShape;
 import org.sosly.villageworks.api.data.ZoneType;
@@ -16,17 +17,23 @@ public abstract class AbstractVillageZone implements IVillageZone {
     private final UUID uuid;
     private final ZoneType type;
     private final int id;
+    private Level level;
     private String name;
+
+    public AbstractVillageZone(UUID uuid, ZoneType type, int id, String name, Level level) {
+        this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
+        this.type = Objects.requireNonNull(type, "Zone type cannot be null");
+        this.level = Objects.requireNonNull(level, "Level cannot be null");
+        this.id = id;
+        this.name = name;
+    }
 
     public AbstractVillageZone(UUID uuid, ZoneType type, int id, String name) {
         this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
         this.type = Objects.requireNonNull(type, "Zone type cannot be null");
         this.id = id;
         this.name = name;
-    }
-
-    public AbstractVillageZone(ZoneType type, int id, String name) {
-        this(UUID.randomUUID(), type, id, name);
+        this.level = null;
     }
 
     @Override
@@ -56,6 +63,15 @@ public abstract class AbstractVillageZone implements IVillageZone {
     }
 
     @Override
+    public Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Level level) {
+        this.level = Objects.requireNonNull(level, "Level cannot be null");
+    }
+
+    @Override
     public abstract ZoneShape getShape();
 
     @Override
@@ -73,6 +89,7 @@ public abstract class AbstractVillageZone implements IVillageZone {
         if (name != null) {
             tag.putString("Name", name);
         }
+        tag.putString("Level", level.dimension().location().toString());
         return tag;
     }
 

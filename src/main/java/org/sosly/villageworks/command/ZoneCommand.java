@@ -119,7 +119,7 @@ public class ZoneCommand {
 
             return createZoneInVillage(source, villageId, level -> {
                 int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createAABBZone(zoneType, nextId, name, bounds);
+                return ZoneFactory.createAABBZone(zoneType, nextId, name, bounds, level);
             });
 
         } catch (Exception e) {
@@ -148,7 +148,7 @@ public class ZoneCommand {
 
             return createZoneInVillage(source, villageId, level -> {
                 int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createRadiusZone(zoneType, nextId, name, center, radius);
+                return ZoneFactory.createRadiusZone(zoneType, nextId, name, center, radius, level);
             });
 
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class ZoneCommand {
 
             return createZoneInVillage(source, villageId, level -> {
                 int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createBlockPosZone(zoneType, nextId, name, pos);
+                return ZoneFactory.createBlockPosZone(zoneType, nextId, name, pos, level);
             });
 
         } catch (Exception e) {
@@ -202,7 +202,7 @@ public class ZoneCommand {
 
             return createZoneInVillage(source, villageId, level -> {
                 int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createPathZone(zoneType, nextId, name, new ArrayList<>());
+                return ZoneFactory.createPathZone(zoneType, nextId, name, new ArrayList<>(), level);
             });
 
         } catch (Exception e) {
@@ -610,16 +610,6 @@ public class ZoneCommand {
     }
     
     private static void showZonePOIs(CommandSourceStack source, IVillageZone zone, ServerLevel level) {
-        if (zone instanceof org.sosly.villageworks.data.zones.AABBVillageZone aabbZone) {
-            aabbZone.rescanPOIs(level);
-        } else if (zone instanceof org.sosly.villageworks.data.zones.RadiusVillageZone radiusZone) {
-            radiusZone.rescanPOIs(level);
-        } else if (zone instanceof org.sosly.villageworks.data.zones.BlockPosVillageZone blockPosZone) {
-            blockPosZone.rescanPOIs(level);
-        } else if (zone instanceof org.sosly.villageworks.data.zones.PathVillageZone pathZone) {
-            pathZone.rescanPOIs(level);
-        }
-        
         var pois = zone.getPOIs();
         if (pois.isEmpty()) {
             source.sendSuccess(() ->

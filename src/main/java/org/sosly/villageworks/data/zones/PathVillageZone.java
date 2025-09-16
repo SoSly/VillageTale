@@ -17,21 +17,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PathVillageZone implements IVillageZone {
+public class PathVillageZone extends AbstractVillageZone implements IVillageZone {
 
-    private final UUID uuid;
-    private final ZoneType type;
-    private final int id;
-    private String name;
     private List<BlockPos> path;
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
+    public PathVillageZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
+        super(uuid, type, id, name, level);
+        this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
+    }
+
     public PathVillageZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path) {
-        this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
-        this.type = Objects.requireNonNull(type, "Zone type cannot be null");
-        this.id = id;
-        this.name = name;
+        super(uuid, type, id, name);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
     }
 
@@ -57,34 +55,8 @@ public class PathVillageZone implements IVillageZone {
     }
 
     @Override
-    public UUID getUUID() {
-        return uuid;
-    }
-
-    @Override
-    public String getName() {
-        if (name != null) {
-            return name;
-        }
-
-        String translationKey = "villageworks.zone." + type.name().toLowerCase();
-        String zoneName = Component.translatable(translationKey).getString();
-        return Component.translatable("villageworks.zone.numbered", zoneName, id).getString();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
     public ZoneShape getShape() {
         return ZoneShape.PATH;
-    }
-
-    @Override
-    public ZoneType getType() {
-        return type;
     }
 
     @Override
@@ -98,26 +70,15 @@ public class PathVillageZone implements IVillageZone {
 
     @Override
     public Optional<List<BlockPos>> getPOIs() {
-        if (getType() == ZoneType.NONE) {
+        if (getType() == ZoneType.NONE || getLevel() == null) {
             return Optional.empty();
         }
 
         if (poiCacheDirty) {
-            rescanPOIs();
+            rescanPOIs(getLevel());
         }
 
         return Optional.of(new ArrayList<>(cachedPOIs));
-    }
-
-    private void rescanPOIs() {
-        cachedPOIs = new ArrayList<>();
-
-        if (path.isEmpty()) {
-            poiCacheDirty = false;
-            return;
-        }
-
-        poiCacheDirty = false;
     }
 
     public void rescanPOIs(Level level) {
@@ -140,13 +101,7 @@ public class PathVillageZone implements IVillageZone {
 
     @Override
     public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("UUID", uuid.toString());
-        tag.putByte("Type", (byte) type.ordinal());
-        tag.putShort("Id", (short) id);
-        if (name != null) {
-            tag.putString("Name", name);
-        }
+        CompoundTag tag = super.serializeNBT();
         tag.putByte("Shape", (byte) ZoneShape.PATH.ordinal());
 
         ListTag pathList = new ListTag();
@@ -160,9 +115,7 @@ public class PathVillageZone implements IVillageZone {
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        if (tag.contains("Name")) {
-            this.name = tag.getString("Name");
-        }
+        super.deserializeNBT(tag);
 
         this.path = new ArrayList<>();
         if (tag.contains("Path", Tag.TAG_LIST)) {

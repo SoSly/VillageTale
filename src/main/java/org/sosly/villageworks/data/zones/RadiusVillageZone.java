@@ -2,7 +2,6 @@ package org.sosly.villageworks.data.zones;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneShape;
@@ -10,26 +9,24 @@ import org.sosly.villageworks.api.data.ZoneType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RadiusVillageZone implements IVillageZone {
+public class RadiusVillageZone extends AbstractVillageZone implements IVillageZone {
 
-    private final UUID uuid;
-    private final ZoneType type;
-    private final int id;
-    private String name;
     private BlockPos center;
     private int radius;
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
+    public RadiusVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
+        super(uuid, type, id, name, level);
+        this.center = center;
+        this.radius = radius;
+    }
+
     public RadiusVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius) {
-        this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
-        this.type = Objects.requireNonNull(type, "Zone type cannot be null");
-        this.id = id;
-        this.name = name;
+        super(uuid, type, id, name);
         this.center = center;
         this.radius = radius;
     }
@@ -53,34 +50,8 @@ public class RadiusVillageZone implements IVillageZone {
     }
 
     @Override
-    public UUID getUUID() {
-        return uuid;
-    }
-
-    @Override
-    public String getName() {
-        if (name != null) {
-            return name;
-        }
-
-        String translationKey = "villageworks.zone." + type.name().toLowerCase();
-        String zoneName = Component.translatable(translationKey).getString();
-        return Component.translatable("villageworks.zone.numbered", zoneName, id).getString();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
     public ZoneShape getShape() {
         return ZoneShape.RADIUS;
-    }
-
-    @Override
-    public ZoneType getType() {
-        return type;
     }
 
     @Override
@@ -95,26 +66,15 @@ public class RadiusVillageZone implements IVillageZone {
 
     @Override
     public Optional<List<BlockPos>> getPOIs() {
-        if (getType() == ZoneType.NONE) {
+        if (getType() == ZoneType.NONE || getLevel() == null) {
             return Optional.empty();
         }
 
         if (poiCacheDirty) {
-            rescanPOIs();
+            rescanPOIs(getLevel());
         }
 
         return Optional.of(new ArrayList<>(cachedPOIs));
-    }
-
-    private void rescanPOIs() {
-        cachedPOIs = new ArrayList<>();
-
-        if (center == null) {
-            poiCacheDirty = false;
-            return;
-        }
-
-        poiCacheDirty = false;
     }
 
     public void rescanPOIs(Level level) {
@@ -149,13 +109,7 @@ public class RadiusVillageZone implements IVillageZone {
 
     @Override
     public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("UUID", uuid.toString());
-        tag.putByte("Type", (byte) type.ordinal());
-        tag.putShort("Id", (short) id);
-        if (name != null) {
-            tag.putString("Name", name);
-        }
+        CompoundTag tag = super.serializeNBT();
         tag.putByte("Shape", (byte) ZoneShape.RADIUS.ordinal());
 
         if (center != null) {
@@ -168,9 +122,7 @@ public class RadiusVillageZone implements IVillageZone {
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        if (tag.contains("Name")) {
-            this.name = tag.getString("Name");
-        }
+        super.deserializeNBT(tag);
 
         if (tag.contains("Center")) {
             this.center = BlockPos.of(tag.getLong("Center"));

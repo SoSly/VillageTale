@@ -1,7 +1,12 @@
 package org.sosly.villageworks.data.zones;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneShape;
@@ -27,36 +32,48 @@ public class ZoneFactory {
         };
     }
 
-    public static IVillageZone createAABBZone(ZoneType type, int id, String name, AABB bounds) {
+    public static IVillageZone createAABBZone(ZoneType type, int id, String name, AABB bounds, Level level) {
         UUID uuid = UUID.randomUUID();
-        return createAABBZone(uuid, type, id, name, bounds);
+        return createAABBZone(uuid, type, id, name, bounds, level);
+    }
+
+    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, int id, String name, AABB bounds, Level level) {
+        return new AABBVillageZone(uuid, type, id, name, bounds, level);
     }
 
     public static IVillageZone createAABBZone(UUID uuid, ZoneType type, int id, String name, AABB bounds) {
         return new AABBVillageZone(uuid, type, id, name, bounds);
     }
 
-    public static IVillageZone createRadiusZone(ZoneType type, int id, String name, BlockPos center, int radius) {
+    public static IVillageZone createRadiusZone(ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
         UUID uuid = UUID.randomUUID();
-        return createRadiusZone(uuid, type, id, name, center, radius);
+        return createRadiusZone(uuid, type, id, name, center, radius, level);
+    }
+
+    public static IVillageZone createRadiusZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
+        return new RadiusVillageZone(uuid, type, id, name, center, radius, level);
     }
 
     public static IVillageZone createRadiusZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius) {
         return new RadiusVillageZone(uuid, type, id, name, center, radius);
     }
 
-    public static IVillageZone createBlockPosZone(ZoneType type, int id, String name, BlockPos pos) {
+    public static IVillageZone createBlockPosZone(ZoneType type, int id, String name, BlockPos pos, Level level) {
         UUID uuid = UUID.randomUUID();
-        return createBlockPosZone(uuid, type, id, name, pos);
+        return createBlockPosZone(uuid, type, id, name, pos, level);
     }
 
-    public static IVillageZone createBlockPosZone(UUID uuid, ZoneType type, int id, String name, BlockPos pos) {
-        return new BlockPosVillageZone(uuid, type, id, name, pos);
+    public static IVillageZone createBlockPosZone(UUID uuid, ZoneType type, int id, String name, BlockPos pos, Level level) {
+        return new BlockPosVillageZone(uuid, type, id, name, pos, level);
     }
 
-    public static IVillageZone createPathZone(ZoneType type, int id, String name, List<BlockPos> path) {
+    public static IVillageZone createPathZone(ZoneType type, int id, String name, List<BlockPos> path, Level level) {
         UUID uuid = UUID.randomUUID();
-        return createPathZone(uuid, type, id, name, path);
+        return createPathZone(uuid, type, id, name, path, level);
+    }
+
+    public static IVillageZone createPathZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
+        return new PathVillageZone(uuid, type, id, name, path != null ? path : new ArrayList<>(), level);
     }
 
     public static IVillageZone createPathZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path) {
@@ -77,6 +94,24 @@ public class ZoneFactory {
 
             IVillageZone zone = createZone(shape, uuid, type, id, name);
             zone.deserializeNBT(tag);
+
+            if (!(zone instanceof AbstractVillageZone abstractZone)) {
+                return zone;
+            }
+            if (!tag.contains("Level")) {
+                return zone;
+            }
+
+            String levelKey = tag.getString("Level");
+            ResourceLocation dimensionId = new ResourceLocation(levelKey);
+            ResourceKey<Level> levelResourceKey = ResourceKey.create(Registries.DIMENSION, dimensionId);
+
+            Level level = Minecraft.getInstance().level.getServer().getLevel(levelResourceKey);
+            if (level == null) {
+                return zone;
+            }
+
+            abstractZone.setLevel(level);
             return zone;
 
         } catch (Exception e) {
