@@ -24,6 +24,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 import org.sosly.villageworks.VillageWorks;
+import org.sosly.villageworks.api.data.ZoneType;
 import org.sosly.villageworks.block.entity.TownHallBlockEntity;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.data.VillageInfo;
@@ -144,7 +145,7 @@ public class TownHallBlock extends BaseEntityBlock {
         var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
         if (villageCapability != null) {
             var zones = villageCapability.getZones();
-            zones.removeIf(zone -> zone.getType() == org.sosly.villageworks.api.data.ZoneType.TOWNHALL);
+            zones.removeIf(zone -> zone.getType() == ZoneType.TOWNHALL);
             VillageWorks.LOGGER.info("Removed TOWNHALL zone from village {}", village.getVillageName());
         }
     }

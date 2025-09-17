@@ -12,6 +12,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import org.sosly.villageworks.VillageWorks;
 import org.sosly.villageworks.api.capability.IVillageCapability;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
+import org.sosly.villageworks.api.data.ZoneType;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.capability.village.VillageCapability;
 import org.sosly.villageworks.data.VillageInfo;
@@ -149,10 +150,10 @@ public class TownHallBlockEntity extends BlockEntity {
         }
 
         var zones = villageCapability.getZones();
-        zones.removeIf(zone -> zone.getType() == org.sosly.villageworks.api.data.ZoneType.TOWNHALL);
+        zones.removeIf(zone -> zone.getType() == ZoneType.TOWNHALL);
         
         var townHallZone = ZoneFactory.createBlockPosZone(
-            org.sosly.villageworks.api.data.ZoneType.TOWNHALL,
+            ZoneType.TOWNHALL,
             getNextZoneId(villageCapability),
             "Town Hall",
             worldPosition,
