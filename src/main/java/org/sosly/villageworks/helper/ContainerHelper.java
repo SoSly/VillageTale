@@ -12,8 +12,6 @@ import java.util.function.Predicate;
 
 public class ContainerHelper {
 
-    private static FakePlayer globalFakePlayer;
-
     public static void openContainer(ServerLevel level, BlockPos containerPos) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
         if (!(blockEntity instanceof Container)) {
@@ -23,10 +21,8 @@ public class ContainerHelper {
         level.blockEvent(containerPos, level.getBlockState(containerPos).getBlock(), 1, 1);
 
         if (blockEntity instanceof RandomizableContainerBlockEntity container) {
-            if (globalFakePlayer == null) {
-                globalFakePlayer = new FakePlayer(level);
-            }
-            container.startOpen(globalFakePlayer);
+            FakePlayer fakePlayer = new FakePlayer(level);
+            container.startOpen(fakePlayer);
         }
     }
 
@@ -41,10 +37,8 @@ public class ContainerHelper {
         level.blockEvent(containerPos, level.getBlockState(containerPos).getBlock(), 1, 0);
 
         if (blockEntity instanceof RandomizableContainerBlockEntity container) {
-            if (globalFakePlayer == null) {
-                globalFakePlayer = new FakePlayer(level);
-            }
-            container.stopOpen(globalFakePlayer);
+            FakePlayer fakePlayer = new FakePlayer(level);
+            container.stopOpen(fakePlayer);
         }
     }
 
