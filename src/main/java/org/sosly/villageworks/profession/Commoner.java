@@ -1,0 +1,56 @@
+package org.sosly.villageworks.profession;
+
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
+import java.util.Optional;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
+import org.sosly.villageworks.VillageWorks;
+import org.sosly.villageworks.api.data.IVillageZone;
+import org.sosly.villageworks.api.data.IWantedItem;
+import org.sosly.villageworks.entity.Villager;
+
+public class Commoner extends AbstractProfession {
+    public final static ResourceLocation ID = new ResourceLocation(VillageWorks.MOD_ID, "commoner");
+    public Commoner() {
+        super(ID);
+    }
+
+    @Override
+    public Optional<IWantedItem> getAlwaysWantedItems() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<IWantedItem> getTool() {
+        return Optional.empty();
+    }
+
+    @Override
+    public ImmutableList<MemoryModuleType<?>> getMemoryModules() {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public ImmutableList<SensorType<? extends Sensor<? super Villager>>> getSensors() {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public void registerAdditionalGoals(Brain<Villager> brain) {
+    }
+
+    @Override
+    public boolean isValidWorkZone(IVillageZone zone) {
+        return false;
+    }
+}

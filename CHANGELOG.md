@@ -25,5 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/vw hunger` - Check villager hunger status
 - `/vw exhaust` - Add exhaustion to villagers (for testing)
 - `/vw village create/remove/list/info` - Manage villages
+- `/vw villager <targets> profession [<profession>]` - View or set villager professions
 - `/vw zone create/delete/rename/info/list` - Manage village zones
 - `/vw zone path add/clear` - Build custom path-shaped zones

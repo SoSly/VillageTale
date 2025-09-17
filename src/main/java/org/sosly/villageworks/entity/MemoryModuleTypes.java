@@ -1,16 +1,16 @@
 package org.sosly.villageworks.entity;
 
 import com.mojang.serialization.Codec;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.UUID;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villageworks.VillageWorks;
-
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.UUID;
 
 public class MemoryModuleTypes {
     public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
@@ -24,6 +24,9 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<Boolean>> IS_STARVING =
         MEMORY_MODULE_TYPES.register("is_starving", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+
+    public static final RegistryObject<MemoryModuleType<ResourceLocation>> PROFESSION =
+        MEMORY_MODULE_TYPES.register("profession", () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC)));
 
     public static final RegistryObject<MemoryModuleType<UUID>> VILLAGE =
         MEMORY_MODULE_TYPES.register("village", () -> new MemoryModuleType<>(Optional.of(

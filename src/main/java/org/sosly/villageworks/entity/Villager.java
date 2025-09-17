@@ -1,84 +1,67 @@
 package org.sosly.villageworks.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Dynamic;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villageworks.VillageWorks;
-import org.sosly.villageworks.data.LivingEntityFoodData;
-import org.sosly.villageworks.entity.ai.goals.VillagerGoalPackages;
-import org.sosly.villageworks.entity.ai.SensorTypes;
+import org.sosly.villageworks.api.profession.IProfession;
 import org.sosly.villageworks.capability.Capabilities;
+import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.data.VillageInfo;
-
-import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.UUID;
+import org.sosly.villageworks.entity.ai.SensorTypes;
+import org.sosly.villageworks.entity.ai.goals.VillagerGoalPackages;
+import org.sosly.villageworks.profession.Commoner;
+import org.sosly.villageworks.profession.ProfessionRegistry;
 
 public class Villager extends PathfinderMob {
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
+    private Dynamic<?> dynamic;
+    private static ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = DefaultVillagerBrain.MEMORY_TYPES;
 
-    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
-        MemoryModuleType.HOME,
-        MemoryModuleType.NEAREST_LIVING_ENTITIES,
-        MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
-        MemoryModuleType.NEAREST_PLAYERS,
-        MemoryModuleType.NEAREST_VISIBLE_PLAYER,
-        MemoryModuleType.WALK_TARGET,
-        MemoryModuleType.LOOK_TARGET,
-        MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
-        MemoryModuleType.PATH,
-        MemoryModuleType.HURT_BY,
-        MemoryModuleType.HURT_BY_ENTITY,
-        MemoryModuleType.NEAREST_HOSTILE,
-        MemoryModuleType.LAST_SLEPT,
-        MemoryModuleType.LAST_WOKEN,
-        MemoryModuleTypes.CAN_EAT.get(),
-        MemoryModuleTypes.IS_HUNGRY.get(),
-        MemoryModuleTypes.IS_STARVING.get(),
-        MemoryModuleTypes.VILLAGE.get()
-    );
-
-    private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
-        SensorType.NEAREST_LIVING_ENTITIES,
-        SensorType.NEAREST_PLAYERS,
-        SensorType.HURT_BY,
-        SensorType.VILLAGER_HOSTILES,
-        SensorTypes.HUNGER.get()
-    );
+    private static ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = DefaultVillagerBrain.SENSOR_TYPES;
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
@@ -103,8 +86,8 @@ public class Villager extends PathfinderMob {
 
     @Override
     protected @NotNull Brain<?> makeBrain(@NotNull Dynamic<?> dynamic) {
+        this.dynamic = dynamic;
         Brain<Villager> brain = this.brainProvider().makeBrain(dynamic);
-        this.registerBrainGoals(brain);
         return brain;
     }
 
@@ -113,10 +96,32 @@ public class Villager extends PathfinderMob {
         return (Brain<Villager>) super.getBrain();
     }
 
+    public void rebuildBrainWithProfession() {
+        Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> savedMemories =
+                new HashMap<>(this.brain.getMemories());
+
+        MEMORY_TYPES = ImmutableList.<MemoryModuleType<?>>builder()
+            .addAll(DefaultVillagerBrain.MEMORY_TYPES)
+            .addAll(this.getProfession().getMemoryModules())
+            .build();
+        SENSOR_TYPES = ImmutableList.<SensorType<? extends Sensor<? super Villager>>>builder()
+            .addAll(DefaultVillagerBrain.SENSOR_TYPES)
+            .addAll(this.getProfession().getSensors())
+            .build();
+
+        NbtOps nbtops = NbtOps.INSTANCE;
+        this.brain = this.makeBrain(new Dynamic<>(nbtops, nbtops.createMap(ImmutableMap.of(nbtops.createString("memories"), nbtops.emptyMap()))));
+
+        for(Map.Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : savedMemories.entrySet()) {
+            if (entry.getValue().isPresent() && this.brain.getMemories().containsKey(entry.getKey())) {
+                this.brain.getMemories().put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
     public void refreshBrain(ServerLevel serverLevel) {
-        Brain<Villager> brain = this.getBrain();
-        brain.stopAll(serverLevel, this);
-        this.brain = brain.copyWithoutBehaviors();
+        this.getBrain().stopAll(serverLevel, this);
+        this.rebuildBrainWithProfession();
         this.registerBrainGoals(this.getBrain());
     }
 
@@ -127,6 +132,7 @@ public class Villager extends PathfinderMob {
         brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(0.3F));
         brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(0.6F));
         brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(0.6F));
+        brain.addActivity(Activity.WORK, this.getProfession().getWorkPackage(0.6F));
 
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
@@ -158,6 +164,11 @@ public class Villager extends PathfinderMob {
         if (villageId.isPresent()) {
             tag.putString("VillageId", villageId.get().toString());
         }
+
+        Optional<ResourceLocation> profession = this.brain.getMemory(MemoryModuleTypes.PROFESSION.get());
+        if (profession.isPresent()) {
+            tag.putString("Profession", profession.get().toString());
+        }
     }
 
     @Override
@@ -174,6 +185,12 @@ public class Villager extends PathfinderMob {
             UUID villageId = UUID.fromString(tag.getString("VillageId"));
             this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
         }
+
+        ResourceLocation profession = Commoner.ID;
+        if (tag.contains("Profession") && ResourceLocation.tryParse(tag.getString("Profession")) != null) {
+            profession = ResourceLocation.tryParse(tag.getString("Profession"));
+        }
+        this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), profession);
 
         if (this.level() instanceof ServerLevel) {
             this.refreshBrain((ServerLevel) this.level());
@@ -238,6 +255,25 @@ public class Villager extends PathfinderMob {
         return this.brain.getMemory(MemoryModuleType.HOME)
             .map(GlobalPos::pos)
             .orElse(null);
+    }
+
+    public IProfession getProfession() {
+        ResourceLocation professionId = this.brain.getMemory(MemoryModuleTypes.PROFESSION.get()).orElse(Commoner.ID);
+        return ProfessionRegistry.INSTANCE.getProfession(professionId).orElse(new Commoner());
+    }
+
+    public void setProfession(ResourceLocation professionId) {
+        IProfession profession = ProfessionRegistry.INSTANCE.getProfession(professionId).orElse(null);
+        if (profession == null) {
+            return;
+        }
+
+        this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), professionId);
+
+        if (!(this.level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        this.refreshBrain(serverLevel);
     }
 
     public Optional<UUID> getVillage() {
@@ -391,5 +427,37 @@ public class Villager extends PathfinderMob {
         }
 
         return bedPos.relative(blockState.getValue(BedBlock.FACING));
+    }
+
+    protected static class DefaultVillagerBrain {
+        protected static ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
+            MemoryModuleType.HOME,
+            MemoryModuleType.NEAREST_LIVING_ENTITIES,
+            MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
+            MemoryModuleType.NEAREST_PLAYERS,
+            MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+            MemoryModuleType.WALK_TARGET,
+            MemoryModuleType.LOOK_TARGET,
+            MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+            MemoryModuleType.PATH,
+            MemoryModuleType.HURT_BY,
+            MemoryModuleType.HURT_BY_ENTITY,
+            MemoryModuleType.NEAREST_HOSTILE,
+            MemoryModuleType.LAST_SLEPT,
+            MemoryModuleType.LAST_WOKEN,
+            MemoryModuleTypes.CAN_EAT.get(),
+            MemoryModuleTypes.IS_HUNGRY.get(),
+            MemoryModuleTypes.IS_STARVING.get(),
+            MemoryModuleTypes.PROFESSION.get(),
+            MemoryModuleTypes.VILLAGE.get()
+        );
+
+        protected static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
+                SensorType.NEAREST_LIVING_ENTITIES,
+                SensorType.NEAREST_PLAYERS,
+                SensorType.HURT_BY,
+                SensorType.VILLAGER_HOSTILES,
+                SensorTypes.HUNGER.get()
+        );
     }
 }

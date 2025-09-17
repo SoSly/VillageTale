@@ -17,6 +17,8 @@ import org.sosly.villageworks.entity.EntityTypes;
 import org.sosly.villageworks.entity.MemoryModuleTypes;
 import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.entity.ai.SensorTypes;
+import org.sosly.villageworks.event.RegisterProfessionsEvent;
+import org.sosly.villageworks.profession.ProfessionRegistry;
 
 @Mod(VillageWorks.MOD_ID)
 public class VillageWorks {
@@ -41,6 +43,10 @@ public class VillageWorks {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
+        LOGGER.info("Registering extended professions");
+        event.enqueueWork(() -> {
+            MinecraftForge.EVENT_BUS.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
+        });
         LOGGER.info("VillageWorks setup complete");
     }
 
