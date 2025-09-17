@@ -5,8 +5,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import org.sosly.villageworks.VillageWorks;
-import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.entity.MemoryModuleTypes;
+import org.sosly.villageworks.entity.Villager;
 
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package org.sosly.villageworks.entity.ai.behavior;
+package org.sosly.villageworks.entity.ai.goals;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
@@ -17,6 +17,13 @@ import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.sosly.villageworks.entity.Villager;
+import org.sosly.villageworks.entity.ai.behavior.EatFood;
+import org.sosly.villageworks.entity.ai.behavior.FindFoodInStorageBehavior;
+import org.sosly.villageworks.entity.ai.behavior.GoToAssignedBed;
+import org.sosly.villageworks.entity.ai.behavior.SetWalkTargetFromBlockMemory;
+import org.sosly.villageworks.entity.ai.behavior.SleepInBed;
+import org.sosly.villageworks.entity.ai.behavior.VillagerPanicTrigger;
+import org.sosly.villageworks.entity.ai.behavior.WakeUp;
 
 public class VillagerGoalPackages {
 

@@ -1,7 +1,6 @@
 package org.sosly.villageworks;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -14,10 +13,9 @@ import org.slf4j.Logger;
 import org.sosly.villageworks.block.BlockTypes;
 import org.sosly.villageworks.block.entity.BlockEntityTypes;
 import org.sosly.villageworks.command.VillageWorksCommand;
-import org.sosly.villageworks.entity.Villager;
-import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.entity.EntityTypes;
 import org.sosly.villageworks.entity.MemoryModuleTypes;
+import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.entity.ai.SensorTypes;
 
 @Mod(VillageWorks.MOD_ID)
