@@ -151,8 +151,7 @@ public class ZoneCommand {
             );
 
             return createZoneInVillage(source, villageId, level -> {
-                int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createAABBZone(zoneType, nextId, name, bounds, level);
+                return ZoneFactory.createAABBZone(zoneType, name, bounds, level);
             });
 
         } catch (Exception e) {
@@ -185,8 +184,7 @@ public class ZoneCommand {
             int radius = IntegerArgumentType.getInteger(context, "radius");
 
             return createZoneInVillage(source, villageId, level -> {
-                int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createRadiusZone(zoneType, nextId, name, center, radius, level);
+                return ZoneFactory.createRadiusZone(zoneType, name, center, radius, level);
             });
 
         } catch (Exception e) {
@@ -218,8 +216,7 @@ public class ZoneCommand {
             BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
 
             return createZoneInVillage(source, villageId, level -> {
-                int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createBlockPosZone(zoneType, nextId, name, pos, level);
+                return ZoneFactory.createBlockPosZone(zoneType, name, pos, level);
             });
 
         } catch (Exception e) {
@@ -249,8 +246,7 @@ public class ZoneCommand {
             }
 
             return createZoneInVillage(source, villageId, level -> {
-                int nextId = getNextZoneId(level, villageId);
-                return ZoneFactory.createPathZone(zoneType, nextId, name, new ArrayList<>(), level);
+                return ZoneFactory.createPathZone(zoneType, name, new ArrayList<>(), level);
             });
 
         } catch (Exception e) {
@@ -590,27 +586,6 @@ public class ZoneCommand {
                 }
             })
             .orElse(0);
-    }
-
-    private static int getNextZoneId(ServerLevel level, UUID villageId) {
-        return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-            .map(manager -> {
-                VillageInfo village = manager.getVillageById(villageId);
-                if (village == null) {
-                    return 1;
-                }
-
-                ChunkPos villageChunk = village.getVillageStartingChunk();
-                LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                    .map(villageCapability -> {
-                        List<IVillageZone> zones = villageCapability.getZones();
-                        return zones.size() + 1;
-                    })
-                    .orElse(1);
-            })
-            .orElse(1);
     }
 
     private static void showZoneBounds(CommandSourceStack source, IVillageZone zone) {

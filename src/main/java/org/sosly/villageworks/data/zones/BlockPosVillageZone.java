@@ -16,6 +16,16 @@ public class BlockPosVillageZone extends AbstractVillageZone implements IVillage
 
     private BlockPos blockPos;
 
+    public BlockPosVillageZone(UUID uuid, ZoneType type, String name, BlockPos blockPos, Level level) {
+        super(uuid, type, name, level);
+        this.blockPos = blockPos;
+    }
+
+    public BlockPosVillageZone(UUID uuid, ZoneType type, String name, BlockPos blockPos) {
+        super(uuid, type, name);
+        this.blockPos = blockPos;
+    }
+    
     public BlockPosVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos blockPos, Level level) {
         super(uuid, type, id, name, level);
         this.blockPos = blockPos;

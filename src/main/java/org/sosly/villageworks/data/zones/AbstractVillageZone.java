@@ -16,10 +16,26 @@ import java.util.UUID;
 public abstract class AbstractVillageZone implements IVillageZone {
     private final UUID uuid;
     private final ZoneType type;
-    private final int id;
+    private int id;
     private Level level;
     private String name;
 
+    public AbstractVillageZone(UUID uuid, ZoneType type, String name, Level level) {
+        this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
+        this.type = Objects.requireNonNull(type, "Zone type cannot be null");
+        this.level = Objects.requireNonNull(level, "Level cannot be null");
+        this.id = 0;
+        this.name = name;
+    }
+
+    public AbstractVillageZone(UUID uuid, ZoneType type, String name) {
+        this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
+        this.type = Objects.requireNonNull(type, "Zone type cannot be null");
+        this.id = 0;
+        this.name = name;
+        this.level = null;
+    }
+    
     public AbstractVillageZone(UUID uuid, ZoneType type, int id, String name, Level level) {
         this.uuid = Objects.requireNonNull(uuid, "UUID cannot be null");
         this.type = Objects.requireNonNull(type, "Zone type cannot be null");
@@ -60,6 +76,14 @@ public abstract class AbstractVillageZone implements IVillageZone {
     @Override
     public ZoneType getType() {
         return type;
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override

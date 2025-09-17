@@ -19,6 +19,16 @@ public class AABBVillageZone extends AbstractVillageZone implements IVillageZone
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
+    public AABBVillageZone(UUID uuid, ZoneType type, String name, AABB bounds, Level level) {
+        super(uuid, type, name, level);
+        this.bounds = bounds;
+    }
+
+    public AABBVillageZone(UUID uuid, ZoneType type, String name, AABB bounds) {
+        super(uuid, type, name);
+        this.bounds = bounds;
+    }
+    
     public AABBVillageZone(UUID uuid, ZoneType type, int id, String name, AABB bounds, Level level) {
         super(uuid, type, id, name, level);
         this.bounds = bounds;

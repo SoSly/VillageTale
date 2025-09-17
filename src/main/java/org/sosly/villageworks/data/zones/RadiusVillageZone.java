@@ -19,6 +19,18 @@ public class RadiusVillageZone extends AbstractVillageZone implements IVillageZo
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
+    public RadiusVillageZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius, Level level) {
+        super(uuid, type, name, level);
+        this.center = center;
+        this.radius = radius;
+    }
+
+    public RadiusVillageZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius) {
+        super(uuid, type, name);
+        this.center = center;
+        this.radius = radius;
+    }
+    
     public RadiusVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
         super(uuid, type, id, name, level);
         this.center = center;

@@ -93,7 +93,7 @@ public class VillageCapability implements IVillageCapability {
             return;
         }
         
-        state.addZone(zone);
+        state.addExistingZone(zone);
     }
     
     @Override

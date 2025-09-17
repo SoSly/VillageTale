@@ -154,7 +154,6 @@ public class TownHallBlockEntity extends BlockEntity {
         
         var townHallZone = ZoneFactory.createBlockPosZone(
             ZoneType.TOWNHALL,
-            getNextZoneId(villageCapability),
             "Town Hall",
             worldPosition,
             level
@@ -164,7 +163,4 @@ public class TownHallBlockEntity extends BlockEntity {
         VillageWorks.LOGGER.info("Created TOWNHALL zone at {} for village {}", worldPosition, village.getVillageName());
     }
 
-    private int getNextZoneId(IVillageCapability villageCapability) {
-        return villageCapability.getZones().size() + 1;
-    }
 }

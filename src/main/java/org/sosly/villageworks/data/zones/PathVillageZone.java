@@ -23,6 +23,16 @@ public class PathVillageZone extends AbstractVillageZone implements IVillageZone
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
+    public PathVillageZone(UUID uuid, ZoneType type, String name, List<BlockPos> path, Level level) {
+        super(uuid, type, name, level);
+        this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
+    }
+
+    public PathVillageZone(UUID uuid, ZoneType type, String name, List<BlockPos> path) {
+        super(uuid, type, name);
+        this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
+    }
+    
     public PathVillageZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
         super(uuid, type, id, name, level);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
