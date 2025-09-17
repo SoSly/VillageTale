@@ -14,10 +14,9 @@ import net.minecraft.world.level.GameType;
 import java.util.UUID;
 
 public class FakePlayer extends Player {
-    private static final GameProfile FAKE_PROFILE = new GameProfile(UUID.fromString("00000000-0000-0000-0000-000000000000"), "[VillageWorks]");
 
     public FakePlayer(ServerLevel level) {
-        super(level, BlockPos.ZERO, 0.0F, FAKE_PROFILE);
+        super(level, BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "[VillageWorks]"));
     }
 
     @Override
