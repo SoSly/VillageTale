@@ -1,7 +1,7 @@
 package org.sosly.villageworks.profession;
 
 import net.minecraft.resources.ResourceLocation;
-import org.sosly.villageworks.api.profession.IProfession;
+import org.sosly.villageworks.api.IProfession;
 
 public abstract class AbstractProfession implements IProfession {
     private final ResourceLocation id;

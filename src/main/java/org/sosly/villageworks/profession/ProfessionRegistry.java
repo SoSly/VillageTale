@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import org.sosly.villageworks.VillageWorks;
-import org.sosly.villageworks.api.profession.IProfession;
+import org.sosly.villageworks.api.IProfession;
 
 public class ProfessionRegistry {
     public static final ProfessionRegistry INSTANCE = new ProfessionRegistry();
@@ -18,6 +18,7 @@ public class ProfessionRegistry {
         ResourceLocation id = profession.getID();
         if (professions.containsKey(id)) {
             VillageWorks.LOGGER.warn("Attempted to register profession " + profession.getID() + " twice");
+            return;
         }
         professions.put(id, profession);
     }

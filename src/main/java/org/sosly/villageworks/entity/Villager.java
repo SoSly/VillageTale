@@ -46,7 +46,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villageworks.VillageWorks;
-import org.sosly.villageworks.api.profession.IProfession;
+import org.sosly.villageworks.api.IProfession;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.data.VillageInfo;
@@ -59,9 +59,9 @@ public class Villager extends PathfinderMob {
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
     private Dynamic<?> dynamic;
-    private static ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = DefaultVillagerBrain.MEMORY_TYPES;
+    private ImmutableList<MemoryModuleType<?>> memoryTypes = DefaultVillagerBrain.MEMORY_TYPES;
 
-    private static ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = DefaultVillagerBrain.SENSOR_TYPES;
+    private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes = DefaultVillagerBrain.SENSOR_TYPES;
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
@@ -81,7 +81,7 @@ public class Villager extends PathfinderMob {
 
     @Override
     protected Brain.@NotNull Provider<Villager> brainProvider() {
-        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+        return Brain.provider(this.memoryTypes, this.sensorTypes);
     }
 
     @Override
@@ -100,11 +100,11 @@ public class Villager extends PathfinderMob {
         Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> savedMemories =
                 new HashMap<>(this.brain.getMemories());
 
-        MEMORY_TYPES = ImmutableList.<MemoryModuleType<?>>builder()
+        this.memoryTypes = ImmutableList.<MemoryModuleType<?>>builder()
             .addAll(DefaultVillagerBrain.MEMORY_TYPES)
             .addAll(this.getProfession().getMemoryModules())
             .build();
-        SENSOR_TYPES = ImmutableList.<SensorType<? extends Sensor<? super Villager>>>builder()
+        this.sensorTypes = ImmutableList.<SensorType<? extends Sensor<? super Villager>>>builder()
             .addAll(DefaultVillagerBrain.SENSOR_TYPES)
             .addAll(this.getProfession().getSensors())
             .build();

@@ -1,4 +1,4 @@
-package org.sosly.villageworks.api.profession;
+package org.sosly.villageworks.api;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;

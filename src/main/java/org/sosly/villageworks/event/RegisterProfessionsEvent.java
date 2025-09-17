@@ -1,7 +1,7 @@
 package org.sosly.villageworks.event;
 
 import net.minecraftforge.eventbus.api.Event;
-import org.sosly.villageworks.api.profession.IProfession;
+import org.sosly.villageworks.api.IProfession;
 import org.sosly.villageworks.profession.ProfessionRegistry;
 
 public class RegisterProfessionsEvent extends Event {

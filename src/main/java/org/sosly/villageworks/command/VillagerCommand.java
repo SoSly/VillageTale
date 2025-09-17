@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import org.sosly.villageworks.api.capability.IVillagesCapability;
-import org.sosly.villageworks.api.profession.IProfession;
+import org.sosly.villageworks.api.IProfession;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.command.arguments.VillageUUIDArgument;
 import org.sosly.villageworks.data.VillageInfo;
