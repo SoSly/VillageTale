@@ -10,9 +10,6 @@ public class VillageWorksCommand {
         LiteralArgumentBuilder<CommandSourceStack> vwCommand = Commands.literal("vw")
             .requires(source -> source.hasPermission(2));
 
-        AssignCommand.register(vwCommand);
-        ExhaustCommand.register(vwCommand);
-        HungerCommand.register(vwCommand);
         VillageCommand.register(vwCommand);
         VillagerCommand.register(vwCommand);
         ZoneCommand.register(vwCommand);

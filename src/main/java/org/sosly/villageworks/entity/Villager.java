@@ -58,10 +58,9 @@ import org.sosly.villageworks.profession.ProfessionRegistry;
 public class Villager extends PathfinderMob {
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
-    private Dynamic<?> dynamic;
-    private ImmutableList<MemoryModuleType<?>> memoryTypes = DefaultVillagerBrain.MEMORY_TYPES;
+    private ImmutableList<MemoryModuleType<?>> memoryTypes;
 
-    private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes = DefaultVillagerBrain.SENSOR_TYPES;
+    private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes;
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
@@ -81,12 +80,17 @@ public class Villager extends PathfinderMob {
 
     @Override
     protected Brain.@NotNull Provider<Villager> brainProvider() {
+        if (this.memoryTypes == null) {
+            this.memoryTypes = DefaultVillagerBrain.getMemoryModules();
+        }
+        if (this.sensorTypes == null) {
+            this.sensorTypes = DefaultVillagerBrain.getSensors();
+        }
         return Brain.provider(this.memoryTypes, this.sensorTypes);
     }
 
     @Override
     protected @NotNull Brain<?> makeBrain(@NotNull Dynamic<?> dynamic) {
-        this.dynamic = dynamic;
         Brain<Villager> brain = this.brainProvider().makeBrain(dynamic);
         return brain;
     }
@@ -101,11 +105,11 @@ public class Villager extends PathfinderMob {
                 new HashMap<>(this.brain.getMemories());
 
         this.memoryTypes = ImmutableList.<MemoryModuleType<?>>builder()
-            .addAll(DefaultVillagerBrain.MEMORY_TYPES)
+            .addAll(DefaultVillagerBrain.getMemoryModules())
             .addAll(this.getProfession().getMemoryModules())
             .build();
         this.sensorTypes = ImmutableList.<SensorType<? extends Sensor<? super Villager>>>builder()
-            .addAll(DefaultVillagerBrain.SENSOR_TYPES)
+            .addAll(DefaultVillagerBrain.getSensors())
             .addAll(this.getProfession().getSensors())
             .build();
 
@@ -430,34 +434,38 @@ public class Villager extends PathfinderMob {
     }
 
     protected static class DefaultVillagerBrain {
-        protected static ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
-            MemoryModuleType.HOME,
-            MemoryModuleType.NEAREST_LIVING_ENTITIES,
-            MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
-            MemoryModuleType.NEAREST_PLAYERS,
-            MemoryModuleType.NEAREST_VISIBLE_PLAYER,
-            MemoryModuleType.WALK_TARGET,
-            MemoryModuleType.LOOK_TARGET,
-            MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
-            MemoryModuleType.PATH,
-            MemoryModuleType.HURT_BY,
-            MemoryModuleType.HURT_BY_ENTITY,
-            MemoryModuleType.NEAREST_HOSTILE,
-            MemoryModuleType.LAST_SLEPT,
-            MemoryModuleType.LAST_WOKEN,
-            MemoryModuleTypes.CAN_EAT.get(),
-            MemoryModuleTypes.IS_HUNGRY.get(),
-            MemoryModuleTypes.IS_STARVING.get(),
-            MemoryModuleTypes.PROFESSION.get(),
-            MemoryModuleTypes.VILLAGE.get()
-        );
+        protected static ImmutableList<MemoryModuleType<?>> getMemoryModules() {
+            return ImmutableList.of(
+                MemoryModuleType.HOME,
+                MemoryModuleType.NEAREST_LIVING_ENTITIES,
+                MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
+                MemoryModuleType.NEAREST_PLAYERS,
+                MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+                MemoryModuleType.WALK_TARGET,
+                MemoryModuleType.LOOK_TARGET,
+                MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+                MemoryModuleType.PATH,
+                MemoryModuleType.HURT_BY,
+                MemoryModuleType.HURT_BY_ENTITY,
+                MemoryModuleType.NEAREST_HOSTILE,
+                MemoryModuleType.LAST_SLEPT,
+                MemoryModuleType.LAST_WOKEN,
+                MemoryModuleTypes.CAN_EAT.get(),
+                MemoryModuleTypes.IS_HUNGRY.get(),
+                MemoryModuleTypes.IS_STARVING.get(),
+                MemoryModuleTypes.PROFESSION.get(),
+                MemoryModuleTypes.VILLAGE.get()
+            );
+        }
 
-        protected static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
+        protected static ImmutableList<SensorType<? extends Sensor<? super Villager>>> getSensors() {
+            return ImmutableList.of(
                 SensorType.NEAREST_LIVING_ENTITIES,
                 SensorType.NEAREST_PLAYERS,
                 SensorType.HURT_BY,
                 SensorType.VILLAGER_HOSTILES,
                 SensorTypes.HUNGER.get()
-        );
+            );
+        }
     }
 }

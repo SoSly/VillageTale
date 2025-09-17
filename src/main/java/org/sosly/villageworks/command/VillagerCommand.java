@@ -1,5 +1,6 @@
 package org.sosly.villageworks.command;
 
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -19,6 +20,7 @@ import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.api.IProfession;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.command.arguments.VillageUUIDArgument;
+import org.sosly.villageworks.data.LivingEntityFoodData;
 import org.sosly.villageworks.data.VillageInfo;
 import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.profession.ProfessionRegistry;
@@ -42,7 +44,11 @@ public class VillagerCommand {
                     .executes(VillagerCommand::queryProfession)
                     .then(Commands.argument("profession", ResourceLocationArgument.id())
                         .suggests(PROFESSION_SUGGESTIONS)
-                        .executes(VillagerCommand::setProfession)))));
+                        .executes(VillagerCommand::setProfession)))
+                .then(Commands.literal("hunger")
+                    .executes(VillagerCommand::displayHunger)
+                    .then(Commands.argument("exhaustion", FloatArgumentType.floatArg(0.0F, 40.0F))
+                        .executes(VillagerCommand::addExhaustion)))));
     }
 
     private static int queryVillageAssignment(CommandContext<CommandSourceStack> context) {
@@ -194,6 +200,71 @@ public class VillagerCommand {
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to set profession: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int displayHunger(CommandContext<CommandSourceStack> context) {
+        try {
+            Collection<? extends Entity> entities = EntityArgument.getEntities(context, "targets");
+            int checkedCount = 0;
+
+            for (Entity entity : entities) {
+                if (entity instanceof Villager villager) {
+                    LivingEntityFoodData foodData = villager.getFoodData();
+                    
+                    context.getSource().sendSuccess(() ->
+                        Component.literal(String.format("Villager %s: Food=%d/20, Saturation=%.1f, Exhaustion=%.1f",
+                            villager.getDisplayName().getString(),
+                            foodData.getFoodLevel(),
+                            foodData.getSaturationLevel(),
+                            foodData.getExhaustionLevel())), false);
+                    
+                    checkedCount++;
+                }
+            }
+
+            if (checkedCount == 0) {
+                context.getSource().sendFailure(Component.literal("No villagers found in selection"));
+                return 0;
+            }
+
+            return checkedCount;
+
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to check hunger: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int addExhaustion(CommandContext<CommandSourceStack> context) {
+        try {
+            Collection<? extends Entity> entities = EntityArgument.getEntities(context, "targets");
+            float amount = FloatArgumentType.getFloat(context, "exhaustion");
+            int exhaustedCount = 0;
+
+            for (Entity entity : entities) {
+                if (entity instanceof Villager villager) {
+                    villager.getFoodData().addExhaustion(amount);
+                    exhaustedCount++;
+                }
+            }
+
+            if (exhaustedCount == 0) {
+                context.getSource().sendFailure(Component.literal("No villagers found in selection"));
+                return 0;
+            }
+
+            final int finalExhaustedCount = exhaustedCount;
+            final float finalAmount = amount;
+            context.getSource().sendSuccess(() ->
+                Component.literal(String.format("Added %.1f exhaustion to %d villager(s)",
+                    finalAmount, finalExhaustedCount)), true);
+
+            return exhaustedCount;
+
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to add exhaustion: " + e.getMessage()));
             return 0;
         }
     }
