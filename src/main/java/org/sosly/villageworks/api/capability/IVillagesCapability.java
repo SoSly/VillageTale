@@ -62,4 +62,12 @@ public interface IVillagesCapability {
      * @return Village with matching name, or null if not found
      */
     VillageInfo getVillageByName(String villageName);
+
+    /**
+     * Updates the town hall position for a village.
+     * @param villageId UUID of village to update
+     * @param newPos New position for the town hall, or null to clear
+     * @return true if village was found and updated
+     */
+    boolean updateTownHallPos(UUID villageId, BlockPos newPos);
 }

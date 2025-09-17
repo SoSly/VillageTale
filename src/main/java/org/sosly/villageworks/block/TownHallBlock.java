@@ -28,9 +28,11 @@ import org.sosly.villageworks.block.entity.TownHallBlockEntity;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.data.VillageInfo;
 
+import java.util.UUID;
+
 public class TownHallBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    
+
     private static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
 
     public TownHallBlock(Properties properties) {
@@ -80,39 +82,46 @@ public class TownHallBlock extends BaseEntityBlock {
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        super.onRemove(state, level, pos, newState, isMoving);
-        
         if (state.is(newState.getBlock()) || level.isClientSide) {
+            super.onRemove(state, level, pos, newState, isMoving);
             return;
         }
-        
+
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof TownHallBlockEntity townHall)) {
+        if (!(blockEntity instanceof TownHallBlockEntity townHall) || !(level instanceof ServerLevel serverLevel)) {
+            super.onRemove(state, level, pos, newState, isMoving);
             return;
         }
-        
-        if (townHall.getVillageId() == null || !(level instanceof ServerLevel serverLevel)) {
+
+        UUID villageId = townHall.getVillageId();
+        if (villageId == null) {
+            super.onRemove(state, level, pos, newState, isMoving);
             return;
         }
-        
+
         var villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
         if (villagesCapability == null) {
+            super.onRemove(state, level, pos, newState, isMoving);
             return;
         }
-        
-        VillageInfo village = villagesCapability.getVillageById(townHall.getVillageId());
-        if (village != null && pos.equals(village.getTownHallPos())) {
-            // Remove the entire village when its town hall is destroyed
-            villagesCapability.removeVillage(townHall.getVillageId());
-            VillageWorks.LOGGER.info("Removed village {} after town hall destruction at {}", 
-                village.getVillageName(), pos);
+
+        VillageInfo village = villagesCapability.getVillageById(villageId);
+        if (village == null) {
+            super.onRemove(state, level, pos, newState, isMoving);
+            return;
         }
+
+        village.setTownHallPos(null);
+        removeTownHallZone(serverLevel, village);
+        VillageWorks.LOGGER.info("Removed town hall at {} from village {}", pos, village.getVillageName());
+
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        
+
         if (level.isClientSide || !(placer instanceof Player player)) {
             return;
         }
@@ -128,5 +137,15 @@ public class TownHallBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TownHallBlockEntity(pos, state);
+    }
+
+    private void removeTownHallZone(ServerLevel level, VillageInfo village) {
+        var chunk = level.getChunk(village.getVillageStartingChunk().x, village.getVillageStartingChunk().z);
+        var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (villageCapability != null) {
+            var zones = villageCapability.getZones();
+            zones.removeIf(zone -> zone.getType() == org.sosly.villageworks.api.data.ZoneType.TOWNHALL);
+            VillageWorks.LOGGER.info("Removed TOWNHALL zone from village {}", village.getVillageName());
+        }
     }
 }

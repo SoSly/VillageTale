@@ -15,6 +15,7 @@ import org.sosly.villageworks.api.capability.IVillagesCapability;
 import org.sosly.villageworks.capability.Capabilities;
 import org.sosly.villageworks.capability.village.VillageCapability;
 import org.sosly.villageworks.data.VillageInfo;
+import org.sosly.villageworks.data.zones.ZoneFactory;
 
 import java.util.UUID;
 
@@ -64,13 +65,29 @@ public class TownHallBlockEntity extends BlockEntity {
     private void handleExistingVillage(ServerLevel level, VillageInfo village, Player player) {
         BlockPos existingTownHall = village.getTownHallPos();
 
-        VillageWorks.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}",
-            worldPosition, village.getVillageName(), existingTownHall);
-        if (player != null) {
-            player.sendSystemMessage(Component.translatable("villageworks.townhall.already_exists",
-                village.getVillageName(), existingTownHall.toShortString()));
+        if (existingTownHall != null) {
+            VillageWorks.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}", worldPosition, village.getVillageName(), existingTownHall);
+            if (player != null) {
+                player.sendSystemMessage(Component.translatable("villageworks.townhall.already_exists", village.getVillageName(), existingTownHall.toShortString()));
+            }
+            level.destroyBlock(worldPosition, true);
+            return;
         }
-        level.destroyBlock(worldPosition, true);
+
+        IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability == null) {
+            return;
+        }
+
+        villagesCapability.updateTownHallPos(village.getVillageId(), worldPosition);
+        setVillageId(village.getVillageId());
+        createTownHallZone(level, village);
+
+        VillageWorks.LOGGER.info("Added town hall for village {} at {}", village.getVillageName(), worldPosition);
+        
+        if (player != null) {
+            player.sendSystemMessage(Component.literal("Added town hall for village " + village.getVillageName()));
+        }
     }
 
     private void createNewVillage(ServerLevel level, ChunkPos chunkPos, Player player,
@@ -98,6 +115,11 @@ public class TownHallBlockEntity extends BlockEntity {
         }
         ((VillageCapability) cap).initializeVillage(newVillageId);
 
+        VillageInfo village = villagesCapability.getVillageById(newVillageId);
+        if (village != null) {
+            createTownHallZone(level, village);
+        }
+
         VillageWorks.LOGGER.info("Created village {} at {} with ID {} and town hall at {}",
             villageName, chunkPos, newVillageId, worldPosition);
     }
@@ -117,5 +139,31 @@ public class TownHallBlockEntity extends BlockEntity {
         if (tag.hasUUID(NBT_VILLAGE_ID)) {
             villageId = tag.getUUID(NBT_VILLAGE_ID);
         }
+    }
+
+    private void createTownHallZone(ServerLevel level, VillageInfo village) {
+        var chunk = level.getChunk(village.getVillageStartingChunk().x, village.getVillageStartingChunk().z);
+        var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (villageCapability == null) {
+            return;
+        }
+
+        var zones = villageCapability.getZones();
+        zones.removeIf(zone -> zone.getType() == org.sosly.villageworks.api.data.ZoneType.TOWNHALL);
+        
+        var townHallZone = ZoneFactory.createBlockPosZone(
+            org.sosly.villageworks.api.data.ZoneType.TOWNHALL,
+            getNextZoneId(villageCapability),
+            "Town Hall",
+            worldPosition,
+            level
+        );
+        
+        villageCapability.addZone(townHallZone);
+        VillageWorks.LOGGER.info("Created TOWNHALL zone at {} for village {}", worldPosition, village.getVillageName());
+    }
+
+    private int getNextZoneId(IVillageCapability villageCapability) {
+        return villageCapability.getZones().size() + 1;
     }
 }

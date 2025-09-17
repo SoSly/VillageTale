@@ -9,7 +9,7 @@ import java.util.UUID;
 public class VillageInfo {
     
     private final UUID villageId;
-    private final BlockPos townHallPos;
+    private BlockPos townHallPos;
     private final ChunkPos villageStartingChunk;
     private final int squadius;
     private final String villageName;
@@ -30,6 +30,10 @@ public class VillageInfo {
         return townHallPos;
     }
     
+    public void setTownHallPos(BlockPos townHallPos) {
+        this.townHallPos = townHallPos;
+    }
+    
     public ChunkPos getVillageStartingChunk() {
         return villageStartingChunk;
     }
@@ -48,7 +52,7 @@ public class VillageInfo {
             return false;
         }
         
-        ChunkPos centerChunk = new ChunkPos(townHallPos);
+        ChunkPos centerChunk = townHallPos != null ? new ChunkPos(townHallPos) : villageStartingChunk;
         int centerX = centerChunk.x;
         int centerZ = centerChunk.z;
         
@@ -67,8 +71,8 @@ public class VillageInfo {
             return false;
         }
         
-        ChunkPos thisChunk = new ChunkPos(townHallPos);
-        ChunkPos otherChunk = new ChunkPos(other.townHallPos);
+        ChunkPos thisChunk = townHallPos != null ? new ChunkPos(townHallPos) : villageStartingChunk;
+        ChunkPos otherChunk = other.townHallPos != null ? new ChunkPos(other.townHallPos) : other.villageStartingChunk;
         
         int thisMinX = thisChunk.x - squadius - minDistance;
         int thisMaxX = thisChunk.x + squadius + minDistance;
@@ -87,7 +91,9 @@ public class VillageInfo {
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putString("VillageId", villageId.toString());
-        tag.putLong("TownHallPos", townHallPos.asLong());
+        if (townHallPos != null) {
+            tag.putLong("TownHallPos", townHallPos.asLong());
+        }
         tag.putLong("VillageStartingChunk", villageStartingChunk.toLong());
         tag.putString("VillageName", villageName);
         tag.putInt("Squadius", squadius);
@@ -95,7 +101,7 @@ public class VillageInfo {
     }
     
     public static VillageInfo deserializeNBT(CompoundTag tag) {
-        if (!tag.contains("VillageId") || !tag.contains("TownHallPos") ||
+        if (!tag.contains("VillageId") ||
             !tag.contains("VillageStartingChunk") || !tag.contains("VillageName") || 
             !tag.contains("Squadius")) {
             return null;
@@ -103,7 +109,7 @@ public class VillageInfo {
         
         try {
             UUID villageId = UUID.fromString(tag.getString("VillageId"));
-            BlockPos townHallPos = BlockPos.of(tag.getLong("TownHallPos"));
+            BlockPos townHallPos = tag.contains("TownHallPos") ? BlockPos.of(tag.getLong("TownHallPos")) : null;
             ChunkPos villageStartingChunk = new ChunkPos(tag.getLong("VillageStartingChunk"));
             String villageName = tag.getString("VillageName");
             int squadius = tag.getInt("Squadius");

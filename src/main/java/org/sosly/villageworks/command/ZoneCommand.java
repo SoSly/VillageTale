@@ -137,6 +137,11 @@ public class ZoneCommand {
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
 
+            if (zoneType == ZoneType.TOWNHALL) {
+                source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
+                return 0;
+            }
+
             BlockPos pos1 = BlockPosArgument.getBlockPos(context, "pos1");
             BlockPos pos2 = BlockPosArgument.getBlockPos(context, "pos2");
 
@@ -171,6 +176,11 @@ public class ZoneCommand {
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
 
+            if (zoneType == ZoneType.TOWNHALL) {
+                source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
+                return 0;
+            }
+
             BlockPos center = BlockPosArgument.getBlockPos(context, "center");
             int radius = IntegerArgumentType.getInteger(context, "radius");
 
@@ -200,6 +210,11 @@ public class ZoneCommand {
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
 
+            if (zoneType == ZoneType.TOWNHALL) {
+                source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
+                return 0;
+            }
+
             BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
 
             return createZoneInVillage(source, villageId, level -> {
@@ -227,6 +242,11 @@ public class ZoneCommand {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
+
+            if (zoneType == ZoneType.TOWNHALL) {
+                source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
+                return 0;
+            }
 
             return createZoneInVillage(source, villageId, level -> {
                 int nextId = getNextZoneId(level, villageId);

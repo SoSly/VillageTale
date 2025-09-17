@@ -26,6 +26,7 @@ public class EatFood extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
+        
         Boolean canEat = villager.getBrain().getMemory(MemoryModuleTypes.CAN_EAT.get()).orElse(false);
         if (!canEat) {
             return false;

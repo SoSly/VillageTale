@@ -126,6 +126,21 @@ public class VillagesCapability implements IVillagesCapability {
         return villages.get(villageId);
     }
 
+    @Override
+    public boolean updateTownHallPos(UUID villageId, BlockPos newPos) {
+        if (villageId == null) {
+            return false;
+        }
+
+        VillageInfo village = villages.get(villageId);
+        if (village == null) {
+            return false;
+        }
+
+        village.setTownHallPos(newPos);
+        return true;
+    }
+
     public void setOwnerLevel(Level level) {
         this.ownerLevel = new WeakReference<>(level);
     }
