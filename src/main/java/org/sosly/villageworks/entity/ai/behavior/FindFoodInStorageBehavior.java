@@ -109,16 +109,24 @@ public class FindFoodInStorageBehavior extends Behavior<Villager> {
         
         this.searchTicks++;
         
-        if (this.searchTicks >= SEARCH_DURATION) {
-            ItemStack extractedFood = ContainerHelper.extractItemFromContainer(level, this.targetContainer, FindFoodInStorageBehavior::isFood);
-            if (!extractedFood.isEmpty()) {
-                int emptySlot = findFirstEmptySlot(villager);
-                if (emptySlot >= 0) {
-                    villager.getInventory().setItem(emptySlot, extractedFood);
-                }
-            }
-            this.searchingForFood = false;
+        if (this.searchTicks < SEARCH_DURATION) {
+            return;
         }
+        
+        int emptySlot = findFirstEmptySlot(villager);
+        if (emptySlot < 0) {
+            this.searchingForFood = false;
+            return;
+        }
+        
+        ItemStack extractedFood = ContainerHelper.extractItemFromContainer(level, this.targetContainer, FindFoodInStorageBehavior::isFood);
+        if (extractedFood.isEmpty()) {
+            this.searchingForFood = false;
+            return;
+        }
+        
+        villager.getInventory().setItem(emptySlot, extractedFood);
+        this.searchingForFood = false;
     }
 
     @Override

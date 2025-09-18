@@ -93,7 +93,7 @@ public class EatFood extends Behavior<Villager> {
         SimpleContainer inventory = villager.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack inventoryItem = inventory.getItem(i);
-            if (!inventoryItem.isEmpty() && inventoryItem.is(this.foodToEat.getItem())) {
+            if (!inventoryItem.isEmpty() && ItemStack.isSameItemSameTags(inventoryItem, this.foodToEat)) {
                 inventoryItem.shrink(1);
                 break;
             }
