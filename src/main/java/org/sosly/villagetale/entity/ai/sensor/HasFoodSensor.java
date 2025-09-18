@@ -1,0 +1,71 @@
+package org.sosly.villagetale.entity.ai.sensor;
+
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.item.ItemStack;
+import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.entity.MemoryModuleTypes;
+import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.data.WantedItem;
+import org.sosly.villagetale.helper.ItemMatcher;
+
+import java.util.Set;
+
+public class HasFoodSensor extends Sensor<Villager> {
+
+    public HasFoodSensor() {
+        super(200);
+    }
+
+    @Override
+    protected void doTick(ServerLevel level, Villager villager) {
+        boolean hasFood = hasFood(villager);
+        boolean isHungry = villager.getBrain().getMemory(MemoryModuleTypes.IS_HUNGRY.get()).orElse(false);
+        boolean isStarving = villager.getBrain().getMemory(MemoryModuleTypes.IS_STARVING.get()).orElse(false);
+
+        boolean needsFood = !hasFood && (isHungry || isStarving);
+        boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
+
+        if (needsFood && (!hasExistingWant || isStarving)) {
+            villager.getBrain().setMemory(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.FOOD.getFor(villager));
+            villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
+            villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
+            
+            if (VillageTale.LOGGER.isDebugEnabled()) {
+                VillageTale.LOGGER.debug("HasFoodSensor set WANTED_ITEM to FOOD for villager {}", villager.getId());
+            }
+        } else if (!needsFood && hasExistingWant) {
+            var currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+            if (currentWant != null && currentWant.equals(ItemMatcher.FOOD.getFor(villager))) {
+                villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
+                
+                if (VillageTale.LOGGER.isDebugEnabled()) {
+                    VillageTale.LOGGER.debug("HasFoodSensor cleared WANTED_ITEM for villager {}", villager.getId());
+                }
+            }
+        }
+    }
+
+    private boolean hasFood(Villager villager) {
+        for (int i = 0; i < villager.getInventory().getContainerSize(); i++) {
+            ItemStack stack = villager.getInventory().getItem(i);
+            if (!stack.isEmpty() && stack.isEdible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Set<MemoryModuleType<?>> requires() {
+        return ImmutableSet.of(
+            MemoryModuleTypes.IS_HUNGRY.get(),
+            MemoryModuleTypes.IS_STARVING.get(),
+            MemoryModuleTypes.WANTED_ITEM.get(),
+            MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get(),
+            MemoryModuleTypes.FOUND_ITEM.get()
+        );
+    }
+}

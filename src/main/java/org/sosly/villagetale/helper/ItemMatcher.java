@@ -8,23 +8,31 @@ import org.sosly.villagetale.entity.Villager;
 public enum ItemMatcher {
     PROFESSION_TOOL {
         @Override
-        public IWantedItem getFor(Villager villager) {
-            return villager.getProfession().getTool().orElse(IWantedItem.EMPTY);
+        public WantedItem getFor(Villager villager) {
+            IWantedItem tool = villager.getProfession().getTool().orElse(IWantedItem.EMPTY);
+            if (tool instanceof WantedItem) {
+                return (WantedItem) tool;
+            }
+            return (WantedItem) IWantedItem.EMPTY;
         }
     },
     FOOD {
         @Override
-        public IWantedItem getFor(Villager villager) {
+        public WantedItem getFor(Villager villager) {
             return new WantedItem(ItemStack::isEdible, 3);
         }
     },
     RESOURCES {
         @Override
-        public IWantedItem getFor(Villager villager) {
+        public WantedItem getFor(Villager villager) {
             // todo: add items from the current recipe or schematic the villager is working on
-            return villager.getProfession().getAlwaysWantedItems().orElse(IWantedItem.EMPTY);
+            IWantedItem resources = villager.getProfession().getAlwaysWantedItems().orElse(IWantedItem.EMPTY);
+            if (resources instanceof WantedItem) {
+                return (WantedItem) resources;
+            }
+            return (WantedItem) IWantedItem.EMPTY;
         }
     };
 
-    public abstract IWantedItem getFor(Villager villager);
+    public abstract WantedItem getFor(Villager villager);
 }
