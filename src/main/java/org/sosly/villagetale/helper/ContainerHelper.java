@@ -112,4 +112,70 @@ public class ContainerHelper {
         return null;
     }
 
+    public static int depositItemToContainer(ServerLevel level, BlockPos containerPos, ItemStack itemToDeposit, int maxAmount) {
+        BlockEntity blockEntity = level.getBlockEntity(containerPos);
+        if (!(blockEntity instanceof Container container)) {
+            return 0;
+        }
+
+        int remainingToDeposit = Math.min(itemToDeposit.getCount(), maxAmount);
+        int deposited = 0;
+
+        for (int i = 0; i < container.getContainerSize() && remainingToDeposit > 0; i++) {
+            ItemStack existingStack = container.getItem(i);
+
+            if (existingStack.isEmpty()) {
+                int depositAmount = Math.min(remainingToDeposit, itemToDeposit.getMaxStackSize());
+                ItemStack newStack = itemToDeposit.copy();
+                newStack.setCount(depositAmount);
+                container.setItem(i, newStack);
+                deposited += depositAmount;
+                remainingToDeposit -= depositAmount;
+                continue;
+            }
+            
+            if (!ItemStack.isSameItemSameTags(existingStack, itemToDeposit)) {
+                continue;
+            }
+            
+            int spaceAvailable = existingStack.getMaxStackSize() - existingStack.getCount();
+            int depositAmount = Math.min(remainingToDeposit, spaceAvailable);
+            if (depositAmount <= 0) {
+                continue;
+            }
+            
+            existingStack.grow(depositAmount);
+            deposited += depositAmount;
+            remainingToDeposit -= depositAmount;
+        }
+
+        if (deposited > 0) {
+            container.setChanged();
+        }
+
+        return deposited;
+    }
+
+    public static boolean hasAvailableSpace(ServerLevel level, BlockPos containerPos, ItemStack itemToCheck) {
+        BlockEntity blockEntity = level.getBlockEntity(containerPos);
+        if (!(blockEntity instanceof Container container)) {
+            return false;
+        }
+
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack existingStack = container.getItem(i);
+
+            if (existingStack.isEmpty()) {
+                return true;
+            } else if (ItemStack.isSameItemSameTags(existingStack, itemToCheck)) {
+                int spaceAvailable = existingStack.getMaxStackSize() - existingStack.getCount();
+                if (spaceAvailable > 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }

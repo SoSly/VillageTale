@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
 import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.entity.ai.behavior.DepositItem;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
 import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
@@ -38,6 +39,7 @@ public class VillagerGoalPackages {
             Pair.of(1, WakeUp.create()),
             Pair.of(2, (BehaviorControl<? super Villager>) new EatFood()),
             Pair.of(3, (BehaviorControl<? super Villager>) new GetFromContainer()),
+            Pair.of(3, (BehaviorControl<? super Villager>) new DepositItem()),
             Pair.of(4, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
             Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
         );
