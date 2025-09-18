@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
@@ -60,6 +61,9 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
         MEMORY_MODULE_TYPES.register("found_item", () -> new MemoryModuleType<>(Optional.empty()));
+
+    public static final RegistryObject<MemoryModuleType<Map<ResourceLocation, Integer>>> ITEMS_TO_DEPOSIT =
+        MEMORY_MODULE_TYPES.register("items_to_deposit", () -> new MemoryModuleType<>(Optional.empty()));
 
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);
