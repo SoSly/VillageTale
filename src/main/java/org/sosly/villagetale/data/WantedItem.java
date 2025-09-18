@@ -7,15 +7,22 @@ import org.sosly.villagetale.api.data.IWantedItem;
 public class WantedItem implements IWantedItem {
     private final Predicate<ItemStack> matcher;
     private final int amount;
+    private final int minimum;
     
-    public WantedItem(Predicate<ItemStack> matcher, int amount) {
+    public WantedItem(Predicate<ItemStack> matcher, int amount, int minimum) {
         this.matcher = matcher;
         this.amount = amount;
+        this.minimum = minimum;
     }
 
     @Override
     public int getAmount() {
         return amount;
+    }
+
+    @Override
+    public int getMinimum() {
+        return minimum;
     }
 
     @Override

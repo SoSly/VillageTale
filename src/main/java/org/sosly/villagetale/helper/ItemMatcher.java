@@ -19,7 +19,7 @@ public enum ItemMatcher {
     FOOD {
         @Override
         public WantedItem getFor(Villager villager) {
-            return new WantedItem(ItemStack::isEdible, 3);
+            return new WantedItem(ItemStack::isEdible, 3, 0);
         }
     },
     RESOURCES {
