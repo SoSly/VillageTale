@@ -50,7 +50,7 @@ public class SleepInBed extends Behavior<Villager> {
     @Override
     protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
         Optional<GlobalPos> homePos = villager.getBrain().getMemory(MemoryModuleType.HOME);
-        if (!homePos.isPresent()) {
+        if (homePos.isEmpty()) {
             return false;
         }
         

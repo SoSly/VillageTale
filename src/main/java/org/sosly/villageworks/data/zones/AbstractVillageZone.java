@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -14,6 +15,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneType;
 
@@ -162,15 +164,17 @@ public abstract class AbstractVillageZone implements IVillageZone {
             for (String posKey : claimsTag.getAllKeys()) {
                 try {
                     String[] coords = posKey.split(",");
-                    if (coords.length == 3) {
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        int z = Integer.parseInt(coords[2]);
-                        BlockPos pos = new BlockPos(x, y, z);
-                        
-                        Optional<Claim> claim = Claim.deserializeNBT(claimsTag.getCompound(posKey));
-                        claim.ifPresent(c -> claims.put(pos, c));
+                    if (coords.length != 3) {
+                        continue;
                     }
+                    
+                    int x = Integer.parseInt(coords[0]);
+                    int y = Integer.parseInt(coords[1]);
+                    int z = Integer.parseInt(coords[2]);
+                    BlockPos pos = new BlockPos(x, y, z);
+                    
+                    Optional<Claim> claim = Claim.deserializeNBT(claimsTag.getCompound(posKey));
+                    claim.ifPresent(c -> claims.put(pos, c));
                 } catch (NumberFormatException e) {
                     // Skip invalid position keys
                 }
@@ -202,7 +206,7 @@ public abstract class AbstractVillageZone implements IVillageZone {
         Map<BlockPos, Optional<UUID>> result = new HashMap<>();
         
         Optional<List<BlockPos>> pois = getPOIs();
-        if (!pois.isPresent()) {
+        if (pois.isEmpty()) {
             return result;
         }
         
@@ -219,13 +223,62 @@ public abstract class AbstractVillageZone implements IVillageZone {
     }
     
     @Override
+    public Map<BlockPos, UUID> getActiveClaims(long currentTime, Optional<Predicate<Block>> blockFilter) {
+        claims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
+        
+        Map<BlockPos, UUID> result = new HashMap<>();
+        for (Map.Entry<BlockPos, Claim> entry : claims.entrySet()) {
+            BlockPos pos = entry.getKey();
+            
+            if (blockFilter.isPresent()) {
+                Block block = level.getBlockState(pos).getBlock();
+                if (!blockFilter.get().test(block)) {
+                    continue;
+                }
+            }
+            
+            result.put(pos, entry.getValue().getVillagerUUID());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<Block>> blockFilter) {
+        claims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
+        
+        List<BlockPos> result = new ArrayList<>();
+        Optional<List<BlockPos>> pois = getPOIs();
+        if (pois.isEmpty()) {
+            return result;
+        }
+        
+        for (BlockPos pos : pois.get()) {
+            if (claims.containsKey(pos)) {
+                continue;
+            }
+            
+            if (blockFilter.isPresent()) {
+                Block block = level.getBlockState(pos).getBlock();
+                if (!blockFilter.get().test(block)) {
+                    continue;
+                }
+            }
+            
+            result.add(pos);
+        }
+        
+        return result;
+    }
+    
+    @Override
     public boolean claim(BlockPos pos, UUID villagerUUID, int durationTicks, long currentTime) {
         if (pos == null || villagerUUID == null) {
             return false;
         }
         
         Optional<List<BlockPos>> pois = getPOIs();
-        if (!pois.isPresent() || !pois.get().contains(pos)) {
+        if (pois.isEmpty() || !pois.get().contains(pos)) {
             return false;
         }
         

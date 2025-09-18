@@ -156,7 +156,7 @@ public class FindFoodInStorageBehavior extends Behavior<Villager> {
             }
 
             Optional<List<BlockPos>> pois = zone.getPOIs();
-            if (!pois.isPresent()) {
+            if (pois.isEmpty()) {
                 continue;
             }
 

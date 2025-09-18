@@ -3,11 +3,13 @@ package org.sosly.villageworks.api.data;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * Represents a defined area within a village with specific functional purpose.
@@ -99,10 +101,27 @@ public interface IVillageZone {
     
     /**
      * Returns current claims in this zone. Automatically cleans expired claims.
+     * WARNING: This can be memory-intensive for large zones. Prefer getActiveClaims or getAvailableClaims for gameplay logic.
      * @param currentTime Current game time for expiration checking
      * @return Map of claimed positions to claiming villager UUID, empty Optional means unclaimed but claimable
      */
     Map<BlockPos, Optional<UUID>> getClaims(long currentTime);
+    
+    /**
+     * Get currently active claims, automatically cleaning expired claims.
+     * @param currentTime The current game time for expiry checking
+     * @param blockFilter Optional filter to only return claims on specific block types
+     * @return Map of positions to villager UUIDs for active claims only
+     */
+    Map<BlockPos, UUID> getActiveClaims(long currentTime, Optional<Predicate<Block>> blockFilter);
+    
+    /**
+     * Get available (unclaimed) positions, automatically cleaning expired claims.
+     * @param currentTime The current game time for expiry checking
+     * @param blockFilter Optional filter to only return positions with specific block types
+     * @return List of positions that can be claimed
+     */
+    List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<Block>> blockFilter);
     
     /**
      * Claims a block position for a villager with specified duration.

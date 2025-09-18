@@ -769,7 +769,7 @@ public class ZoneCommand {
 
         for (Map.Entry<BlockPos, Optional<UUID>> entry : claims.entrySet()) {
             Optional<UUID> claimingVillager = entry.getValue();
-            if (!claimingVillager.isPresent()) {
+            if (claimingVillager.isEmpty()) {
                 continue;
             }
 
