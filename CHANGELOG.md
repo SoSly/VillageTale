@@ -11,13 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Villagers**
 - New custom Villager entity with hunger system
 - Villagers automatically eat food when hungry
-- Right-click villagers with food to give them items
 - Villagers can identify and use storage containers (customizable via datapack tags)
 
 **Villages & Zones**
-- Town Hall block - place to create a village (automatically named after you)
+- Town Hall block - establish your village (automatically named after you)
 - Villages must be at least 30 chunks apart
-- Zone system for defining areas within villages (storage, homes, etc.)
+- Zone system for defining areas within villages (storage, homes, gathering spaces)
 - Four zone shapes available: rectangular, circular, single block, or custom path
 
 **Commands**

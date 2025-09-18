@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
+import java.util.function.Predicate;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -11,6 +14,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.data.IWantedItem;
+import org.sosly.villagetale.data.FoundItem;
 
 public class MemoryModuleTypes {
     public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
@@ -45,6 +50,35 @@ public class MemoryModuleTypes {
                     return buffer;
                 }
             )
+        )));
+
+    public static final RegistryObject<MemoryModuleType<IWantedItem>> WANTED_ITEM =
+        MEMORY_MODULE_TYPES.register("wanted_item", () -> new MemoryModuleType<>(Optional.of(
+            IWantedItem.CODEC
+        )));
+
+    public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
+        MEMORY_MODULE_TYPES.register("already_scanned_storages", () -> new MemoryModuleType<>(Optional.of(
+            Codec.list(Codec.BYTE_BUFFER.xmap(
+                buffer -> {
+                    byte[] bytes = new byte[buffer.remaining()];
+                    buffer.get(bytes);
+                    ByteBuffer bb = ByteBuffer.wrap(bytes);
+                    return new UUID(bb.getLong(), bb.getLong());
+                },
+                uuid -> {
+                    ByteBuffer buffer = ByteBuffer.allocate(16);
+                    buffer.putLong(uuid.getMostSignificantBits());
+                    buffer.putLong(uuid.getLeastSignificantBits());
+                    buffer.flip();
+                    return buffer;
+                }
+            ))
+        )));
+
+    public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
+        MEMORY_MODULE_TYPES.register("found_item", () -> new MemoryModuleType<>(Optional.of(
+            FoundItem.CODEC
         )));
 
     public static void register(IEventBus eventBus) {
