@@ -1,16 +1,16 @@
-# VillageWorks
+# VillageTale
 
-[![Build & Test](https://github.com/SoSly/VillageWorks/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/SoSly/VillageWorks/actions/workflows/build-and-test.yaml)
+[![Build & Test](https://github.com/SoSly/VillageTale/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/SoSly/VillageTale/actions/workflows/build-and-test.yaml)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green)
 [![NeoForge](https://img.shields.io/badge/NeoForge-47.1.100-orange)](https://neoforged.net/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
-![Version](https://img.shields.io/github/v/release/SoSly/VillageWorks?include_prereleases&color=yellow)
+![Version](https://img.shields.io/github/v/release/SoSly/VillageTale?include_prereleases&color=yellow)
 
-Transform Minecraft villagers from emerald vending machines into actual workers with needs, schedules, and the ability to craft items using real materials.
+Build a village where every life matters. Villagers craft with real materials, develop relationships, start families, and create stories you never planned—from childhood games to final goodbyes.
 
 ## Vision
 
-Inspired by TekTopia, VillageWorks reimagines villagers as living beings who wake up hungry, work with tools that break, take breaks when tired, and actually craft items instead of magically trading them. Build a village and watch it come alive as villagers go about their daily lives—no more standing at workstations waiting for trades!
+Village Tale brings Minecraft villages to life with villagers who wake up hungry, work until their tools break, fall in love, grieve their losses, and raise children who learn through play. Inspired by TekTopia, this mod creates a living settlement where emergent stories unfold from the intersection of work, family, and community. Build a village and watch as its stories write themselves—no more lifeless NPCs standing at workstations!
 
 ## Getting Started
 
@@ -95,7 +95,7 @@ A happy village is a productive village:
 - **Children:** Not a profession, but a life stage focused on play and learning
 
 ### Integration with Vanilla
-We're reimagining vanilla professions to fit the VillageWorks system—farmers will actually farm, blacksmiths will actually forge, and so on. More details coming as development progresses!
+We're reimagining vanilla professions to fit the VillageTale system—farmers will actually farm, blacksmiths will actually forge, and so on. More details coming as development progresses!
 
 ## Requirements
 - **Minecraft:** 1.20.1

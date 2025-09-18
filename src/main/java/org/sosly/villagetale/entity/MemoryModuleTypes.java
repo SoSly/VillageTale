@@ -1,0 +1,53 @@
+package org.sosly.villagetale.entity;
+
+import com.mojang.serialization.Codec;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.UUID;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+import org.sosly.villagetale.VillageTale;
+
+public class MemoryModuleTypes {
+    public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
+        DeferredRegister.create(ForgeRegistries.MEMORY_MODULE_TYPES, VillageTale.MOD_ID);
+
+    public static final RegistryObject<MemoryModuleType<Boolean>> CAN_EAT =
+        MEMORY_MODULE_TYPES.register("can_eat", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+
+    public static final RegistryObject<MemoryModuleType<Boolean>> IS_HUNGRY =
+        MEMORY_MODULE_TYPES.register("is_hungry", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+
+    public static final RegistryObject<MemoryModuleType<Boolean>> IS_STARVING =
+        MEMORY_MODULE_TYPES.register("is_starving", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+
+    public static final RegistryObject<MemoryModuleType<ResourceLocation>> PROFESSION =
+        MEMORY_MODULE_TYPES.register("profession", () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC)));
+
+    public static final RegistryObject<MemoryModuleType<UUID>> VILLAGE =
+        MEMORY_MODULE_TYPES.register("village", () -> new MemoryModuleType<>(Optional.of(
+            Codec.BYTE_BUFFER.xmap(
+                buffer -> {
+                    byte[] bytes = new byte[buffer.remaining()];
+                    buffer.get(bytes);
+                    ByteBuffer bb = ByteBuffer.wrap(bytes);
+                    return new UUID(bb.getLong(), bb.getLong());
+                },
+                uuid -> {
+                    ByteBuffer buffer = ByteBuffer.allocate(16);
+                    buffer.putLong(uuid.getMostSignificantBits());
+                    buffer.putLong(uuid.getLeastSignificantBits());
+                    buffer.flip();
+                    return buffer;
+                }
+            )
+        )));
+
+    public static void register(IEventBus eventBus) {
+        MEMORY_MODULE_TYPES.register(eventBus);
+    }
+}

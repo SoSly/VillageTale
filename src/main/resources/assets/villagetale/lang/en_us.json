@@ -1,0 +1,12 @@
+{
+  "itemGroup.villagetale": "VillageTale",
+  "villagetale.zone.none": "Zone",
+  "villagetale.zone.storage": "Storage Zone",
+  "villagetale.zone.townhall": "Town Hall Zone",
+  "villagetale.zone.home": "Home Zone",
+  "villagetale.zone.numbered": "%s #%d",
+  "block.villagetale.townhall": "Town Hall",
+  "villagetale.village.default_name": "%s's Village",
+  "villagetale.townhall.already_exists": "Cannot place Town Hall - %s already has a Town Hall at %s",
+  "villagetale.townhall.too_close": "Cannot create village - too close to another village (minimum 30 chunks distance required)"
+}
