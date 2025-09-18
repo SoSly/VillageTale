@@ -197,7 +197,7 @@ public class VillageCommand {
                     source.sendSuccess(() ->
                         Component.literal("Village: " + village.getVillageName()), false);
                     source.sendSuccess(() ->
-                        Component.literal("UUID: " + village.getVillageId().toString()), false);
+                        Component.literal("UUID: (" + village.getVillageId().toString() + ")"), false);
                     source.sendSuccess(() ->
                         Component.literal("Town Hall: block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
                                         "chunk (" + townHallChunk.x + ", " + townHallChunk.z + ")"), false);
@@ -261,7 +261,7 @@ public class VillageCommand {
                     source.sendSuccess(() ->
                         Component.literal("Village: " + villageData.getVillageName()), false);
                     source.sendSuccess(() ->
-                        Component.literal("UUID: " + villageData.getVillageId().toString()), false);
+                        Component.literal("UUID: (" + villageData.getVillageId().toString() + ")"), false);
                     source.sendSuccess(() ->
                         Component.literal("Town Hall: block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
                                         "chunk (" + townHallChunk.x + ", " + townHallChunk.z + ")"), false);

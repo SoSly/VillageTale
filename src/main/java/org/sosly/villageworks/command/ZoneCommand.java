@@ -4,12 +4,19 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
@@ -24,16 +31,13 @@ import org.sosly.villageworks.command.arguments.ZoneUUIDArgument;
 import org.sosly.villageworks.data.VillageInfo;
 import org.sosly.villageworks.data.zones.PathVillageZone;
 import org.sosly.villageworks.data.zones.ZoneFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import org.sosly.villageworks.entity.Villager;
 
 public class ZoneCommand {
 
     private static IVillageCapability getVillageCapability(CommandSourceStack source, UUID villageId) {
         ServerLevel level = source.getLevel();
-        
+
         IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
         if (villages == null) {
             source.sendFailure(Component.literal("Villages capability not found"));
@@ -53,7 +57,7 @@ public class ZoneCommand {
             source.sendFailure(Component.literal("Village capability not found"));
             return null;
         }
-        
+
         return villageCapability;
     }
 
@@ -112,6 +116,26 @@ public class ZoneCommand {
                         .executes(ZoneCommand::showZoneInfo)))
                 .then(Commands.literal("list")
                     .executes(ZoneCommand::listZones))
+                .then(Commands.literal("claim")
+                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
+                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
+                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                            .then(Commands.argument("villager", EntityArgument.entity())
+                                .then(Commands.argument("duration", IntegerArgumentType.integer(1))
+                                    .executes(ZoneCommand::claimPosition))))))
+                .then(Commands.literal("release")
+                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
+                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
+                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                            .executes(ZoneCommand::releasePosition))))
+                .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
+                    .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
+                    .then(Commands.literal("assign")
+                        .then(Commands.argument("villager", EntityArgument.entity())
+                            .executes(ZoneCommand::assignVillager)))
+                    .then(Commands.literal("unassign")
+                        .then(Commands.argument("villager", EntityArgument.entity())
+                            .executes(ZoneCommand::unassignVillager))))
                 .then(Commands.literal("path")
                     .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                         .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
@@ -290,7 +314,7 @@ public class ZoneCommand {
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
             ZoneType newZoneType = ZoneTypeArgument.getZoneType(context, "zonetype");
-            
+
             source.sendFailure(Component.literal("Zone type changing not implemented yet"));
             return 0;
 
@@ -381,15 +405,16 @@ public class ZoneCommand {
                                     source.sendSuccess(() ->
                                         Component.literal("Zone: " + zone.getName()), false);
                                     source.sendSuccess(() ->
-                                        Component.literal("UUID: " + zone.getUUID()), false);
+                                        Component.literal("UUID: (" + zone.getUUID() + ")"), false);
                                     source.sendSuccess(() ->
                                         Component.literal("Type: " + zone.getType()), false);
                                     source.sendSuccess(() ->
                                         Component.literal("Shape: " + zone.getShape()), false);
-                                    
+
                                     showZoneBounds(source, zone);
-                                    showZonePOIs(source, zone, level);
-                                    
+                                    showZoneAssignments(source, zone);
+                                    showZoneClaims(source, zone, level);
+
                                     return 1;
                                 }
                             }
@@ -439,7 +464,7 @@ public class ZoneCommand {
 
                             for (IVillageZone zone : zones) {
                                 source.sendSuccess(() ->
-                                    Component.literal("- " + zone.getName() + " (" + zone.getType() + ", " + zone.getShape() + ") UUID: " + zone.getUUID()), false);
+                                    Component.literal("- " + zone.getName() + " (" + zone.getType() + ", " + zone.getShape() + ") (" + zone.getUUID() + ")"), false);
                             }
 
                             return zones.size();
@@ -567,17 +592,17 @@ public class ZoneCommand {
 
                 var capability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
                 if (capability == null) {
-                    source.sendFailure(Component.literal("Village capability not found at chunk " + villageChunk + 
+                    source.sendFailure(Component.literal("Village capability not found at chunk " + villageChunk +
                         ". The chunk may need to be reloaded. Try leaving and re-entering the area."));
                     return 0;
                 }
-                
+
                 try {
                     IVillageZone zone = factory.createZone(level);
                     capability.addZone(zone);
 
                     source.sendSuccess(() ->
-                        Component.literal("Created zone '" + zone.getName() + "' with UUID: " + zone.getUUID()), true);
+                        Component.literal("Created zone '" + zone.getName() + "' (" + zone.getUUID() + ")"), true);
                     return 1;
 
                 } catch (Exception e) {
@@ -592,7 +617,7 @@ public class ZoneCommand {
         if (zone instanceof org.sosly.villageworks.data.zones.AABBVillageZone aabbZone) {
             var bounds = aabbZone.getAABB();
             source.sendSuccess(() ->
-                Component.literal("Bounds: (" + (int)bounds.minX + ", " + (int)bounds.minY + ", " + (int)bounds.minZ + 
+                Component.literal("Bounds: (" + (int)bounds.minX + ", " + (int)bounds.minY + ", " + (int)bounds.minZ +
                                ") to (" + (int)bounds.maxX + ", " + (int)bounds.maxY + ", " + (int)bounds.maxZ + ")"), false);
         } else if (zone instanceof org.sosly.villageworks.data.zones.RadiusVillageZone radiusZone) {
             var center = radiusZone.getCenter();
@@ -622,7 +647,7 @@ public class ZoneCommand {
             }
         }
     }
-    
+
     private static void showZonePOIs(CommandSourceStack source, IVillageZone zone, ServerLevel level) {
         var pois = zone.getPOIs();
         if (pois.isEmpty()) {
@@ -645,23 +670,23 @@ public class ZoneCommand {
             }
         }
     }
-    
+
     private static String getBlockDisplayName(ServerLevel level, BlockPos pos) {
         var blockState = level.getBlockState(pos);
         var block = blockState.getBlock();
         String blockName = block.getDescriptionId();
-        
+
         // Convert from translation key to display name
         if (blockName.startsWith("block.")) {
             // Remove "block." prefix and convert underscores to spaces
             String cleanName = blockName.substring(6);
-            
+
             // Handle mod blocks vs vanilla blocks
             if (cleanName.contains(".")) {
                 String[] parts = cleanName.split("\\.", 2);
                 String modId = parts[0];
                 String blockId = parts[1];
-                
+
                 if ("villageworks".equals(modId)) {
                     // Special handling for our blocks
                     return switch (blockId) {
@@ -678,9 +703,9 @@ public class ZoneCommand {
                     case "chest" -> "Chest";
                     case "barrel" -> "Barrel";
                     case "shulker_box" -> "Shulker Box";
-                    case "white_bed", "orange_bed", "magenta_bed", "light_blue_bed", 
-                         "yellow_bed", "lime_bed", "pink_bed", "gray_bed", "light_gray_bed", 
-                         "cyan_bed", "purple_bed", "blue_bed", "brown_bed", "green_bed", 
+                    case "white_bed", "orange_bed", "magenta_bed", "light_blue_bed",
+                         "yellow_bed", "lime_bed", "pink_bed", "gray_bed", "light_gray_bed",
+                         "cyan_bed", "purple_bed", "blue_bed", "brown_bed", "green_bed",
                          "red_bed", "black_bed" -> {
                         String color = cleanName.replace("_bed", "");
                         yield formatBlockName(color) + " Bed";
@@ -689,15 +714,229 @@ public class ZoneCommand {
                 };
             }
         }
-        
+
         return blockName; // Fallback to raw translation key
     }
-    
+
     private static String formatBlockName(String name) {
         return java.util.Arrays.stream(name.split("_"))
             .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
             .reduce((a, b) -> a + " " + b)
             .orElse(name);
+    }
+
+    private static void showZoneAssignments(CommandSourceStack source, IVillageZone zone) {
+        List<UUID> assignedVillagers = zone.getAssignedVillagers();
+        if (assignedVillagers.isEmpty()) {
+            source.sendSuccess(() ->
+                Component.literal("Assigned villagers: None"), false);
+        } else {
+            source.sendSuccess(() ->
+                Component.literal("Assigned villagers: " + assignedVillagers.size()), false);
+            for (int i = 0; i < Math.min(assignedVillagers.size(), 10); i++) {
+                final int index = i;
+                final UUID villagerUUID = assignedVillagers.get(index);
+                source.sendSuccess(() ->
+                    Component.literal("  " + index + ": Villager (" + villagerUUID.toString() + ")"), false);
+            }
+            if (assignedVillagers.size() > 10) {
+                source.sendSuccess(() ->
+                    Component.literal("  ... and " + (assignedVillagers.size() - 10) + " more villagers"), false);
+            }
+        }
+    }
+
+    private static void showZoneClaims(CommandSourceStack source, IVillageZone zone, ServerLevel level) {
+        long currentTime = level.getGameTime();
+        Map<BlockPos, Optional<UUID>> claims = zone.getClaims(currentTime);
+
+        if (claims.isEmpty()) {
+            source.sendSuccess(() ->
+                Component.literal("Claims: No claimable positions in this zone"), false);
+            return;
+        }
+
+        long claimedCount = claims.values().stream().mapToLong(opt -> opt.isPresent() ? 1 : 0).sum();
+        source.sendSuccess(() ->
+            Component.literal("Claims: " + claimedCount + " claimed out of " + claims.size() + " claimable positions"), false);
+
+        showClaimedPositions(source, claims);
+    }
+
+    private static void showClaimedPositions(CommandSourceStack source, Map<BlockPos, Optional<UUID>> claims) {
+        int shownCount = 0;
+        long totalClaimed = 0;
+
+        for (Map.Entry<BlockPos, Optional<UUID>> entry : claims.entrySet()) {
+            Optional<UUID> claimingVillager = entry.getValue();
+            if (!claimingVillager.isPresent()) {
+                continue;
+            }
+
+            totalClaimed++;
+            if (shownCount < 10) {
+                BlockPos pos = entry.getKey();
+                UUID villagerUUID = claimingVillager.get();
+                final int index = shownCount;
+
+                source.sendSuccess(() ->
+                    Component.literal("  " + index + ": " + pos.toShortString() +
+                                    " claimed by villager (" + villagerUUID.toString() + ")"), false);
+                shownCount++;
+            }
+        }
+
+        if (totalClaimed > 10) {
+            final long remaining = totalClaimed - 10;
+            source.sendSuccess(() ->
+                Component.literal("  ... and " + remaining + " more claimed positions"), false);
+        }
+    }
+
+    private static int assignVillager(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
+            Entity villagerEntity = EntityArgument.getEntity(context, "villager");
+
+            if (!(villagerEntity instanceof Villager villager)) {
+                source.sendFailure(Component.literal("Target entity is not a villager"));
+                return 0;
+            }
+
+            IVillageCapability villageCapability = getVillageCapability(source, villageId);
+            if (villageCapability == null) {
+                return 0;
+            }
+
+            boolean assigned = villageCapability.assignVillagerToZone(zoneId, villager.getUUID());
+            if (assigned) {
+                IVillageZone zone = findZone(villageCapability, zoneId);
+                source.sendSuccess(() ->
+                    Component.literal("Assigned villager " + villager.getDisplayName().getString() +
+                                    " to zone " + zone.getName()), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.literal("Zone not found in village"));
+                return 0;
+            }
+
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to assign villager: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int unassignVillager(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
+            Entity villagerEntity = EntityArgument.getEntity(context, "villager");
+
+            if (!(villagerEntity instanceof Villager villager)) {
+                source.sendFailure(Component.literal("Target entity is not a villager"));
+                return 0;
+            }
+
+            IVillageCapability villageCapability = getVillageCapability(source, villageId);
+            if (villageCapability == null) {
+                return 0;
+            }
+
+            boolean removed = villageCapability.unassignVillagerFromZone(zoneId, villager.getUUID());
+            if (removed) {
+                IVillageZone zone = findZone(villageCapability, zoneId);
+                source.sendSuccess(() ->
+                    Component.literal("Unassigned villager " + villager.getDisplayName().getString() +
+                                    " from zone " + zone.getName()), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.literal("Villager was not assigned to this zone or zone not found"));
+                return 0;
+            }
+
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to unassign villager: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int claimPosition(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
+            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+            Entity villagerEntity = EntityArgument.getEntity(context, "villager");
+            int duration = IntegerArgumentType.getInteger(context, "duration");
+
+            if (!(villagerEntity instanceof Villager villager)) {
+                source.sendFailure(Component.literal("Target entity is not a villager"));
+                return 0;
+            }
+
+            IVillageCapability villageCapability = getVillageCapability(source, villageId);
+            if (villageCapability == null) {
+                return 0;
+            }
+
+            long currentTime = source.getLevel().getGameTime();
+            boolean claimed = villageCapability.claimPositionInZone(zoneId, pos, villager.getUUID(), duration, currentTime);
+            if (claimed) {
+                source.sendSuccess(() ->
+                    Component.literal("Claimed position " + pos.toShortString() +
+                                    " for villager " + villager.getDisplayName().getString() +
+                                    " for " + duration + " ticks"), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.literal("Zone not found or position not claimable"));
+                return 0;
+            }
+
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to claim position: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int releasePosition(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
+            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+
+            IVillageCapability villageCapability = getVillageCapability(source, villageId);
+            if (villageCapability == null) {
+                return 0;
+            }
+
+            boolean released = villageCapability.releasePositionInZone(zoneId, pos);
+            if (released) {
+                source.sendSuccess(() ->
+                    Component.literal("Released claim on position " + pos.toShortString()), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.literal("Position was not claimed or zone not found"));
+                return 0;
+            }
+
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to release position: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static IVillageZone findZone(IVillageCapability villageCapability, UUID zoneId) {
+        List<IVillageZone> zones = villageCapability.getZones();
+        for (IVillageZone zone : zones) {
+            if (zone.getUUID().equals(zoneId)) {
+                return zone;
+            }
+        }
+        return null;
     }
 
     @FunctionalInterface

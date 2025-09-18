@@ -28,3 +28,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/vw villager <targets> profession [<profession>]` - View or set villager professions
 - `/vw zone create/delete/rename/info/list` - Manage village zones
 - `/vw zone path add/clear` - Build custom path-shaped zones
+- `/vw zone claim/release` - Temporarily claim positions within zones for villagers

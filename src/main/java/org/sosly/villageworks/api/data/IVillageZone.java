@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -77,4 +78,46 @@ public interface IVillageZone {
      * @param tag CompoundTag containing zone data
      */
     void deserializeNBT(CompoundTag tag);
+    
+    /**
+     * @return List of villager UUIDs assigned to work in this zone
+     */
+    List<UUID> getAssignedVillagers();
+    
+    /**
+     * Assigns a villager to work in this zone.
+     * @param villagerUUID UUID of the villager to assign
+     */
+    void addAssignedVillager(UUID villagerUUID);
+    
+    /**
+     * Removes a villager assignment from this zone.
+     * @param villagerUUID UUID of the villager to unassign
+     * @return true if the villager was assigned and removed, false otherwise
+     */
+    boolean removeAssignedVillager(UUID villagerUUID);
+    
+    /**
+     * Returns current claims in this zone. Automatically cleans expired claims.
+     * @param currentTime Current game time for expiration checking
+     * @return Map of claimed positions to claiming villager UUID, empty Optional means unclaimed but claimable
+     */
+    Map<BlockPos, Optional<UUID>> getClaims(long currentTime);
+    
+    /**
+     * Claims a block position for a villager with specified duration.
+     * @param pos Position to claim
+     * @param villagerUUID UUID of claiming villager
+     * @param durationTicks Duration in ticks before claim expires
+     * @param currentTime Current game time for expiration checking
+     * @return true if position was successfully claimed, false if already claimed or not claimable
+     */
+    boolean claim(BlockPos pos, UUID villagerUUID, int durationTicks, long currentTime);
+    
+    /**
+     * Releases a claimed block position.
+     * @param pos Position to release
+     * @return true if the position was claimed and released, false otherwise
+     */
+    boolean release(BlockPos pos);
 }

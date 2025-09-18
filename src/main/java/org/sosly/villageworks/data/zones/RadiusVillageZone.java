@@ -1,18 +1,16 @@
 package org.sosly.villageworks.data.zones;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import org.sosly.villageworks.api.data.IVillageZone;
-import org.sosly.villageworks.api.data.ZoneShape;
-import org.sosly.villageworks.api.data.ZoneType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import org.sosly.villageworks.api.data.ZoneShape;
+import org.sosly.villageworks.api.data.ZoneType;
 
-public class RadiusVillageZone extends AbstractVillageZone implements IVillageZone {
+public class RadiusVillageZone extends AbstractVillageZone {
 
     private BlockPos center;
     private int radius;
@@ -30,7 +28,7 @@ public class RadiusVillageZone extends AbstractVillageZone implements IVillageZo
         this.center = center;
         this.radius = radius;
     }
-    
+
     public RadiusVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
         super(uuid, type, id, name, level);
         this.center = center;

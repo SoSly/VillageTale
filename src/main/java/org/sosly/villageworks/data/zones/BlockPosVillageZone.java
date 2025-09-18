@@ -1,18 +1,16 @@
 package org.sosly.villageworks.data.zones;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import org.sosly.villageworks.api.data.IVillageZone;
-import org.sosly.villageworks.api.data.ZoneShape;
-import org.sosly.villageworks.api.data.ZoneType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import org.sosly.villageworks.api.data.ZoneShape;
+import org.sosly.villageworks.api.data.ZoneType;
 
-public class BlockPosVillageZone extends AbstractVillageZone implements IVillageZone {
+public class BlockPosVillageZone extends AbstractVillageZone {
 
     private BlockPos blockPos;
 
@@ -25,7 +23,7 @@ public class BlockPosVillageZone extends AbstractVillageZone implements IVillage
         super(uuid, type, name);
         this.blockPos = blockPos;
     }
-    
+
     public BlockPosVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos blockPos, Level level) {
         super(uuid, type, id, name, level);
         this.blockPos = blockPos;

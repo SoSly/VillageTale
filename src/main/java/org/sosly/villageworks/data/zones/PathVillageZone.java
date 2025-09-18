@@ -1,23 +1,19 @@
 package org.sosly.villageworks.data.zones;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
-import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.ZoneShape;
 import org.sosly.villageworks.api.data.ZoneType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-public class PathVillageZone extends AbstractVillageZone implements IVillageZone {
+public class PathVillageZone extends AbstractVillageZone {
 
     private List<BlockPos> path;
     private List<BlockPos> cachedPOIs;
@@ -32,7 +28,7 @@ public class PathVillageZone extends AbstractVillageZone implements IVillageZone
         super(uuid, type, name);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
     }
-    
+
     public PathVillageZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
         super(uuid, type, id, name, level);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());

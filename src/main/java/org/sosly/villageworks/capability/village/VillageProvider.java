@@ -39,7 +39,7 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public CompoundTag serializeNBT() {
-        if (!capability.hasVillage()) {
+        if (capability.getVillageId() == null) {
             return new CompoundTag();
         }
         
@@ -114,7 +114,7 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
                 CompoundTag zoneTag = zoneList.getCompound(i);
                 var zone = ZoneFactory.deserializeFromNBT(zoneTag);
                 if (zone != null) {
-                    capability.addZoneWithoutDirty(zone);
+                    capability.addExistingZone(zone);
                 }
             }
         }

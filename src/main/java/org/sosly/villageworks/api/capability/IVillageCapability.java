@@ -87,4 +87,39 @@ public interface IVillageCapability {
      * @return true if player has required permission or higher
      */
     boolean hasPermission(UUID playerId, Permission required);
+    
+    /**
+     * Assigns a villager to work in the specified zone.
+     * @param zoneId UUID of the zone
+     * @param villagerUUID UUID of the villager to assign
+     * @return true if zone was found and villager assigned
+     */
+    boolean assignVillagerToZone(UUID zoneId, UUID villagerUUID);
+    
+    /**
+     * Removes a villager assignment from the specified zone.
+     * @param zoneId UUID of the zone
+     * @param villagerUUID UUID of the villager to unassign
+     * @return true if zone was found and villager was assigned
+     */
+    boolean unassignVillagerFromZone(UUID zoneId, UUID villagerUUID);
+    
+    /**
+     * Claims a block position for a villager in the specified zone.
+     * @param zoneId UUID of the zone
+     * @param pos Position to claim
+     * @param villagerUUID UUID of claiming villager
+     * @param durationTicks Duration in ticks before claim expires
+     * @param currentTime Current game time
+     * @return true if zone was found and position was claimable
+     */
+    boolean claimPositionInZone(UUID zoneId, BlockPos pos, UUID villagerUUID, int durationTicks, long currentTime);
+    
+    /**
+     * Releases a claimed block position in the specified zone.
+     * @param zoneId UUID of the zone
+     * @param pos Position to release
+     * @return true if zone was found and position was claimed
+     */
+    boolean releasePositionInZone(UUID zoneId, BlockPos pos);
 }
