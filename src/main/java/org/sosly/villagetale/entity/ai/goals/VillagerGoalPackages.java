@@ -18,9 +18,9 @@ import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
-import org.sosly.villagetale.entity.ai.behavior.GetFromContainerBehavior;
+import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
-import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorageBehavior;
+import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorage;
 import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
 import org.sosly.villagetale.entity.ai.behavior.SleepInBed;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
@@ -37,8 +37,8 @@ public class VillagerGoalPackages {
             Pair.of(1, (BehaviorControl<? super Villager>) new MoveToTargetSink()),
             Pair.of(1, WakeUp.create()),
             Pair.of(2, (BehaviorControl<? super Villager>) new EatFood()),
-            Pair.of(3, (BehaviorControl<? super Villager>) new GetFromContainerBehavior()),
-            Pair.of(4, (BehaviorControl<? super Villager>) new GoToNearestStorageBehavior()),
+            Pair.of(3, (BehaviorControl<? super Villager>) new GetFromContainer()),
+            Pair.of(4, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
             Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
         );
     }

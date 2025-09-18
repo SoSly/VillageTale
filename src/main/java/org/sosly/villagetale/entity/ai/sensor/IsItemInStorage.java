@@ -98,6 +98,8 @@ public class IsItemInStorage extends Sensor<Villager> {
             return;
         }
 
+        addToScannedList(villager, zone.getUUID(), alreadyScanned);
+
         for (BlockPos containerPos : pois.get()) {
             ResourceLocation itemId = ContainerHelper.getFirstMatchingItemId(level, containerPos, wantedItem.getMatcher());
             if (itemId == null) {
@@ -106,6 +108,7 @@ public class IsItemInStorage extends Sensor<Villager> {
 
             FoundItem foundItem = new FoundItem(containerPos, itemId);
             villager.getBrain().setMemory(MemoryModuleTypes.FOUND_ITEM.get(), foundItem);
+            villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
 
             if (VillageTale.LOGGER.isDebugEnabled()) {
                 VillageTale.LOGGER.debug("IsItemInStorage found item {} at {} for villager {}",
@@ -113,8 +116,6 @@ public class IsItemInStorage extends Sensor<Villager> {
             }
             return;
         }
-
-        addToScannedList(villager, zone.getUUID(), alreadyScanned);
     }
 
 

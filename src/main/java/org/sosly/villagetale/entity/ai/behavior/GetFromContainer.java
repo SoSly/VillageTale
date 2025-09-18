@@ -26,7 +26,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
 
-public class GetFromContainerBehavior extends Behavior<Villager> {
+public class GetFromContainer extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 100;
     private static final double INTERACTION_DISTANCE = 2.0D;
     private static final int CLAIM_DURATION = 60;
@@ -38,7 +38,7 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
     private int searchTicks;
     private IVillageZone claimedZone;
 
-    public GetFromContainerBehavior() {
+    public GetFromContainer() {
         super(ImmutableMap.of(
             MemoryModuleTypes.FOUND_ITEM.get(), MemoryStatus.VALUE_PRESENT,
             MemoryModuleTypes.WANTED_ITEM.get(), MemoryStatus.VALUE_PRESENT,
@@ -80,7 +80,7 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
 
     @Override
     protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
-        return this.targetContainer != null && 
+        return this.targetContainer != null &&
                villager.getBrain().hasMemoryValue(MemoryModuleTypes.FOUND_ITEM.get()) &&
                villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
     }
@@ -96,16 +96,7 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
         }
 
         if (!this.atContainer) {
-            this.atContainer = true;
-            this.searchTicks = 0;
-            villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
-
-            if (!claimContainer(level, villager, gameTime)) {
-                stopBehavior(villager);
-                return;
-            }
-
-            ContainerHelper.openContainer(level, this.targetContainer);
+            handleArrival(level, villager, gameTime);
             return;
         }
 
@@ -118,6 +109,19 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
         extractItems(level, villager);
         clearMemories(villager);
         stopBehavior(villager);
+    }
+
+    private void handleArrival(ServerLevel level, Villager villager, long gameTime) {
+        this.atContainer = true;
+        this.searchTicks = 0;
+        villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+
+        if (!claimContainer(level, villager, gameTime)) {
+            stopBehavior(villager);
+            return;
+        }
+
+        ContainerHelper.openContainer(level, this.targetContainer);
     }
 
     @Override
@@ -165,7 +169,7 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
         }
 
         SimpleContainer inventory = villager.getInventory();
-        
+
         if (findFirstEmptySlot(inventory) < 0) {
             if (VillageTale.LOGGER.isDebugEnabled()) {
                 VillageTale.LOGGER.debug("GetFromContainer aborting - no empty slots for villager {}", villager.getId());
@@ -195,7 +199,7 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
 
             int takeAmount = Math.min(extractedItem.getCount(), maxToExtract - extracted);
             extractedItem.setCount(takeAmount);
-            
+
             inventory.setItem(emptySlot, extractedItem);
             extracted += takeAmount;
 
@@ -247,7 +251,7 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
     private void releaseContainer() {
         if (this.containerClaimed && this.claimedZone != null && this.targetContainer != null) {
             boolean released = this.claimedZone.release(this.targetContainer);
-            
+
             if (VillageTale.LOGGER.isDebugEnabled()) {
                 VillageTale.LOGGER.debug("GetFromContainer {} container at {}",
                     released ? "released" : "failed to release", this.targetContainer);
@@ -257,7 +261,6 @@ public class GetFromContainerBehavior extends Behavior<Villager> {
 
     private void clearMemories(Villager villager) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
-        villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
         villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
     }
 

@@ -22,13 +22,13 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 
-public class GoToNearestStorageBehavior extends Behavior<Villager> {
+public class GoToNearestStorage extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
     private static final double ARRIVAL_DISTANCE = 4.0D;
 
     private BlockPos targetStoragePos;
 
-    public GoToNearestStorageBehavior() {
+    public GoToNearestStorage() {
         super(ImmutableMap.of(
             MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT,
             MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT
