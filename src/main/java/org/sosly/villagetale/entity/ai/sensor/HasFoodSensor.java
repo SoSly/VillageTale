@@ -36,15 +36,22 @@ public class HasFoodSensor extends Sensor<Villager> {
             if (VillageTale.LOGGER.isDebugEnabled()) {
                 VillageTale.LOGGER.debug("HasFoodSensor set WANTED_ITEM to FOOD for villager {}", villager.getId());
             }
-        } else if (!needsFood && hasExistingWant) {
-            var currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
-            if (currentWant != null && currentWant.equals(ItemMatcher.FOOD.getFor(villager))) {
-                villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
-                
-                if (VillageTale.LOGGER.isDebugEnabled()) {
-                    VillageTale.LOGGER.debug("HasFoodSensor cleared WANTED_ITEM for villager {}", villager.getId());
-                }
-            }
+            return;
+        }
+
+        if (!needsFood && !hasExistingWant) {
+            return;
+        }
+
+        var currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        if (currentWant == null || !currentWant.equals(ItemMatcher.FOOD.getFor(villager))) {
+            return;
+        }
+
+        villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
+        
+        if (VillageTale.LOGGER.isDebugEnabled()) {
+            VillageTale.LOGGER.debug("HasFoodSensor cleared WANTED_ITEM for villager {}", villager.getId());
         }
     }
 

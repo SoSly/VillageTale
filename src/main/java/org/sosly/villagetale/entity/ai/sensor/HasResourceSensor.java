@@ -43,16 +43,23 @@ public class HasResourceSensor extends Sensor<Villager> {
                 VillageTale.LOGGER.debug("HasResourceSensor set WANTED_ITEM to RESOURCES for villager {} (has {}/{})", 
                     villager.getId(), resourceCount, REQUIRED_RESOURCE_COUNT);
             }
-        } else if (hasEnoughResources && hasExistingWant) {
-            var currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
-            if (currentWant != null && currentWant.equals(ItemMatcher.RESOURCES.getFor(villager))) {
-                villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
-                
-                if (VillageTale.LOGGER.isDebugEnabled()) {
-                    VillageTale.LOGGER.debug("HasResourceSensor cleared WANTED_ITEM for villager {} (has {}/{})", 
-                        villager.getId(), resourceCount, REQUIRED_RESOURCE_COUNT);
-                }
-            }
+            return;
+        }
+
+        if (!hasEnoughResources || !hasExistingWant) {
+            return;
+        }
+
+        var currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        if (currentWant == null || !currentWant.equals(ItemMatcher.RESOURCES.getFor(villager))) {
+            return;
+        }
+
+        villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
+        
+        if (VillageTale.LOGGER.isDebugEnabled()) {
+            VillageTale.LOGGER.debug("HasResourceSensor cleared WANTED_ITEM for villager {} (has {}/{})", 
+                villager.getId(), resourceCount, REQUIRED_RESOURCE_COUNT);
         }
     }
 
