@@ -7,6 +7,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.entity.ai.sensor.HasFood;
+import org.sosly.villagetale.entity.ai.sensor.HasItemsToDeposit;
 import org.sosly.villagetale.entity.ai.sensor.HasResources;
 import org.sosly.villagetale.entity.ai.sensor.HasTool;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
@@ -30,6 +31,9 @@ public class SensorTypes {
 
     public static final RegistryObject<SensorType<IsItemInStorage>> SEARCH_STORAGE_FOR_ITEM =
         SENSOR_TYPES.register("search_storage_for_item", () -> new SensorType<>(IsItemInStorage::new));
+
+    public static final RegistryObject<SensorType<HasItemsToDeposit>> HAS_ITEMS_TO_DEPOSIT =
+        SENSOR_TYPES.register("has_items_to_deposit", () -> new SensorType<>(HasItemsToDeposit::new));
 
     public static void register(IEventBus eventBus) {
         SENSOR_TYPES.register(eventBus);

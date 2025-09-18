@@ -3,23 +3,24 @@ package org.sosly.villagetale.entity.ai.goals;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
-import net.minecraft.world.entity.ai.behavior.Swim;
+import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.UpdateActivityFromSchedule;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
 import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.DoNothing;
-import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetAwayFrom;
-import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
+import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
+import net.minecraft.world.entity.ai.behavior.Swim;
+import net.minecraft.world.entity.ai.behavior.UpdateActivityFromSchedule;
 import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
+import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
-import org.sosly.villagetale.entity.ai.behavior.FindFoodInStorageBehavior;
+import org.sosly.villagetale.entity.ai.behavior.GetFromContainerBehavior;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
+import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorageBehavior;
 import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
 import org.sosly.villagetale.entity.ai.behavior.SleepInBed;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
@@ -36,7 +37,8 @@ public class VillagerGoalPackages {
             Pair.of(1, (BehaviorControl<? super Villager>) new MoveToTargetSink()),
             Pair.of(1, WakeUp.create()),
             Pair.of(2, (BehaviorControl<? super Villager>) new EatFood()),
-            Pair.of(3, (BehaviorControl<? super Villager>) new FindFoodInStorageBehavior()),
+            Pair.of(3, (BehaviorControl<? super Villager>) new GetFromContainerBehavior()),
+            Pair.of(4, (BehaviorControl<? super Villager>) new GoToNearestStorageBehavior()),
             Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
         );
     }

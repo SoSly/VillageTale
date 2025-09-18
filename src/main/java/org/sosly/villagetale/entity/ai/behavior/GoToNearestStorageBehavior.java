@@ -23,7 +23,8 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 
 public class GoToNearestStorageBehavior extends Behavior<Villager> {
-    private static final int BEHAVIOR_DURATION = 60;
+    private static final int BEHAVIOR_DURATION = 200;
+    private static final double ARRIVAL_DISTANCE = 4.0D;
 
     private BlockPos targetStoragePos;
 
@@ -64,21 +65,45 @@ public class GoToNearestStorageBehavior extends Behavior<Villager> {
             return false;
         }
 
+        if (villager.blockPosition().closerThan(targetStorage, ARRIVAL_DISTANCE)) {
+            return false;
+        }
+
         this.targetStoragePos = targetStorage;
         return true;
     }
 
     @Override
     protected void start(ServerLevel level, Villager villager, long gameTime) {
-        if (this.targetStoragePos != null) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(this.targetStoragePos, 0.5F, 2));
-
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GoToNearestStorage set walk target to {} for villager {}",
-                    this.targetStoragePos, villager.getId());
-            }
+        if (this.targetStoragePos == null) {
+            return;
         }
+
+        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(this.targetStoragePos, 0.5F, 2));
+
+        if (VillageTale.LOGGER.isDebugEnabled()) {
+            VillageTale.LOGGER.debug("GoToNearestStorage set walk target to {} for villager {}",
+                this.targetStoragePos, villager.getId());
+        }
+    }
+
+    @Override
+    protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
+        if (this.targetStoragePos == null) {
+            return false;
+        }
+
+        boolean closeEnough = villager.blockPosition().closerThan(this.targetStoragePos, ARRIVAL_DISTANCE);
+        if (closeEnough) {
+            if (VillageTale.LOGGER.isDebugEnabled()) {
+                VillageTale.LOGGER.debug("GoToNearestStorage stopping - villager {} arrived at storage {}",
+                    villager.getId(), this.targetStoragePos);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private BlockPos findNearestStorage(ServerLevel level, Villager villager, UUID villageId, boolean excludeScanned) {

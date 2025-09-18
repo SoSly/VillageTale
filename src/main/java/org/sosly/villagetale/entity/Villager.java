@@ -452,7 +452,12 @@ public class Villager extends PathfinderMob {
                 SensorType.NEAREST_PLAYERS,
                 SensorType.HURT_BY,
                 SensorType.VILLAGER_HOSTILES,
-                SensorTypes.HUNGER.get()
+                SensorTypes.HUNGER.get(),
+                SensorTypes.HAS_FOOD.get(),
+                SensorTypes.HAS_TOOL.get(),
+                SensorTypes.HAS_RESOURCE.get(),
+                SensorTypes.SEARCH_STORAGE_FOR_ITEM.get(),
+                SensorTypes.HAS_ITEMS_TO_DEPOSIT.get()
             );
         }
     }

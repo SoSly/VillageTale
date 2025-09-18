@@ -27,9 +27,10 @@ import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
 
 public class IsItemInStorage extends Sensor<Villager> {
+    private static final double ZONE_DETECTION_DISTANCE = 4.0D;
 
     public IsItemInStorage() {
-        super(200);
+        super(20);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class IsItemInStorage extends Sensor<Villager> {
         return villageCapability.getZones()
                 .stream()
                 .filter(z -> z.getType() == ZoneType.STORAGE)
-                .filter(z -> z.containsPosition(villagerPos))
+                .filter(z -> villagerPos.closerThan(z.getStartPos(), ZONE_DETECTION_DISTANCE))
                 .findFirst().orElse(null);
     }
 
@@ -102,7 +103,7 @@ public class IsItemInStorage extends Sensor<Villager> {
             if (itemId == null) {
                 continue;
             }
-            
+
             FoundItem foundItem = new FoundItem(containerPos, itemId);
             villager.getBrain().setMemory(MemoryModuleTypes.FOUND_ITEM.get(), foundItem);
 
