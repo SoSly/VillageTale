@@ -130,7 +130,7 @@ public class Villager extends PathfinderMob {
     }
 
     private void registerBrainGoals(Brain<Villager> brain) {
-        brain.setSchedule(Schedule.VILLAGER_DEFAULT);
+        brain.setSchedule(this.getProfession().getSchedule());
 
         brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage());
         brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(0.3F));

@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.schedule.Schedule;
 import org.sosly.villageworks.api.data.IVillageZone;
 import org.sosly.villageworks.api.data.IWantedItem;
 import org.sosly.villageworks.entity.Villager;
@@ -72,4 +73,10 @@ public interface IProfession {
      * @param brain The villager's brain to add behaviors to
      */
     public void registerAdditionalGoals(Brain<Villager> brain);
+
+    /**
+     * Gets the work schedule for this profession.
+     * @return The schedule defining when this profession works, rests, and socializes
+     */
+    public Schedule getSchedule();
 }
