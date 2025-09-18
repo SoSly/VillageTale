@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -65,7 +67,7 @@ public class Villager extends PathfinderMob {
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
         this.foodData = new LivingEntityFoodData();
-        this.inventory = new SimpleContainer(1);
+        this.inventory = new SimpleContainer(5);
         ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         this.getNavigation().setCanFloat(true);
         this.setCanPickUpLoot(true);
@@ -157,11 +159,18 @@ public class Villager extends PathfinderMob {
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         this.foodData.addAdditionalSaveData(tag);
-        ItemStack inventoryItem = this.inventory.getItem(0);
-        if (!inventoryItem.isEmpty()) {
-            CompoundTag itemTag = new CompoundTag();
-            inventoryItem.save(itemTag);
-            tag.put("InventoryItem", itemTag);
+        ListTag inventoryListTag = new ListTag();
+        for (int i = 0; i < this.inventory.getContainerSize(); i++) {
+            ItemStack itemStack = this.inventory.getItem(i);
+            if (!itemStack.isEmpty()) {
+                CompoundTag itemTag = new CompoundTag();
+                itemTag.putByte("Slot", (byte) i);
+                itemStack.save(itemTag);
+                inventoryListTag.add(itemTag);
+            }
+        }
+        if (!inventoryListTag.isEmpty()) {
+            tag.put("Inventory", inventoryListTag);
         }
 
         Optional<UUID> villageId = this.brain.getMemory(MemoryModuleTypes.VILLAGE.get());
@@ -179,7 +188,17 @@ public class Villager extends PathfinderMob {
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.foodData.readAdditionalSaveData(tag);
-        if (tag.contains("InventoryItem")) {
+        if (tag.contains("Inventory", Tag.TAG_LIST)) {
+            ListTag inventoryListTag = tag.getList("Inventory", Tag.TAG_COMPOUND);
+            for (int i = 0; i < inventoryListTag.size(); i++) {
+                CompoundTag itemTag = inventoryListTag.getCompound(i);
+                byte slot = itemTag.getByte("Slot");
+                if (slot >= 0 && slot < this.inventory.getContainerSize()) {
+                    ItemStack itemStack = ItemStack.of(itemTag);
+                    this.inventory.setItem(slot, itemStack);
+                }
+            }
+        } else if (tag.contains("InventoryItem")) {
             CompoundTag itemTag = tag.getCompound("InventoryItem");
             ItemStack inventoryItem = ItemStack.of(itemTag);
             this.inventory.setItem(0, inventoryItem);
@@ -379,43 +398,17 @@ public class Villager extends PathfinderMob {
         return this.inventory;
     }
 
-    @Override
-    public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
-
-        if (itemStack.isEmpty()) {
-            return InteractionResult.PASS;
-        }
-
-        if (!this.inventory.getItem(0).isEmpty()) {
-            return InteractionResult.PASS;
-        }
-
-        FoodProperties foodProperties = itemStack.getFoodProperties(this);
-        if (foodProperties == null || foodProperties.getSaturationModifier() <= 0) {
-            return InteractionResult.PASS;
-        }
-
-        ItemStack singleItem = itemStack.copy();
-        singleItem.setCount(1);
-        this.inventory.setItem(0, singleItem);
-
-        if (!player.getAbilities().instabuild) {
-            itemStack.shrink(1);
-        }
-
-        this.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
-        return InteractionResult.SUCCESS;
-    }
 
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int looting, boolean recentlyHit) {
         super.dropCustomDeathLoot(damageSource, looting, recentlyHit);
 
-        ItemStack inventoryItem = this.inventory.getItem(0);
-        if (!inventoryItem.isEmpty()) {
-            ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), inventoryItem);
-            this.level().addFreshEntity(itemEntity);
+        for (int i = 0; i < this.inventory.getContainerSize(); i++) {
+            ItemStack inventoryItem = this.inventory.getItem(i);
+            if (!inventoryItem.isEmpty()) {
+                ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), inventoryItem);
+                this.level().addFreshEntity(itemEntity);
+            }
         }
     }
 

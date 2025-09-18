@@ -8,8 +8,10 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.SimpleContainer;
+import org.sosly.villageworks.api.data.IWantedItem;
 import org.sosly.villageworks.entity.Villager;
 import org.sosly.villageworks.entity.MemoryModuleTypes;
+import org.sosly.villageworks.helper.ItemMatcher;
 
 public class EatFood extends Behavior<Villager> {
     private static final int EATING_DURATION = 32;
@@ -89,9 +91,12 @@ public class EatFood extends Behavior<Villager> {
         villager.getFoodData().eat(foodProperties.getNutrition(), foodProperties.getSaturationModifier());
 
         SimpleContainer inventory = villager.getInventory();
-        ItemStack inventoryItem = inventory.getItem(0);
-        if (!inventoryItem.isEmpty() && inventoryItem.is(this.foodToEat.getItem())) {
-            inventoryItem.shrink(1);
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack inventoryItem = inventory.getItem(i);
+            if (!inventoryItem.isEmpty() && inventoryItem.is(this.foodToEat.getItem())) {
+                inventoryItem.shrink(1);
+                break;
+            }
         }
 
         this.foodToEat = ItemStack.EMPTY;
@@ -100,18 +105,34 @@ public class EatFood extends Behavior<Villager> {
 
     private ItemStack findBestFood(Villager villager) {
         SimpleContainer inventory = villager.getInventory();
-        ItemStack item = inventory.getItem(0);
-
-        if (item.isEmpty()) {
-            return ItemStack.EMPTY;
+        IWantedItem foodMatcher = ItemMatcher.FOOD.getFor(villager);
+        
+        ItemStack bestFood = ItemStack.EMPTY;
+        float bestSaturation = 0.0f;
+        
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack item = inventory.getItem(i);
+            if (item.isEmpty()) {
+                continue;
+            }
+            
+            if (!foodMatcher.getMatcher().test(item)) {
+                continue;
+            }
+            
+            FoodProperties foodProperties = item.getFoodProperties(villager);
+            if (foodProperties == null) {
+                continue;
+            }
+            
+            float saturation = foodProperties.getSaturationModifier();
+            if (saturation > bestSaturation) {
+                bestFood = item;
+                bestSaturation = saturation;
+            }
         }
-
-        FoodProperties foodProperties = item.getFoodProperties(villager);
-        if (foodProperties == null) {
-            return ItemStack.EMPTY;
-        }
-
-        return item;
+        
+        return bestFood;
     }
 
     private void playEatingSound(ServerLevel level, Villager villager) {

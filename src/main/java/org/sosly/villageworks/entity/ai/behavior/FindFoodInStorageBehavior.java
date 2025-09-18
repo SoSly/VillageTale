@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -51,7 +52,7 @@ public class FindFoodInStorageBehavior extends Behavior<Villager> {
             return false;
         }
 
-        if (!villager.getInventory().getItem(0).isEmpty()) {
+        if (hasAnyFood(villager)) {
             return false;
         }
 
@@ -85,7 +86,7 @@ public class FindFoodInStorageBehavior extends Behavior<Villager> {
         }
 
         Boolean isHungry = villager.getBrain().getMemory(MemoryModuleTypes.IS_HUNGRY.get()).orElse(false);
-        return isHungry && villager.getInventory().getItem(0).isEmpty();
+        return isHungry && !hasAnyFood(villager);
     }
 
     @Override
@@ -111,7 +112,10 @@ public class FindFoodInStorageBehavior extends Behavior<Villager> {
         if (this.searchTicks >= SEARCH_DURATION) {
             ItemStack extractedFood = ContainerHelper.extractItemFromContainer(level, this.targetContainer, FindFoodInStorageBehavior::isFood);
             if (!extractedFood.isEmpty()) {
-                villager.getInventory().setItem(0, extractedFood);
+                int emptySlot = findFirstEmptySlot(villager);
+                if (emptySlot >= 0) {
+                    villager.getInventory().setItem(emptySlot, extractedFood);
+                }
             }
             this.searchingForFood = false;
         }
@@ -181,5 +185,26 @@ public class FindFoodInStorageBehavior extends Behavior<Villager> {
             return false;
         }
         return stack.getFoodProperties(null) != null;
+    }
+    
+    private boolean hasAnyFood(Villager villager) {
+        SimpleContainer inventory = villager.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack item = inventory.getItem(i);
+            if (!item.isEmpty() && item.isEdible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private int findFirstEmptySlot(Villager villager) {
+        SimpleContainer inventory = villager.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            if (inventory.getItem(i).isEmpty()) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
