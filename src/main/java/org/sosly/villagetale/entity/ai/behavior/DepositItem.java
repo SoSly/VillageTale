@@ -176,11 +176,11 @@ public class DepositItem extends Behavior<Villager> {
             return null;
         }
 
-        for (ResourceLocation itemId : itemsToDeposit.keySet()) {
-            ItemStack testItem = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
-            
-            for (BlockPos containerPos : pois.get()) {
-                if (ContainerHelper.hasAvailableSpace(level, containerPos, testItem)) {
+        for (BlockPos containerPos : pois.get()) {
+            for (ResourceLocation itemId : itemsToDeposit.keySet()) {
+                net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(itemId);
+                
+                if (ContainerHelper.hasAvailableSpace(level, containerPos, item)) {
                     return containerPos;
                 }
             }

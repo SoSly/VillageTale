@@ -179,4 +179,26 @@ public class ContainerHelper {
         return false;
     }
 
+    public static boolean hasAvailableSpace(ServerLevel level, BlockPos containerPos, net.minecraft.world.item.Item item) {
+        BlockEntity blockEntity = level.getBlockEntity(containerPos);
+        if (!(blockEntity instanceof Container container)) {
+            return false;
+        }
+
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack existingStack = container.getItem(i);
+
+            if (existingStack.isEmpty()) {
+                return true;
+            } else if (existingStack.is(item)) {
+                int spaceAvailable = existingStack.getMaxStackSize() - existingStack.getCount();
+                if (spaceAvailable > 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }
