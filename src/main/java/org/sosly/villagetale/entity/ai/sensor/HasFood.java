@@ -8,14 +8,13 @@ import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
-import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.helper.ItemMatcher;
 
 import java.util.Set;
 
-public class HasFoodSensor extends Sensor<Villager> {
+public class HasFood extends Sensor<Villager> {
 
-    public HasFoodSensor() {
+    public HasFood() {
         super(200);
     }
 
@@ -32,9 +31,9 @@ public class HasFoodSensor extends Sensor<Villager> {
             villager.getBrain().setMemory(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.FOOD.getFor(villager));
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
-            
+
             if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("HasFoodSensor set WANTED_ITEM to FOOD for villager {}", villager.getId());
+                VillageTale.LOGGER.debug("HasFood set WANTED_ITEM to FOOD for villager {}", villager.getId());
             }
             return;
         }
@@ -49,9 +48,9 @@ public class HasFoodSensor extends Sensor<Villager> {
         }
 
         villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
-        
+
         if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HasFoodSensor cleared WANTED_ITEM for villager {}", villager.getId());
+            VillageTale.LOGGER.debug("HasFood cleared WANTED_ITEM for villager {}", villager.getId());
         }
     }
 

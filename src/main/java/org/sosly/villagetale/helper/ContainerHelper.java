@@ -1,6 +1,8 @@
 package org.sosly.villagetale.helper;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -95,5 +97,19 @@ public class ContainerHelper {
         return false;
     }
 
+    public static ResourceLocation getFirstMatchingItemId(ServerLevel level, BlockPos containerPos, Predicate<ItemStack> itemMatcher) {
+        BlockEntity blockEntity = level.getBlockEntity(containerPos);
+        if (!(blockEntity instanceof Container container)) {
+            return null;
+        }
+
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            ItemStack stack = container.getItem(i);
+            if (itemMatcher.test(stack)) {
+                return BuiltInRegistries.ITEM.getKey(stack.getItem());
+            }
+        }
+        return null;
+    }
 
 }

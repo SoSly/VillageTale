@@ -10,13 +10,13 @@ import org.sosly.villagetale.entity.Villager;
 
 import java.util.Set;
 
-public class HungerSensor extends Sensor<Villager> {
+public class IsHungry extends Sensor<Villager> {
 
     private static final int MAX_FOOD_LEVEL = 20;
     private static final int HUNGRY_THRESHOLD = 12;
     private static final int STARVING_THRESHOLD = 6;
 
-    public HungerSensor() {
+    public IsHungry() {
         super(600);
     }
 
@@ -33,7 +33,7 @@ public class HungerSensor extends Sensor<Villager> {
         updateMemoryIfChanged(villager, MemoryModuleTypes.IS_STARVING.get(), isStarving);
 
         if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HungerSensor for villager {}: foodLevel={}, canEat={}, isHungry={}, isStarving={}",
+            VillageTale.LOGGER.debug("IsHungry for villager {}: foodLevel={}, canEat={}, isHungry={}, isStarving={}",
                 villager.getId(), foodLevel, canEat, isHungry, isStarving);
         }
     }

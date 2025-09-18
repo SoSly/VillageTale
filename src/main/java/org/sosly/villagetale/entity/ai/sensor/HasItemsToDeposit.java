@@ -16,12 +16,12 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ItemMatcher;
 
-public class HasItemsToDepositSensor extends Sensor<Villager> {
+public class HasItemsToDeposit extends Sensor<Villager> {
     private static final int NEARLY_FULL_THRESHOLD = 4;
     private static final int LARGE_QUANTITY_THRESHOLD = 32;
     private static final int FOOD_TO_KEEP = 3;
 
-    public HasItemsToDepositSensor() {
+    public HasItemsToDeposit() {
         super(200);
     }
 
@@ -44,7 +44,7 @@ public class HasItemsToDepositSensor extends Sensor<Villager> {
         villager.getBrain().setMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), itemsToDeposit);
 
         if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HasItemsToDepositSensor set ITEMS_TO_DEPOSIT for villager {} with {} items",
+            VillageTale.LOGGER.debug("HasItemsToDeposit set ITEMS_TO_DEPOSIT for villager {} with {} items",
                 villager.getId(), itemsToDeposit.size());
         }
     }
