@@ -98,27 +98,24 @@ public class IsItemInStorage extends Sensor<Villager> {
         }
 
         for (BlockPos containerPos : pois.get()) {
-            if (ContainerHelper.hasMatchingItem(level, containerPos, wantedItem.getMatcher())) {
-                ResourceLocation itemId = findMatchingItemId(level, containerPos, wantedItem);
-                if (itemId != null) {
-                    FoundItem foundItem = new FoundItem(containerPos, itemId);
-                    villager.getBrain().setMemory(MemoryModuleTypes.FOUND_ITEM.get(), foundItem);
-
-                    if (VillageTale.LOGGER.isDebugEnabled()) {
-                        VillageTale.LOGGER.debug("IsItemInStorage found item {} at {} for villager {}",
-                            itemId, containerPos, villager.getId());
-                    }
-                    return;
-                }
+            ResourceLocation itemId = ContainerHelper.getFirstMatchingItemId(level, containerPos, wantedItem.getMatcher());
+            if (itemId == null) {
+                continue;
             }
+            
+            FoundItem foundItem = new FoundItem(containerPos, itemId);
+            villager.getBrain().setMemory(MemoryModuleTypes.FOUND_ITEM.get(), foundItem);
+
+            if (VillageTale.LOGGER.isDebugEnabled()) {
+                VillageTale.LOGGER.debug("IsItemInStorage found item {} at {} for villager {}",
+                    itemId, containerPos, villager.getId());
+            }
+            return;
         }
 
         addToScannedList(villager, zone.getUUID(), alreadyScanned);
     }
 
-    private ResourceLocation findMatchingItemId(ServerLevel level, BlockPos containerPos, WantedItem wantedItem) {
-        return ContainerHelper.getFirstMatchingItemId(level, containerPos, wantedItem.getMatcher());
-    }
 
     private void addToScannedList(Villager villager, UUID zoneId, List<UUID> alreadyScanned) {
         List<UUID> updatedList = new ArrayList<>(alreadyScanned);
