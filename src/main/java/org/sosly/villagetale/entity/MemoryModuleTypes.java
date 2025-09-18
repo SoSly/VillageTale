@@ -14,8 +14,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.data.IWantedItem;
 import org.sosly.villagetale.data.FoundItem;
+import org.sosly.villagetale.data.WantedItem;
 
 public class MemoryModuleTypes {
     public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
@@ -52,34 +52,14 @@ public class MemoryModuleTypes {
             )
         )));
 
-    public static final RegistryObject<MemoryModuleType<IWantedItem>> WANTED_ITEM =
-        MEMORY_MODULE_TYPES.register("wanted_item", () -> new MemoryModuleType<>(Optional.of(
-            IWantedItem.CODEC
-        )));
+    public static final RegistryObject<MemoryModuleType<WantedItem>> WANTED_ITEM =
+        MEMORY_MODULE_TYPES.register("wanted_item", () -> new MemoryModuleType<>(Optional.empty()));
 
     public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
-        MEMORY_MODULE_TYPES.register("already_scanned_storages", () -> new MemoryModuleType<>(Optional.of(
-            Codec.list(Codec.BYTE_BUFFER.xmap(
-                buffer -> {
-                    byte[] bytes = new byte[buffer.remaining()];
-                    buffer.get(bytes);
-                    ByteBuffer bb = ByteBuffer.wrap(bytes);
-                    return new UUID(bb.getLong(), bb.getLong());
-                },
-                uuid -> {
-                    ByteBuffer buffer = ByteBuffer.allocate(16);
-                    buffer.putLong(uuid.getMostSignificantBits());
-                    buffer.putLong(uuid.getLeastSignificantBits());
-                    buffer.flip();
-                    return buffer;
-                }
-            ))
-        )));
+        MEMORY_MODULE_TYPES.register("already_scanned_storages", () -> new MemoryModuleType<>(Optional.empty()));
 
     public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
-        MEMORY_MODULE_TYPES.register("found_item", () -> new MemoryModuleType<>(Optional.of(
-            FoundItem.CODEC
-        )));
+        MEMORY_MODULE_TYPES.register("found_item", () -> new MemoryModuleType<>(Optional.empty()));
 
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);
