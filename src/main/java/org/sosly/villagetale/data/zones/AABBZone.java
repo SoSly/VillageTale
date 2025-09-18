@@ -7,42 +7,41 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import org.sosly.villagetale.api.data.ZoneShape;
 import org.sosly.villagetale.api.data.ZoneType;
 
-public class AABBVillageZone extends AbstractVillageZone {
+public class AABBZone extends AbstractVillageZone {
 
-    private AABB bounds;
+    private net.minecraft.world.phys.AABB bounds;
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
-    public AABBVillageZone(UUID uuid, ZoneType type, String name, AABB bounds, Level level) {
+    public AABBZone(UUID uuid, ZoneType type, String name, net.minecraft.world.phys.AABB bounds, Level level) {
         super(uuid, type, name, level);
         this.bounds = bounds;
     }
 
-    public AABBVillageZone(UUID uuid, ZoneType type, String name, AABB bounds) {
+    public AABBZone(UUID uuid, ZoneType type, String name, net.minecraft.world.phys.AABB bounds) {
         super(uuid, type, name);
         this.bounds = bounds;
     }
 
-    public AABBVillageZone(UUID uuid, ZoneType type, int id, String name, AABB bounds, Level level) {
+    public AABBZone(UUID uuid, ZoneType type, int id, String name, net.minecraft.world.phys.AABB bounds, Level level) {
         super(uuid, type, id, name, level);
         this.bounds = bounds;
     }
 
-    public AABBVillageZone(UUID uuid, ZoneType type, int id, String name, AABB bounds) {
+    public AABBZone(UUID uuid, ZoneType type, int id, String name, net.minecraft.world.phys.AABB bounds) {
         super(uuid, type, id, name);
         this.bounds = bounds;
     }
 
 
-    public AABB getAABB() {
+    public net.minecraft.world.phys.AABB getAABB() {
         return bounds;
     }
 
-    public void setAABB(AABB bounds) {
+    public void setAABB(net.minecraft.world.phys.AABB bounds) {
         this.bounds = bounds;
         this.poiCacheDirty = true;
     }
@@ -133,7 +132,7 @@ public class AABBVillageZone extends AbstractVillageZone {
 
         if (tag.contains("Bounds")) {
             CompoundTag boundsTag = tag.getCompound("Bounds");
-            this.bounds = new AABB(
+            this.bounds = new net.minecraft.world.phys.AABB(
                 boundsTag.getDouble("MinX"),
                 boundsTag.getDouble("MinY"),
                 boundsTag.getDouble("MinZ"),
@@ -144,5 +143,10 @@ public class AABBVillageZone extends AbstractVillageZone {
         }
 
         this.poiCacheDirty = true;
+    }
+
+    @Override
+    public BlockPos getStartPos() {
+        return BlockPos.containing(bounds.getCenter());
     }
 }

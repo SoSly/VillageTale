@@ -29,7 +29,10 @@ import org.sosly.villagetale.command.arguments.VillageUUIDArgument;
 import org.sosly.villagetale.command.arguments.ZoneTypeArgument;
 import org.sosly.villagetale.command.arguments.ZoneUUIDArgument;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.data.zones.PathVillageZone;
+import org.sosly.villagetale.data.zones.AABBZone;
+import org.sosly.villagetale.data.zones.BlockPosZone;
+import org.sosly.villagetale.data.zones.PathZone;
+import org.sosly.villagetale.data.zones.RadiusZone;
 import org.sosly.villagetale.data.zones.ZoneFactory;
 import org.sosly.villagetale.entity.Villager;
 
@@ -181,7 +184,7 @@ public class ZoneCommand {
             });
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to create AABB zone: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to create AABBZone zone: " + e.getMessage()));
             return 0;
         }
     }
@@ -515,7 +518,7 @@ public class ZoneCommand {
                         .map(villageCapability -> {
                             List<IVillageZone> zones = villageCapability.getZones();
                             for (IVillageZone zone : zones) {
-                                if (zone.getUUID().equals(zoneId) && zone instanceof PathVillageZone pathZone) {
+                                if (zone.getUUID().equals(zoneId) && zone instanceof PathZone pathZone) {
                                     pathZone.addPoint(pos);
                                     source.sendSuccess(() ->
                                         Component.literal("Added point " + pos.toShortString() + " to path zone"), true);
@@ -558,7 +561,7 @@ public class ZoneCommand {
                         .map(villageCapability -> {
                             List<IVillageZone> zones = villageCapability.getZones();
                             for (IVillageZone zone : zones) {
-                                if (zone.getUUID().equals(zoneId) && zone instanceof PathVillageZone pathZone) {
+                                if (zone.getUUID().equals(zoneId) && zone instanceof PathZone pathZone) {
                                     pathZone.clearPath();
                                     source.sendSuccess(() ->
                                         Component.literal("Cleared path zone"), true);
@@ -616,20 +619,20 @@ public class ZoneCommand {
     }
 
     private static void showZoneBounds(CommandSourceStack source, IVillageZone zone) {
-        if (zone instanceof org.sosly.villagetale.data.zones.AABBVillageZone aabbZone) {
+        if (zone instanceof AABBZone aabbZone) {
             var bounds = aabbZone.getAABB();
             source.sendSuccess(() ->
                 Component.literal("Bounds: (" + (int)bounds.minX + ", " + (int)bounds.minY + ", " + (int)bounds.minZ +
                                ") to (" + (int)bounds.maxX + ", " + (int)bounds.maxY + ", " + (int)bounds.maxZ + ")"), false);
-        } else if (zone instanceof org.sosly.villagetale.data.zones.RadiusVillageZone radiusZone) {
+        } else if (zone instanceof RadiusZone radiusZone) {
             var center = radiusZone.getCenter();
             source.sendSuccess(() ->
                 Component.literal("Center: " + center.toShortString() + ", Radius: " + radiusZone.getRadius()), false);
-        } else if (zone instanceof org.sosly.villagetale.data.zones.BlockPosVillageZone blockPosZone) {
+        } else if (zone instanceof BlockPosZone blockPosZone) {
             var pos = blockPosZone.getBlockPos();
             source.sendSuccess(() ->
                 Component.literal("Position: " + pos.toShortString()), false);
-        } else if (zone instanceof org.sosly.villagetale.data.zones.PathVillageZone pathZone) {
+        } else if (zone instanceof PathZone pathZone) {
             var path = pathZone.getPath();
             if (path.isEmpty()) {
                 source.sendSuccess(() ->

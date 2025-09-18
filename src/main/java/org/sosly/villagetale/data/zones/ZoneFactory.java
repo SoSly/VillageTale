@@ -8,7 +8,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import org.sosly.villagetale.api.data.IVillageZone;
 import org.sosly.villagetale.api.data.ZoneShape;
 import org.sosly.villagetale.api.data.ZoneType;
@@ -26,24 +25,24 @@ public class ZoneFactory {
 
     public static IVillageZone createZone(ZoneShape shape, UUID uuid, ZoneType type, String name) {
         return switch (shape) {
-            case AABB -> new AABBVillageZone(uuid, type, name, new AABB(0, 0, 0, 1, 1, 1));
-            case RADIUS -> new RadiusVillageZone(uuid, type, name, BlockPos.ZERO, 1);
-            case BLOCKPOS -> new BlockPosVillageZone(uuid, type, name, BlockPos.ZERO);
-            case PATH -> new PathVillageZone(uuid, type, name, new ArrayList<>());
+            case AABB -> new AABBZone(uuid, type, name, new net.minecraft.world.phys.AABB(0, 0, 0, 1, 1, 1));
+            case RADIUS -> new RadiusZone(uuid, type, name, BlockPos.ZERO, 1);
+            case BLOCKPOS -> new BlockPosZone(uuid, type, name, BlockPos.ZERO);
+            case PATH -> new PathZone(uuid, type, name, new ArrayList<>());
         };
     }
 
-    public static IVillageZone createAABBZone(ZoneType type, String name, AABB bounds, Level level) {
+    public static IVillageZone createAABBZone(ZoneType type, String name, net.minecraft.world.phys.AABB bounds, Level level) {
         UUID uuid = UUID.randomUUID();
         return createAABBZone(uuid, type, name, bounds, level);
     }
 
-    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, String name, AABB bounds, Level level) {
-        return new AABBVillageZone(uuid, type, name, bounds, level);
+    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, String name, net.minecraft.world.phys.AABB bounds, Level level) {
+        return new AABBZone(uuid, type, name, bounds, level);
     }
 
-    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, String name, AABB bounds) {
-        return new AABBVillageZone(uuid, type, name, bounds);
+    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, String name, net.minecraft.world.phys.AABB bounds) {
+        return new AABBZone(uuid, type, name, bounds);
     }
 
     public static IVillageZone createRadiusZone(ZoneType type, String name, BlockPos center, int radius, Level level) {
@@ -52,11 +51,11 @@ public class ZoneFactory {
     }
 
     public static IVillageZone createRadiusZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius, Level level) {
-        return new RadiusVillageZone(uuid, type, name, center, radius, level);
+        return new RadiusZone(uuid, type, name, center, radius, level);
     }
 
     public static IVillageZone createRadiusZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius) {
-        return new RadiusVillageZone(uuid, type, name, center, radius);
+        return new RadiusZone(uuid, type, name, center, radius);
     }
 
     public static IVillageZone createBlockPosZone(ZoneType type, String name, BlockPos pos, Level level) {
@@ -65,7 +64,7 @@ public class ZoneFactory {
     }
 
     public static IVillageZone createBlockPosZone(UUID uuid, ZoneType type, String name, BlockPos pos, Level level) {
-        return new BlockPosVillageZone(uuid, type, name, pos, level);
+        return new BlockPosZone(uuid, type, name, pos, level);
     }
 
     public static IVillageZone createPathZone(ZoneType type, String name, List<BlockPos> path, Level level) {
@@ -74,11 +73,11 @@ public class ZoneFactory {
     }
 
     public static IVillageZone createPathZone(UUID uuid, ZoneType type, String name, List<BlockPos> path, Level level) {
-        return new PathVillageZone(uuid, type, name, path != null ? path : new ArrayList<>(), level);
+        return new PathZone(uuid, type, name, path != null ? path : new ArrayList<>(), level);
     }
 
     public static IVillageZone createPathZone(UUID uuid, ZoneType type, String name, List<BlockPos> path) {
-        return new PathVillageZone(uuid, type, name, path != null ? path : new ArrayList<>());
+        return new PathZone(uuid, type, name, path != null ? path : new ArrayList<>());
     }
 
 
@@ -89,24 +88,24 @@ public class ZoneFactory {
 
     public static IVillageZone createZone(ZoneShape shape, UUID uuid, ZoneType type, int id, String name) {
         return switch (shape) {
-            case AABB -> new AABBVillageZone(uuid, type, id, name, new AABB(0, 0, 0, 1, 1, 1));
-            case RADIUS -> new RadiusVillageZone(uuid, type, id, name, BlockPos.ZERO, 1);
-            case BLOCKPOS -> new BlockPosVillageZone(uuid, type, id, name, BlockPos.ZERO);
-            case PATH -> new PathVillageZone(uuid, type, id, name, new ArrayList<>());
+            case AABB -> new AABBZone(uuid, type, id, name, new net.minecraft.world.phys.AABB(0, 0, 0, 1, 1, 1));
+            case RADIUS -> new RadiusZone(uuid, type, id, name, BlockPos.ZERO, 1);
+            case BLOCKPOS -> new BlockPosZone(uuid, type, id, name, BlockPos.ZERO);
+            case PATH -> new PathZone(uuid, type, id, name, new ArrayList<>());
         };
     }
 
-    public static IVillageZone createAABBZone(ZoneType type, int id, String name, AABB bounds, Level level) {
+    public static IVillageZone createAABBZone(ZoneType type, int id, String name, net.minecraft.world.phys.AABB bounds, Level level) {
         UUID uuid = UUID.randomUUID();
         return createAABBZone(uuid, type, id, name, bounds, level);
     }
 
-    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, int id, String name, AABB bounds, Level level) {
-        return new AABBVillageZone(uuid, type, id, name, bounds, level);
+    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, int id, String name, net.minecraft.world.phys.AABB bounds, Level level) {
+        return new AABBZone(uuid, type, id, name, bounds, level);
     }
 
-    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, int id, String name, AABB bounds) {
-        return new AABBVillageZone(uuid, type, id, name, bounds);
+    public static IVillageZone createAABBZone(UUID uuid, ZoneType type, int id, String name, net.minecraft.world.phys.AABB bounds) {
+        return new AABBZone(uuid, type, id, name, bounds);
     }
 
     public static IVillageZone createRadiusZone(ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
@@ -115,11 +114,11 @@ public class ZoneFactory {
     }
 
     public static IVillageZone createRadiusZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
-        return new RadiusVillageZone(uuid, type, id, name, center, radius, level);
+        return new RadiusZone(uuid, type, id, name, center, radius, level);
     }
 
     public static IVillageZone createRadiusZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius) {
-        return new RadiusVillageZone(uuid, type, id, name, center, radius);
+        return new RadiusZone(uuid, type, id, name, center, radius);
     }
 
     public static IVillageZone createBlockPosZone(ZoneType type, int id, String name, BlockPos pos, Level level) {
@@ -128,7 +127,7 @@ public class ZoneFactory {
     }
 
     public static IVillageZone createBlockPosZone(UUID uuid, ZoneType type, int id, String name, BlockPos pos, Level level) {
-        return new BlockPosVillageZone(uuid, type, id, name, pos, level);
+        return new BlockPosZone(uuid, type, id, name, pos, level);
     }
 
     public static IVillageZone createPathZone(ZoneType type, int id, String name, List<BlockPos> path, Level level) {
@@ -137,11 +136,11 @@ public class ZoneFactory {
     }
 
     public static IVillageZone createPathZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
-        return new PathVillageZone(uuid, type, id, name, path != null ? path : new ArrayList<>(), level);
+        return new PathZone(uuid, type, id, name, path != null ? path : new ArrayList<>(), level);
     }
 
     public static IVillageZone createPathZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path) {
-        return new PathVillageZone(uuid, type, id, name, path != null ? path : new ArrayList<>());
+        return new PathZone(uuid, type, id, name, path != null ? path : new ArrayList<>());
     }
 
     public static IVillageZone deserializeFromNBT(CompoundTag tag) {

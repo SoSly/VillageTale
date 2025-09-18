@@ -70,6 +70,13 @@ public interface IVillageZone {
     boolean containsPosition(BlockPos pos);
 
     /**
+     * Gets the starting/reference position for this zone.
+     * @return Starting position - center for Radius, first position for Path,
+     *         the single position for BlockPos, calculated center for AABBZone
+     */
+    BlockPos getStartPos();
+
+    /**
      * Serializes this zone's data to NBT for persistence.
      * @return CompoundTag containing all zone data
      */

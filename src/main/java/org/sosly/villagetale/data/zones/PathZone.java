@@ -13,28 +13,28 @@ import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.data.ZoneShape;
 import org.sosly.villagetale.api.data.ZoneType;
 
-public class PathVillageZone extends AbstractVillageZone {
+public class PathZone extends AbstractVillageZone {
 
     private List<BlockPos> path;
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
-    public PathVillageZone(UUID uuid, ZoneType type, String name, List<BlockPos> path, Level level) {
+    public PathZone(UUID uuid, ZoneType type, String name, List<BlockPos> path, Level level) {
         super(uuid, type, name, level);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
     }
 
-    public PathVillageZone(UUID uuid, ZoneType type, String name, List<BlockPos> path) {
+    public PathZone(UUID uuid, ZoneType type, String name, List<BlockPos> path) {
         super(uuid, type, name);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
     }
 
-    public PathVillageZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
+    public PathZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path, Level level) {
         super(uuid, type, id, name, level);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
     }
 
-    public PathVillageZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path) {
+    public PathZone(UUID uuid, ZoneType type, int id, String name, List<BlockPos> path) {
         super(uuid, type, id, name);
         this.path = new ArrayList<>(path != null ? path : new ArrayList<>());
     }
@@ -132,5 +132,13 @@ public class PathVillageZone extends AbstractVillageZone {
             }
         }
         this.poiCacheDirty = true;
+    }
+
+    @Override
+    public BlockPos getStartPos() {
+        if (path.isEmpty()) {
+            return BlockPos.ZERO;
+        }
+        return path.get(0);
     }
 }

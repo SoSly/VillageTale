@@ -10,26 +10,26 @@ import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.data.ZoneShape;
 import org.sosly.villagetale.api.data.ZoneType;
 
-public class BlockPosVillageZone extends AbstractVillageZone {
+public class BlockPosZone extends AbstractVillageZone {
 
     private BlockPos blockPos;
 
-    public BlockPosVillageZone(UUID uuid, ZoneType type, String name, BlockPos blockPos, Level level) {
+    public BlockPosZone(UUID uuid, ZoneType type, String name, BlockPos blockPos, Level level) {
         super(uuid, type, name, level);
         this.blockPos = blockPos;
     }
 
-    public BlockPosVillageZone(UUID uuid, ZoneType type, String name, BlockPos blockPos) {
+    public BlockPosZone(UUID uuid, ZoneType type, String name, BlockPos blockPos) {
         super(uuid, type, name);
         this.blockPos = blockPos;
     }
 
-    public BlockPosVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos blockPos, Level level) {
+    public BlockPosZone(UUID uuid, ZoneType type, int id, String name, BlockPos blockPos, Level level) {
         super(uuid, type, id, name, level);
         this.blockPos = blockPos;
     }
 
-    public BlockPosVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos blockPos) {
+    public BlockPosZone(UUID uuid, ZoneType type, int id, String name, BlockPos blockPos) {
         super(uuid, type, id, name);
         this.blockPos = blockPos;
     }
@@ -91,5 +91,10 @@ public class BlockPosVillageZone extends AbstractVillageZone {
         if (tag.contains("BlockPos")) {
             this.blockPos = BlockPos.of(tag.getLong("BlockPos"));
         }
+    }
+
+    @Override
+    public BlockPos getStartPos() {
+        return this.blockPos;
     }
 }

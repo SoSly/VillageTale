@@ -10,32 +10,32 @@ import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.data.ZoneShape;
 import org.sosly.villagetale.api.data.ZoneType;
 
-public class RadiusVillageZone extends AbstractVillageZone {
+public class RadiusZone extends AbstractVillageZone {
 
     private BlockPos center;
     private int radius;
     private List<BlockPos> cachedPOIs;
     private boolean poiCacheDirty = true;
 
-    public RadiusVillageZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius, Level level) {
+    public RadiusZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius, Level level) {
         super(uuid, type, name, level);
         this.center = center;
         this.radius = radius;
     }
 
-    public RadiusVillageZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius) {
+    public RadiusZone(UUID uuid, ZoneType type, String name, BlockPos center, int radius) {
         super(uuid, type, name);
         this.center = center;
         this.radius = radius;
     }
 
-    public RadiusVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
+    public RadiusZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius, Level level) {
         super(uuid, type, id, name, level);
         this.center = center;
         this.radius = radius;
     }
 
-    public RadiusVillageZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius) {
+    public RadiusZone(UUID uuid, ZoneType type, int id, String name, BlockPos center, int radius) {
         super(uuid, type, id, name);
         this.center = center;
         this.radius = radius;
@@ -139,5 +139,10 @@ public class RadiusVillageZone extends AbstractVillageZone {
         }
         this.radius = tag.getInt("Radius");
         this.poiCacheDirty = true;
+    }
+
+    @Override
+    public BlockPos getStartPos() {
+        return this.center;
     }
 }
