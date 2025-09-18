@@ -184,7 +184,7 @@ public class ZoneCommand {
             });
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to create AABBZone zone: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to create AABB zone: " + e.getMessage()));
             return 0;
         }
     }

@@ -25,6 +25,8 @@ import org.sosly.villagetale.entity.Villager;
 public class GoToNearestStorageBehavior extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 60;
 
+    private BlockPos targetStoragePos;
+
     public GoToNearestStorageBehavior() {
         super(ImmutableMap.of(
             MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT,
@@ -78,8 +80,6 @@ public class GoToNearestStorageBehavior extends Behavior<Villager> {
             }
         }
     }
-
-    private BlockPos targetStoragePos;
 
     private BlockPos findNearestStorage(ServerLevel level, Villager villager, UUID villageId, boolean excludeScanned) {
         IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);

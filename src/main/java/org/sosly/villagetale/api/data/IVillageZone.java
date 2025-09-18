@@ -72,7 +72,7 @@ public interface IVillageZone {
     /**
      * Gets the starting/reference position for this zone.
      * @return Starting position - center for Radius, first position for Path,
-     *         the single position for BlockPos, calculated center for AABBZone
+     *         the single position for BlockPos, calculated center for AABB
      */
     BlockPos getStartPos();
 
