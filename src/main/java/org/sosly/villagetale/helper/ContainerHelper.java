@@ -125,7 +125,8 @@ public class ContainerHelper {
             ItemStack existingStack = container.getItem(i);
 
             if (existingStack.isEmpty()) {
-                int depositAmount = Math.min(remainingToDeposit, itemToDeposit.getMaxStackSize());
+                int maxStackSize = container.getMaxStackSize();
+                int depositAmount = Math.min(remainingToDeposit, Math.min(itemToDeposit.getMaxStackSize(), maxStackSize));
                 ItemStack newStack = itemToDeposit.copy();
                 newStack.setCount(depositAmount);
                 container.setItem(i, newStack);
