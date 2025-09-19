@@ -11,6 +11,7 @@ import org.sosly.villagetale.entity.ai.sensor.HasItemsToDeposit;
 import org.sosly.villagetale.entity.ai.sensor.HasResources;
 import org.sosly.villagetale.entity.ai.sensor.HasTool;
 import org.sosly.villagetale.entity.ai.sensor.HasWorkZone;
+import org.sosly.villagetale.entity.ai.sensor.IsFarmland;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
 import org.sosly.villagetale.entity.ai.sensor.IsItemInStorage;
 
@@ -32,6 +33,9 @@ public class SensorTypes {
 
     public static final RegistryObject<SensorType<HasWorkZone>> HAS_WORK_ZONE =
             SENSOR_TYPES.register("has_work_zone", () -> new SensorType<>(HasWorkZone::new));
+
+    public static final RegistryObject<SensorType<IsFarmland>> IS_FARMLAND =
+            SENSOR_TYPES.register("is_farmland", () -> new SensorType<>(IsFarmland::new));
 
     public static final RegistryObject<SensorType<IsHungry>> IS_HUNGRY =
             SENSOR_TYPES.register("is_hungry", () -> new SensorType<>(IsHungry::new));

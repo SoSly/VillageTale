@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
@@ -139,22 +139,22 @@ public class Zone implements IVillageZone {
     }
 
     @Override
-    public Map<BlockPos, UUID> getActiveClaims(long currentTime, Optional<Predicate<Block>> blockFilter) {
+    public Map<BlockPos, UUID> getActiveClaims(long currentTime, Optional<Predicate<BlockState>> blockFilter) {
         return getClaims(currentTime).entrySet().stream()
                 .filter(entry -> entry.getValue().isPresent())
                 .filter(claim -> blockFilter
-                    .map(filter -> filter.test(this.level.getBlockState(claim.getKey()).getBlock()))
+                    .map(filter -> filter.test(this.level.getBlockState(claim.getKey())))
                     .orElse(true))
                 .flatMap(entry -> entry.getValue().map(uuid -> Map.entry(entry.getKey(), uuid)).stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
-    public List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<Block>> blockFilter) {
+    public List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<BlockState>> blockFilter) {
         return getClaims(currentTime).entrySet().stream()
             .filter(claim -> claim.getValue().isEmpty())
             .filter(claim -> blockFilter
-                .map(filter -> filter.test(this.level.getBlockState(claim.getKey()).getBlock()))
+                .map(filter -> filter.test(this.level.getBlockState(claim.getKey())))
                 .orElse(true))
             .map(Map.Entry::getKey)
             .collect(Collectors.toList());

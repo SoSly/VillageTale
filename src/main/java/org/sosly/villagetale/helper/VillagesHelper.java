@@ -4,10 +4,12 @@ import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
+import org.sosly.villagetale.entity.Villager;
 
 public class VillagesHelper {
     public static IVillageCapability getVillageCapability(ServerLevel level, UUID uuid) {
@@ -29,5 +31,17 @@ public class VillagesHelper {
             return null;
         }
         return village;
+    }
+
+    public static IVillageZone getWorkZone(ServerLevel level, Villager villager, UUID villageId, UUID workplaceId) {
+        IVillageCapability village = VillagesHelper.getVillageCapability(level, villageId);
+        if (village == null) {
+            return null;
+        }
+
+        return village.getZones().stream()
+                .filter(z -> z.getUUID().equals(workplaceId))
+                .findFirst()
+                .orElse(null);
     }
 }

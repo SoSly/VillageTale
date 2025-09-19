@@ -53,6 +53,7 @@ public class Farmer extends AbstractProfession {
     @Override
     public ImmutableList<SensorType<? extends Sensor<? super Villager>>> getSensors() {
         return ImmutableList.of(
+            SensorTypes.IS_FARMLAND.get(),
             SensorTypes.HAS_WORK_ZONE.get()
         );
     }

@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 
 /**
@@ -100,7 +100,7 @@ public interface IVillageZone {
      * @param blockFilter Optional filter to only return claims on specific block types
      * @return Map of positions to villager UUIDs for active claims only
      */
-    Map<BlockPos, UUID> getActiveClaims(long currentTime, Optional<Predicate<Block>> blockFilter);
+    Map<BlockPos, UUID> getActiveClaims(long currentTime, Optional<Predicate<BlockState>> blockFilter);
 
     /**
      * Get available (unclaimed) positions, automatically cleaning expired claims.
@@ -108,7 +108,7 @@ public interface IVillageZone {
      * @param blockFilter Optional filter to only return positions with specific block types
      * @return List of positions that can be claimed
      */
-    List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<Block>> blockFilter);
+    List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<BlockState>> blockFilter);
 
     /**
      * Claims a block position for a villager with specified duration.

@@ -9,7 +9,6 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
@@ -34,7 +33,7 @@ public class GoToWorkZone extends Behavior<Villager> {
             return false;
         }
 
-        IVillageZone zone = getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
         if (zone == null) {
             return false;
         }
@@ -50,7 +49,7 @@ public class GoToWorkZone extends Behavior<Villager> {
             return;
         }
 
-        IVillageZone zone = getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
 
         if (zone == null) {
             VillageTale.LOGGER.warn("No zone found for workplace " + workplaceId);
@@ -70,24 +69,12 @@ public class GoToWorkZone extends Behavior<Villager> {
             return false;
         }
 
-        IVillageZone zone = getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
         if (zone == null) {
             return false;
         }
 
         return !villager.blockPosition()
                 .closerThan(zone.getStartPosition().atY(villager.getBlockY()), ARRIVAL_DISTANCE);
-    }
-
-    private IVillageZone getWorkZone(ServerLevel level, Villager villager, UUID villageId, UUID workplaceId) {
-        IVillageCapability village = VillagesHelper.getVillageCapability(level, villageId);
-        if (village == null) {
-            return null;
-        }
-
-        return village.getZones().stream()
-                .filter(z -> z.getUUID().equals(workplaceId))
-                .findFirst()
-                .orElse(null);
     }
 }
