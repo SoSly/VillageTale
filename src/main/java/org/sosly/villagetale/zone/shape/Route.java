@@ -7,12 +7,14 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
+import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -62,21 +64,22 @@ public class Route implements IZoneShape {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        int i = 0;
-        for (BlockPos pos : points) {
-            tag.putLong("pos" + i, pos.asLong());
+
+        ListTag points = new ListTag();
+        for (BlockPos pos : this.points) {
+            points.add(LongTag.valueOf(pos.asLong()));
         }
-        tag.putInt("points", i);
+        tag.put("points", points);
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
         this.points.clear();
-        int points = tag.getInt("points");
-        for (int i = 0; i < points; i++) {
-            BlockPos pos = BlockPos.of(tag.getLong("pos" + i));
-            this.points.add(pos);
+        ListTag points = tag.getList("points", 10);
+        for (int i = 0; i < points.size(); ++i) {
+            long point = points.getInt(i);
+            this.points.add(BlockPos.of(point));
         }
     }
 
