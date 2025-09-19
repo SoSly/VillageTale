@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -69,7 +70,7 @@ public class TillSoil extends Behavior<Villager> {
 
         villager.setItemInHand(InteractionHand.MAIN_HAND, getTool(villager));
 
-        if (!villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
             return;
         }
 
@@ -115,6 +116,14 @@ public class TillSoil extends Behavior<Villager> {
         level.setBlock(pos, Blocks.FARMLAND.defaultBlockState(), 3);
         level.playSound(null, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get());
+
+        ItemStack tool = getTool(villager);
+        tool.setDamageValue(tool.getDamageValue() + 1);
+        if (tool.getDamageValue() >= tool.getMaxDamage()) {
+            tool.shrink(1);
+            level.playSound(null, pos, SoundEvents.ITEM_BREAK, SoundSource.NEUTRAL, 1.0F, 1.0F);
+        }
+        VillageTale.LOGGER.info("Tool damage: {}/{}", tool.getDamageValue(), tool.getMaxDamage());
 
         claimed = false;
     }
