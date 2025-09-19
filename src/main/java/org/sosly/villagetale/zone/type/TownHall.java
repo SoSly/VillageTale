@@ -18,7 +18,7 @@ public class TownHall implements IZoneType {
     }
 
     @Override
-    public boolean isPoI(Level level, BlockPos pos) {
+    public boolean isPOI(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         return state.is(BlockTypes.TOWNHALL.get());
     }

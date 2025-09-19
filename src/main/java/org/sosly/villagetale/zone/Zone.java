@@ -237,7 +237,7 @@ public class Zone implements IVillageZone {
 
     private Optional<List<BlockPos>> getPOIs() {
         return Optional.ofNullable(this.shape.getPOIs(this.village.getChunk().getLevel(),
-                (pos) -> this.type.isPoI(this.village.getChunk().getLevel(), pos)));
+                (pos) -> this.type.isPOI(this.village.getChunk().getLevel(), pos)));
     }
 
     private void markDirty() {

@@ -7,7 +7,7 @@ import net.minecraft.world.level.Level;
 
 public interface IZoneType {
     ResourceLocation getID();
-    boolean isPoI(Level level, BlockPos pos);
+    boolean isPOI(Level level, BlockPos pos);
     CompoundTag serializeNBT();
     void deserializeNBT(CompoundTag nbt);
 }
