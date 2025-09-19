@@ -135,6 +135,12 @@ public class VillageCapability implements IVillageCapability {
     }
 
     private void markDirty() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        VillageTale.LOGGER.info("Marking dirty called from:");
+        for (int i = 2; i < Math.min(stackTrace.length, 10); i++) {
+            VillageTale.LOGGER.info("  at " + stackTrace[i]);
+        }
+
         LevelChunk chunk = this.chunk.get();
         if (chunk == null) {
             return;

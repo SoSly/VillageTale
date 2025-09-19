@@ -53,7 +53,6 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
             zones.add(zone.serializeNBT());
         }
         tag.put("zones", zones);
-        VillageTale.LOGGER.info("Saving " + zones.size() + " zones");
 
         ListTag villagers = new ListTag();
         for (UUID uuid : capability.getVillagerUUIDs()) {
@@ -72,6 +71,7 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
         });
         tag.put("players", players);
 
+        capability.getChunk().setUnsaved(false);
         return tag;
     }
 

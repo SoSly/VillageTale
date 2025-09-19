@@ -173,13 +173,14 @@ public class Zone implements IVillageZone {
 
         long expirationTime = currentTime + durationTicks;
         claims.put(pos, new Claim(villager, expirationTime));
-        markDirty();
+        if (durationTicks > 6000) {
+            markDirty();
+        }
         return true;
     }
 
     @Override
     public boolean release(BlockPos pos) {
-        markDirty();
         return claims.remove(pos) != null;
     }
 

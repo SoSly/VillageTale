@@ -123,7 +123,6 @@ public class TillSoil extends Behavior<Villager> {
             tool.shrink(1);
             level.playSound(null, pos, SoundEvents.ITEM_BREAK, SoundSource.NEUTRAL, 1.0F, 1.0F);
         }
-        VillageTale.LOGGER.info("Tool damage: {}/{}", tool.getDamageValue(), tool.getMaxDamage());
 
         claimed = false;
     }
