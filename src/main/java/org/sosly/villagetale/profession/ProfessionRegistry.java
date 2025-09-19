@@ -8,6 +8,7 @@ import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
+import org.sosly.villagetale.profession.professions.Commoner;
 
 public class ProfessionRegistry {
     public static final ProfessionRegistry INSTANCE = new ProfessionRegistry();

@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 **Villagers**
-- New custom Villager entity with hunger system
-- Villagers automatically eat food when hungry
-- Villagers can identify and use storage containers (customizable via datapack tags)
+- New custom Villager entity
+- Villager profession system with many professions available:
+    Commoner (unemployed), Farmer
 
 **Villages & Zones**
 - Town Hall block - establish your village (automatically named after you)

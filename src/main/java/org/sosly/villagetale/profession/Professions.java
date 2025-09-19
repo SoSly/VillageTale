@@ -2,6 +2,7 @@ package org.sosly.villagetale.profession;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.sosly.villagetale.event.RegisterProfessionsEvent;
+import org.sosly.villagetale.profession.professions.Commoner;
 
 //@Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Professions {

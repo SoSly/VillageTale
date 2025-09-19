@@ -1,13 +1,10 @@
 package org.sosly.villagetale.entity;
 
 import com.mojang.serialization.Codec;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
-import net.minecraft.world.item.ItemStack;
+import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -17,13 +14,21 @@ import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.WantedItem;
+import org.sosly.villagetale.api.serialization.Codecs;
 
 public class MemoryModuleTypes {
     public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
         DeferredRegister.create(ForgeRegistries.MEMORY_MODULE_TYPES, VillageTale.MOD_ID);
 
+
+    public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
+        MEMORY_MODULE_TYPES.register("already_scanned_storages", () -> new MemoryModuleType<>(Optional.empty()));
+
     public static final RegistryObject<MemoryModuleType<Boolean>> CAN_EAT =
         MEMORY_MODULE_TYPES.register("can_eat", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+
+    public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
+            MEMORY_MODULE_TYPES.register("found_item", () -> new MemoryModuleType<>(Optional.empty()));
 
     public static final RegistryObject<MemoryModuleType<Boolean>> IS_HUNGRY =
         MEMORY_MODULE_TYPES.register("is_hungry", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
@@ -31,39 +36,19 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<Boolean>> IS_STARVING =
         MEMORY_MODULE_TYPES.register("is_starving", () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
 
+    public static final RegistryObject<MemoryModuleType<Map<ResourceLocation, Integer>>> ITEMS_TO_DEPOSIT =
+            MEMORY_MODULE_TYPES.register("items_to_deposit", () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<ResourceLocation>> PROFESSION =
         MEMORY_MODULE_TYPES.register("profession", () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC)));
 
     public static final RegistryObject<MemoryModuleType<UUID>> VILLAGE =
-        MEMORY_MODULE_TYPES.register("village", () -> new MemoryModuleType<>(Optional.of(
-            Codec.BYTE_BUFFER.xmap(
-                buffer -> {
-                    byte[] bytes = new byte[buffer.remaining()];
-                    buffer.get(bytes);
-                    ByteBuffer bb = ByteBuffer.wrap(bytes);
-                    return new UUID(bb.getLong(), bb.getLong());
-                },
-                uuid -> {
-                    ByteBuffer buffer = ByteBuffer.allocate(16);
-                    buffer.putLong(uuid.getMostSignificantBits());
-                    buffer.putLong(uuid.getLeastSignificantBits());
-                    buffer.flip();
-                    return buffer;
-                }
-            )
-        )));
+        MEMORY_MODULE_TYPES.register("village", () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
 
     public static final RegistryObject<MemoryModuleType<WantedItem>> WANTED_ITEM =
         MEMORY_MODULE_TYPES.register("wanted_item", () -> new MemoryModuleType<>(Optional.empty()));
 
-    public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
-        MEMORY_MODULE_TYPES.register("already_scanned_storages", () -> new MemoryModuleType<>(Optional.empty()));
-
-    public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
-        MEMORY_MODULE_TYPES.register("found_item", () -> new MemoryModuleType<>(Optional.empty()));
-
-    public static final RegistryObject<MemoryModuleType<Map<ResourceLocation, Integer>>> ITEMS_TO_DEPOSIT =
-        MEMORY_MODULE_TYPES.register("items_to_deposit", () -> new MemoryModuleType<>(Optional.empty()));
+    public static final RegistryObject<MemoryModuleType<UUID>> WORK_ZONE =
+            MEMORY_MODULE_TYPES.register("work_zone", () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
 
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);

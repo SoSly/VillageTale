@@ -51,7 +51,7 @@ import org.sosly.villagetale.data.LivingEntityFoodData;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
-import org.sosly.villagetale.profession.Commoner;
+import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 
 public class Villager extends PathfinderMob {

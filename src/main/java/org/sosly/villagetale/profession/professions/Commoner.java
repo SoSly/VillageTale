@@ -1,4 +1,4 @@
-package org.sosly.villagetale.profession;
+package org.sosly.villagetale.profession.professions;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
@@ -13,6 +13,7 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.profession.AbstractProfession;
 
 public class Commoner extends AbstractProfession {
     public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "commoner");
