@@ -34,6 +34,10 @@ public class HasWorkZone extends Sensor<Villager> {
         }
 
         IVillageCapability village = VillagesHelper.getVillageCapability(level, villager.getVillage().get());
+        if (village == null) {
+            return;
+        }
+
         Optional<IVillageZone> zone = village.getZones()
             .stream()
             .filter(z -> z.getAssignedVillagers().contains(villager.getUUID()))

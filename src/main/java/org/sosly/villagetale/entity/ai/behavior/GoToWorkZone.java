@@ -75,11 +75,16 @@ public class GoToWorkZone extends Behavior<Villager> {
             return false;
         }
 
-        return villager.blockPosition().closerThan(zone.getStartPosition().atY(villager.getBlockY()), ARRIVAL_DISTANCE);
+        return !villager.blockPosition()
+                .closerThan(zone.getStartPosition().atY(villager.getBlockY()), ARRIVAL_DISTANCE);
     }
 
     private IVillageZone getWorkZone(ServerLevel level, Villager villager, UUID villageId, UUID workplaceId) {
         IVillageCapability village = VillagesHelper.getVillageCapability(level, villageId);
+        if (village == null) {
+            return null;
+        }
+
         return village.getZones().stream()
                 .filter(z -> z.getUUID().equals(workplaceId))
                 .findFirst()

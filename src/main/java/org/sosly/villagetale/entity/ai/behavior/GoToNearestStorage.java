@@ -91,11 +91,15 @@ public class GoToNearestStorage extends Behavior<Villager> {
             return false;
         }
 
-        return villager.blockPosition().closerThan(this.targetStoragePos, ARRIVAL_DISTANCE);
+        return !villager.blockPosition()
+                .closerThan(this.targetStoragePos, ARRIVAL_DISTANCE);
     }
 
     private BlockPos findNearestStorage(ServerLevel level, Villager villager, UUID villageId, boolean excludeScanned) {
         IVillageCapability village = VillagesHelper.getVillageCapability(level, villageId);
+        if (village == null) {
+            return null;
+        }
 
         List<IVillageZone> zones = village.getZones();
         BlockPos villagerPos = villager.blockPosition();
