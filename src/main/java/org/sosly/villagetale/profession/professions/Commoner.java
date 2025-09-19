@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -44,10 +43,6 @@ public class Commoner extends AbstractProfession {
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of();
-    }
-
-    @Override
-    public void registerAdditionalGoals(Brain<Villager> brain) {
     }
 
     @Override

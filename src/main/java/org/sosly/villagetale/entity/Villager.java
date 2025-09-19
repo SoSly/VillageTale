@@ -293,6 +293,7 @@ public class Villager extends PathfinderMob {
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
         }
+
         this.refreshBrain(serverLevel);
     }
 
@@ -454,11 +455,11 @@ public class Villager extends PathfinderMob {
                 SensorType.NEAREST_PLAYERS,
                 SensorType.HURT_BY,
                 SensorType.VILLAGER_HOSTILES,
-                SensorTypes.HUNGER.get(),
+                SensorTypes.IS_HUNGRY.get(),
                 SensorTypes.HAS_FOOD.get(),
                 SensorTypes.HAS_TOOL.get(),
                 SensorTypes.HAS_RESOURCE.get(),
-                SensorTypes.SEARCH_STORAGE_FOR_ITEM.get(),
+                SensorTypes.IS_ITEM_IN_STORAGE.get(),
                 SensorTypes.HAS_ITEMS_TO_DEPOSIT.get()
             );
         }

@@ -1,10 +1,12 @@
 package org.sosly.villagetale.profession;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import org.sosly.villagetale.api.IProfession;
+import org.sosly.villagetale.entity.Villager;
 
 public abstract class AbstractProfession implements IProfession {
     private final ResourceLocation id;
@@ -31,5 +33,9 @@ public abstract class AbstractProfession implements IProfession {
             .changeActivityAt(11000, Activity.IDLE)   // IDLE  (5 PM - 8 PM, evening social)
             .changeActivityAt(14000, Activity.REST)   // REST  (8 PM - 6 AM, sleep)
             .build();
+    }
+
+    @Override
+    public void registerAdditionalGoals(Brain<Villager> brain) {
     }
 }
