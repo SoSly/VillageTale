@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -17,9 +18,6 @@ import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.capability.village.VillageCapability;
 import org.sosly.villagetale.data.VillageInfo;
-
-import java.util.Collection;
-import java.util.UUID;
 
 public class VillageCommand {
 
@@ -81,7 +79,9 @@ public class VillageCommand {
                 source.sendFailure(Component.literal("Village creation failed"));
                 return 0;
             }
-            ((VillageCapability) cap).initializeVillage(villageId);
+            
+            cap.setUUID(villageId);
+            cap.setName(villageName);
 
             source.sendSuccess(() ->
                     Component.literal("Created village '" + villageName + "' with squadius " + squadius +
@@ -99,25 +99,32 @@ public class VillageCommand {
             String villageName = StringArgumentType.getString(context, "name");
             ServerLevel level = source.getLevel();
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageByName(villageName);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village '" + villageName + "' not found"));
-                        return 0;
-                    }
+            IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+            if (villages == null) {
+                source.sendFailure(Component.literal("Village not found"));
+                return 0;
+            }
 
-                    if (manager.removeVillage(village.getVillageId())) {
-                        source.sendSuccess(() ->
-                            Component.literal("Removed village '" + villageName + "'"), true);
-                        return 1;
-                    } else {
-                        source.sendFailure(Component.literal("Failed to remove village '" + villageName + "'"));
-                        return 0;
-                    }
-                })
-                .orElse(0);
+            VillageInfo info = villages.getVillageByName(villageName);
+            if (info == null) {
+                source.sendFailure(Component.literal("Village not found"));
+                return 0;
+            }
 
+            boolean removed = villages.removeVillage(info.getVillageId());
+            if (!removed) {
+                source.sendFailure(Component.literal("Village not removed"));
+            }
+
+            VillageCapability village = (VillageCapability) level.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+            if (village == null) {
+                source.sendFailure(Component.literal("Village could not be removed from chunk."));
+                return 0;
+            }
+            village.destroy();
+
+            source.sendSuccess(() -> Component.literal("Removed village '" + villageName + "'"), true);
+            return 1;
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to remove village: " + e.getMessage()));
             return 0;
@@ -129,33 +136,26 @@ public class VillageCommand {
             CommandSourceStack source = context.getSource();
             ServerLevel level = source.getLevel();
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    Collection<VillageInfo> villages = manager.getVillages();
+            IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+            if (villages == null || villages.getVillages().isEmpty()) {
+                source.sendFailure(Component.literal("No Villages found in this dimension"));
+                return 0;
+            }
 
-                    if (villages.isEmpty()) {
-                        source.sendSuccess(() ->
-                            Component.literal("No villages found in this dimension"), false);
-                        return 1;
-                    }
+            source.sendSuccess(() ->
+                    Component.literal("Villages in " + level.dimension().location() + ":"), false);
 
-                    source.sendSuccess(() ->
-                        Component.literal("Villages in " + level.dimension().location() + ":"), false);
+            for (VillageInfo village : villages.getVillages()) {
+                BlockPos townHall = village.getTownHallPos();
+                ChunkPos chunkPos = new ChunkPos(townHall);
+                source.sendSuccess(() ->
+                        Component.literal("- " + village.getVillageName() +
+                                " at block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
+                                "chunk (" + chunkPos.x + ", " + chunkPos.z + ") " +
+                                "squadius " + village.getSquadius()), false);
+            }
 
-                    for (VillageInfo village : villages) {
-                        BlockPos townHall = village.getTownHallPos();
-                        ChunkPos chunkPos = new ChunkPos(townHall);
-                        source.sendSuccess(() ->
-                            Component.literal("- " + village.getVillageName() +
-                                            " at block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
-                                            "chunk (" + chunkPos.x + ", " + chunkPos.z + ") " +
-                                            "squadius " + village.getSquadius()), false);
-                    }
-
-                    return villages.size();
-                })
-                .orElse(0);
-
+            return villages.getVillages().size();
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to list villages: " + e.getMessage()));
             return 0;
@@ -175,49 +175,52 @@ public class VillageCommand {
             BlockPos pos = entity.blockPosition();
             ChunkPos chunkPos = new ChunkPos(pos);
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageAt(chunkPos);
+            IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+            if (villages == null) {
+                source.sendFailure(Component.literal("No Villages found in this dimension"));
+                return 0;
+            }
 
-                    if (village == null) {
-                        source.sendSuccess(() ->
-                            Component.literal("No village at this location"), false);
-                        return 1;
-                    }
+            VillageInfo info = villages.getVillageAt(chunkPos);
+            if (info == null) {
+                source.sendFailure(Component.literal("No Villages found in this dimension"));
+                return 0;
+            }
 
-                    BlockPos townHall = village.getTownHallPos();
-                    ChunkPos townHallChunk = new ChunkPos(townHall);
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    int squadius = village.getSquadius();
-                    int minX = townHallChunk.x - squadius;
-                    int maxX = townHallChunk.x + squadius;
-                    int minZ = townHallChunk.z - squadius;
-                    int maxZ = townHallChunk.z + squadius;
+            BlockPos townHall = info.getTownHallPos();
+            ChunkPos townHallChunk = new ChunkPos(townHall);
+            ChunkPos startingChunk = info.getVillageStartingChunk();
+            LevelChunk chunk = level.getChunk(startingChunk.x, startingChunk.z);
+            int squadius = info.getSquadius();
+            int minX = townHallChunk.x - squadius;
+            int maxX = townHallChunk.x + squadius;
+            int minZ = townHallChunk.z - squadius;
+            int maxZ = townHallChunk.z + squadius;
 
-                    source.sendSuccess(() ->
-                        Component.literal("Village: " + village.getVillageName()), false);
-                    source.sendSuccess(() ->
-                        Component.literal("UUID: (" + village.getVillageId().toString() + ")"), false);
-                    source.sendSuccess(() ->
-                        Component.literal("Town Hall: block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
-                                        "chunk (" + townHallChunk.x + ", " + townHallChunk.z + ")"), false);
-                    source.sendSuccess(() ->
-                        Component.literal("Squadius: " + squadius + " (covers " +
-                                        ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
-                    source.sendSuccess(() ->
-                        Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
 
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-                    var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
-                    if (villageCapability != null) {
-                        int villagerCount = villageCapability.getVillagerIds().size();
-                        source.sendSuccess(() ->
-                            Component.literal("Villagers: " + villagerCount), false);
-                    }
+            IVillageCapability village = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+            if (village == null) {
+                source.sendFailure(Component.literal("No Villages found at chunk " + chunkPos.x + ", " + chunkPos.z));
+                return 0;
+            }
 
-                    return 1;
-                })
-                .orElse(0);
+            source.sendSuccess(() ->
+                    Component.literal("Village: " + info.getVillageName()), false);
+            source.sendSuccess(() ->
+                    Component.literal("UUID: (" + info.getVillageId().toString() + ")"), false);
+            source.sendSuccess(() ->
+                    Component.literal("Town Hall: block (" + townHall.getX() + ", " + townHall.getY() + ", " + townHall.getZ() + ") " +
+                            "chunk (" + townHallChunk.x + ", " + townHallChunk.z + ")"), false);
+            source.sendSuccess(() ->
+                    Component.literal("Squadius: " + squadius + " (covers " +
+                            ((squadius * 2 + 1) * (squadius * 2 + 1)) + " chunks)"), false);
+            source.sendSuccess(() ->
+                    Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
+            source.sendSuccess(() ->
+                    Component.literal("Zones: " + village.getZones().size()), false);
+            source.sendSuccess(() ->
+                    Component.literal("Villagers: " + village.getVillagerUUIDs().stream().count()), false);
+            return 1;
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to show village info: " + e.getMessage()));
@@ -272,9 +275,9 @@ public class VillageCommand {
                         Component.literal("Boundaries: chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"), false);
 
                     LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-                    var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+                    IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
                     if (villageCapability != null) {
-                        int villagerCount = villageCapability.getVillagerIds().size();
+                        int villagerCount = villageCapability.getVillagerUUIDs().size();
                         source.sendSuccess(() ->
                             Component.literal("Villagers: " + villagerCount), false);
                     }

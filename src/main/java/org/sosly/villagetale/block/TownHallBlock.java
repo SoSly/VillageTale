@@ -1,8 +1,11 @@
 package org.sosly.villagetale.block;
 
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -17,18 +20,19 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.data.ZoneType;
+import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.api.capability.IVillagesCapability;
+import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.block.entity.TownHallBlockEntity;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
-
-import java.util.UUID;
+import org.sosly.villagetale.zone.type.TownHall;
 
 public class TownHallBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -99,7 +103,7 @@ public class TownHallBlock extends BaseEntityBlock {
             return;
         }
 
-        var villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        IVillagesCapability villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
         if (villagesCapability == null) {
             super.onRemove(state, level, pos, newState, isMoving);
             return;
@@ -139,13 +143,22 @@ public class TownHallBlock extends BaseEntityBlock {
         return new TownHallBlockEntity(pos, state);
     }
 
-    private void removeTownHallZone(ServerLevel level, VillageInfo village) {
-        var chunk = level.getChunk(village.getVillageStartingChunk().x, village.getVillageStartingChunk().z);
-        var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
-        if (villageCapability != null) {
-            var zones = villageCapability.getZones();
-            zones.removeIf(zone -> zone.getType() == ZoneType.TOWNHALL);
-            VillageTale.LOGGER.info("Removed TOWNHALL zone from village {}", village.getVillageName());
+    private void removeTownHallZone(ServerLevel level, VillageInfo info) {
+        LevelChunk chunk = level.getChunk(info.getVillageStartingChunk().x, info.getVillageStartingChunk().z);
+        IVillageCapability village = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (village == null) {
+            return;
         }
+
+        List<IVillageZone> zones = village.getZones();
+        IVillageZone oldTownHall = zones.stream()
+                .filter(zone -> zone.getType().getID() == TownHall.ID)
+                .findAny()
+                .orElse(null);
+        if (oldTownHall != null) {
+            village.removeZone(oldTownHall.getUUID());
+        }
+
+        VillageTale.LOGGER.info("Removed TownHall zone from village {}", village.getName());
     }
 }

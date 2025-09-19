@@ -12,10 +12,9 @@ import net.minecraftforge.fml.common.Mod;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
+import org.sosly.villagetale.capability.village.VillageProvider;
 import org.sosly.villagetale.capability.villages.VillagesCapability;
 import org.sosly.villagetale.capability.villages.VillagesProvider;
-import org.sosly.villagetale.capability.village.VillageCapability;
-import org.sosly.villagetale.capability.village.VillageProvider;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Capabilities {
@@ -36,18 +35,9 @@ public class Capabilities {
     public static void onAttachCapabilities(AttachCapabilitiesEvent<LevelChunk> event) {
         LevelChunk chunk = event.getObject();
 
-        var villagesCapability = chunk.getLevel().getCapability(VILLAGES_CAPABILITY).orElse(null);
-        if (villagesCapability == null) {
-            return;
-        }
-
         VillageProvider provider = new VillageProvider();
-
-        var villageCap = provider.getCapability(VILLAGE_CAPABILITY, null).orElse(null);
-        if (villageCap instanceof VillageCapability impl) {
-            impl.setOwnerChunk(chunk);
-        }
-
+        IVillageCapability village = provider.getCapability(VILLAGE_CAPABILITY, null).resolve().get();
+        village.setChunk(chunk);
         event.addCapability(VILLAGE_CAPABILITY_KEY, provider);
     }
 
@@ -57,10 +47,9 @@ public class Capabilities {
 
         VillagesProvider provider = new VillagesProvider();
 
-        var villagesCap = provider.getCapability(VILLAGES_CAPABILITY, null).orElse(null);
-        if (villagesCap instanceof VillagesCapability impl) {
-            impl.setOwnerLevel(level);
-        }
+        // todo: fix this so we are using IVillagesCapability
+        VillagesCapability villages = (VillagesCapability) provider.getCapability(VILLAGES_CAPABILITY, null).resolve().get();
+        villages.setOwnerLevel(level);
 
         event.addCapability(VILLAGES_CAPABILITY_KEY, provider);
     }

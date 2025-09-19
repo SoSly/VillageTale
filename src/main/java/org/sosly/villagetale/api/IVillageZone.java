@@ -1,15 +1,14 @@
-package org.sosly.villagetale.api.data;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+package org.sosly.villagetale.api;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.Block;
+import org.sosly.villagetale.api.capability.IVillageCapability;
 
 /**
  * Represents a defined area within a village with specific functional purpose.
@@ -36,31 +35,12 @@ public interface IVillageZone {
     /**
      * @return Physical shape type defining the zone's boundaries
      */
-    ZoneShape getShape();
+    IZoneShape getShape();
 
     /**
      * @return Functional type determining zone behavior and POI scanning
      */
-    ZoneType getType();
-
-    /**
-     * @return The level this zone exists in
-     */
-    Level getLevel();
-
-    /**
-     * Sets the level this zone exists in.
-     * @param level The level to set, must not be null
-     */
-    void setLevel(Level level);
-
-    /**
-     * Returns type-specific points of interest within this zone.
-     * Results are cached and only rescanned when zone boundaries change.
-     *
-     * @return Optional containing POI list, or empty for NONE type zones
-     */
-    Optional<List<BlockPos>> getPOIs();
+    IZoneType getType();
 
     /**
      * Checks if the specified position is within this zone's boundaries.
@@ -74,7 +54,7 @@ public interface IVillageZone {
      * @return Starting position - center for Radius, first position for Path,
      *         the single position for BlockPos, calculated center for AABB
      */
-    BlockPos getStartPos();
+    BlockPos getStartPosition();
 
     /**
      * Serializes this zone's data to NBT for persistence.
@@ -84,9 +64,10 @@ public interface IVillageZone {
 
     /**
      * Deserializes zone data from NBT.
+     * @param cap IVillageCapability the village containing the zone
      * @param tag CompoundTag containing zone data
      */
-    void deserializeNBT(CompoundTag tag);
+    void deserializeNBT(IVillageCapability cap, CompoundTag tag);
 
     /**
      * @return List of villager UUIDs assigned to work in this zone
@@ -107,8 +88,7 @@ public interface IVillageZone {
     boolean removeAssignedVillager(UUID villagerUUID);
 
     /**
-     * Returns current claims in this zone. Automatically cleans expired claims.
-     * WARNING: This can be memory-intensive for large zones. Prefer getActiveClaims or getAvailableClaims for gameplay logic.
+     * Returns all possible claims in this zone. Automatically cleans expired claims.
      * @param currentTime Current game time for expiration checking
      * @return Map of claimed positions to claiming villager UUID, empty Optional means unclaimed but claimable
      */

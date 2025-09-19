@@ -1,7 +1,7 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.data.IVillageZone;
+import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.VillageInfo;
@@ -241,8 +241,8 @@ public class GetFromContainer extends Behavior<Villager> {
         return villageCapability.getZones()
                 .stream()
                 .filter(zone -> {
-                    Optional<List<BlockPos>> pois = zone.getPOIs();
-                    return pois.map(list -> list.contains(pos)).orElse(false);
+                    Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
+                    return claims.containsKey(pos);
                 })
                 .findFirst()
                 .orElse(null);

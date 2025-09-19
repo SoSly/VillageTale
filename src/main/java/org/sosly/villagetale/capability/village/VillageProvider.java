@@ -1,124 +1,114 @@
 package org.sosly.villagetale.capability.village;
 
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.capability.Capabilities;
-import org.sosly.villagetale.data.zones.ZoneFactory;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.UUID;
+import org.sosly.villagetale.zone.Zone;
 
 public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
-
     private final VillageCapability capability;
-    private final LazyOptional<IVillageCapability> lazyOptional;
+    private final LazyOptional<IVillageCapability> holder;
 
     public VillageProvider() {
         this.capability = new VillageCapability();
-        this.lazyOptional = LazyOptional.of(() -> capability);
+        this.holder = LazyOptional.of(() -> capability);
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == Capabilities.VILLAGE_CAPABILITY) {
-            return lazyOptional.cast();
+        if (cap != Capabilities.VILLAGE_CAPABILITY){
+            return LazyOptional.empty();
         }
-        return LazyOptional.empty();
+
+        return holder.cast();
+    }
+
+    public void invalidate() {
+        holder.invalidate();
     }
 
     @Override
     public CompoundTag serializeNBT() {
-        if (capability.getVillageId() == null) {
-            return new CompoundTag();
-        }
-
         CompoundTag tag = new CompoundTag();
-
-        tag.putString("VillageId", capability.getVillageId().toString());
-
-        ListTag villagerList = new ListTag();
-        for (UUID villagerId : capability.getVillagerIds()) {
-            villagerList.add(StringTag.valueOf(villagerId.toString()));
+        if (capability == null || capability.getUUID() == null) {
+            return tag;
         }
-        tag.put("VillagerIds", villagerList);
 
-        CompoundTag permissionsTag = new CompoundTag();
-        for (var entry : capability.getPlayerPermissions().entrySet()) {
-            permissionsTag.putByte(entry.getKey().toString(), (byte) entry.getValue().ordinal());
-        }
-        tag.put("PlayerPermissions", permissionsTag);
+        tag.putUUID("village", capability.getUUID());
+        tag.putString("name", capability.getName());
 
-        ListTag zoneList = new ListTag();
-        for (var zone : capability.getZones()) {
-            zoneList.add(zone.serializeNBT());
+        ListTag zones = new ListTag();
+        for (IVillageZone zone : capability.getZones()) {
+            zones.add(zone.serializeNBT());
         }
-        tag.put("Zones", zoneList);
+        tag.put("zones", zones);
+        VillageTale.LOGGER.info("Saving " + zones.size() + " zones");
+
+        ListTag villagers = new ListTag();
+        for (UUID uuid : capability.getVillagerUUIDs()) {
+            CompoundTag villager = new CompoundTag();
+            villager.putUUID("villager", uuid);
+            villagers.add(villager);
+        }
+        tag.put("villagers", villagers);
+
+        ListTag players = new ListTag();
+        capability.getPlayerPermissions().forEach((key, value) -> {
+            CompoundTag player = new CompoundTag();
+            player.putUUID("player", key);
+            player.putString("permission", value.toString());
+            players.add(player);
+        });
+        tag.put("players", players);
 
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        if (!tag.hasUUID("VillageId") && !tag.contains("VillageId", Tag.TAG_STRING)) {
+        if (!tag.contains("village")) {
             return;
         }
 
-        UUID villageId = UUID.fromString(tag.getString("VillageId"));
+        capability.setUUID(tag.getUUID("village"));
+        capability.setName(tag.getString("name"));
 
-        capability.initializeVillage(villageId);
-
-        // Deserialize villager IDs
-        if (tag.contains("VillagerIds", Tag.TAG_LIST)) {
-            ListTag villagerList = tag.getList("VillagerIds", Tag.TAG_STRING);
-            for (int i = 0; i < villagerList.size(); i++) {
-                try {
-                    UUID villagerId = UUID.fromString(villagerList.getString(i));
-                    capability.assignVillager(villagerId);
-                } catch (IllegalArgumentException e) {
-                    // Skip invalid UUIDs
-                }
+        if (tag.contains("zones")) {
+            ListTag zones = tag.getList("zones", 10);
+            for (int i = 0; i < zones.size(); i++) {
+                IVillageZone zone = new Zone(null);
+                zone.deserializeNBT(capability, zones.getCompound(i));
+                capability.addZone(zone);
             }
         }
 
-        if (tag.contains("PlayerPermissions", Tag.TAG_COMPOUND)) {
-            CompoundTag permissionsTag = tag.getCompound("PlayerPermissions");
-            for (String playerIdStr : permissionsTag.getAllKeys()) {
-                try {
-                    UUID playerId = UUID.fromString(playerIdStr);
-                    byte permissionOrdinal = permissionsTag.getByte(playerIdStr);
-                    if (permissionOrdinal >= 0 && permissionOrdinal < IVillageCapability.Permission.values().length) {
-                        IVillageCapability.Permission permission = IVillageCapability.Permission.values()[permissionOrdinal];
-                        capability.setPlayerPermission(playerId, permission);
-                    }
-                } catch (IllegalArgumentException e) {
-                    // Skip invalid UUIDs
-                }
+        if (tag.contains("villagers")) {
+            ListTag villagers = tag.getList("villagers", 10);
+            for (int i = 0; i < villagers.size(); i++) {
+                UUID uuid = villagers.getCompound(i).getUUID("villager");
+                capability.addVillagerByUUID(uuid);
             }
         }
 
-        // Deserialize zones
-        if (tag.contains("Zones", Tag.TAG_LIST)) {
-            ListTag zoneList = tag.getList("Zones", Tag.TAG_COMPOUND);
-            for (int i = 0; i < zoneList.size(); i++) {
-                CompoundTag zoneTag = zoneList.getCompound(i);
-                var zone = ZoneFactory.deserializeFromNBT(zoneTag);
-                if (zone != null) {
-                    capability.addExistingZone(zone);
-                }
+        if (tag.contains("players")) {
+            ListTag players = tag.getList("players", 10);
+            for (int i = 0; i < players.size(); i++) {
+                UUID uuid = players.getCompound(i).getUUID("player");
+                IVillageCapability.Permission permission = IVillageCapability.Permission
+                    .fromString(players.getCompound(i).getString("permission"));
+                capability.setPlayerPermission(uuid, permission);
             }
         }
-    }
-
-    public void invalidate() {
-        lazyOptional.invalidate();
     }
 }

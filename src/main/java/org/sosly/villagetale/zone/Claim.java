@@ -1,4 +1,4 @@
-package org.sosly.villagetale.data.zones;
+package org.sosly.villagetale.zone;
 
 import net.minecraft.nbt.CompoundTag;
 import java.util.Objects;

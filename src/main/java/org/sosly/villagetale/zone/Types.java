@@ -1,0 +1,17 @@
+package org.sosly.villagetale.zone;
+
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.sosly.villagetale.event.RegisterZoneTypesEvent;
+import org.sosly.villagetale.zone.type.Home;
+import org.sosly.villagetale.zone.type.Storage;
+import org.sosly.villagetale.zone.type.TownHall;
+
+//@Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class Types {
+    @SubscribeEvent
+    public static void onRegisterZoneTypes(RegisterZoneTypesEvent event) {
+        event.register(Home.ID, Home::new);
+        event.register(Storage.ID, Storage::new);
+        event.register(TownHall.ID, TownHall::new);
+    }
+}

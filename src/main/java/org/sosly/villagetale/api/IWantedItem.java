@@ -1,6 +1,5 @@
-package org.sosly.villagetale.api.data;
+package org.sosly.villagetale.api;
 
-import com.mojang.serialization.Codec;
 import java.util.function.Predicate;
 import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.data.WantedItem;
@@ -15,7 +14,7 @@ public interface IWantedItem {
      * Used as a default value when no specific item is needed.
      */
     public static final IWantedItem EMPTY = new WantedItem(stack -> false, 0, 0);
-    
+
 
     /**
      * Gets the desired quantity of this item to fetch from storage.

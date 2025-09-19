@@ -1,12 +1,12 @@
 package org.sosly.villagetale.api.capability;
 
-import net.minecraft.core.BlockPos;
-import org.sosly.villagetale.api.data.IVillageZone;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.sosly.villagetale.api.IVillageZone;
 
 /**
  * Capability for storing all data related to a single village.
@@ -15,14 +15,59 @@ import java.util.UUID;
 public interface IVillageCapability {
 
     enum Permission {
-        NONE,
-        OWNER
+        NONE {
+            @Override
+            public String toString() {
+                return "NONE";
+            }
+        },
+        OWNER {
+            @Override
+            public String toString() {
+                return "OWNER";
+            }
+        };
+
+        abstract public String toString();
+        public static Permission fromString(String string) {
+            return Permission.valueOf(string.toUpperCase());
+        }
     }
 
     /**
      * @return Unique identifier for this village
      */
-    UUID getVillageId();
+    UUID getUUID();
+
+    /**
+     * Set the unique identifier for this village
+     * @param uuid UUID
+     */
+    void setUUID(UUID uuid);
+
+    /**
+     * The chunk the village was created in.
+     * @return LevelChunk
+     */
+    LevelChunk getChunk();
+
+    /**
+     * Sets the chunk the village was created in.
+     * @param chunk LevelChunk
+     */
+    void setChunk(LevelChunk chunk);
+
+    /**
+     * The name of the village.
+     * @return String
+     */
+    String getName();
+
+    /**
+     * Sets the name of the village.
+     * @param name String
+     */
+    void setName(String name);
 
     /**
      * @return All zones within this village
@@ -52,20 +97,20 @@ public interface IVillageCapability {
     /**
      * @return UUIDs of all villagers assigned to this village
      */
-    Set<UUID> getVillagerIds();
+    Set<UUID> getVillagerUUIDs();
 
     /**
-     * Assigns a villager to this village.
-     * @param villagerId UUID of villager to assign
+     * Adds a villager to this village.
+     * @param villager UUID to add to the village
      */
-    void assignVillager(UUID villagerId);
+    void addVillagerByUUID(UUID villager);
 
     /**
      * Removes a villager from this village.
-     * @param villagerId UUID of villager to remove
+     * @param villager UUID of villager to remove
      * @return true if villager was found and removed
      */
-    boolean removeVillager(UUID villagerId);
+    boolean removeVillagerByUUID(UUID villager);
 
     /**
      * @return Map of player UUIDs to their permissions in this village
@@ -74,51 +119,16 @@ public interface IVillageCapability {
 
     /**
      * Sets a player's permission level for this village.
-     * @param playerId UUID of player
+     * @param player UUID of player
      * @param permission Permission level to set
      */
-    void setPlayerPermission(UUID playerId, Permission permission);
+    void setPlayerPermission(UUID player, Permission permission);
 
     /**
      * Checks if a player has the required permission level.
-     * @param playerId UUID of player to check
+     * @param player UUID of player to check
      * @param required Minimum permission level required
      * @return true if player has required permission or higher
      */
-    boolean hasPermission(UUID playerId, Permission required);
-
-    /**
-     * Assigns a villager to work in the specified zone.
-     * @param zoneId UUID of the zone
-     * @param villagerUUID UUID of the villager to assign
-     * @return true if zone was found and villager assigned
-     */
-    boolean assignVillagerToZone(UUID zoneId, UUID villagerUUID);
-
-    /**
-     * Removes a villager assignment from the specified zone.
-     * @param zoneId UUID of the zone
-     * @param villagerUUID UUID of the villager to unassign
-     * @return true if zone was found and villager was assigned
-     */
-    boolean unassignVillagerFromZone(UUID zoneId, UUID villagerUUID);
-
-    /**
-     * Claims a block position for a villager in the specified zone.
-     * @param zoneId UUID of the zone
-     * @param pos Position to claim
-     * @param villagerUUID UUID of claiming villager
-     * @param durationTicks Duration in ticks before claim expires
-     * @param currentTime Current game time
-     * @return true if zone was found and position was claimable
-     */
-    boolean claimPositionInZone(UUID zoneId, BlockPos pos, UUID villagerUUID, int durationTicks, long currentTime);
-
-    /**
-     * Releases a claimed block position in the specified zone.
-     * @param zoneId UUID of the zone
-     * @param pos Position to release
-     * @return true if zone was found and position was claimed
-     */
-    boolean releasePositionInZone(UUID zoneId, BlockPos pos);
+    boolean hasPermission(UUID player, Permission required);
 }

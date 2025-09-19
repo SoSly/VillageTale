@@ -2,7 +2,6 @@ package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,13 +20,13 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.data.IVillageZone;
-import org.sosly.villagetale.api.data.ZoneType;
+import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
+import org.sosly.villagetale.zone.type.Storage;
 
 public class DepositItem extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
@@ -53,7 +52,7 @@ public class DepositItem extends Behavior<Villager> {
         @SuppressWarnings("unchecked")
         Map<ResourceLocation, Integer> itemsToDeposit = villager.getBrain()
             .getMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get()).orElse(null);
-        
+
         if (itemsToDeposit == null || itemsToDeposit.isEmpty()) {
             return false;
         }
@@ -117,19 +116,19 @@ public class DepositItem extends Behavior<Villager> {
         }
 
         depositItems(level, villager);
-        
+
         @SuppressWarnings("unchecked")
         Map<ResourceLocation, Integer> remainingItems = villager.getBrain()
             .getMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get()).orElse(null);
-        
+
         if (remainingItems == null || remainingItems.isEmpty()) {
             clearMemories(villager);
             stopBehavior(villager);
         } else {
-            this.targetContainer = findAvailableContainer(level, villager, 
-                villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null), 
+            this.targetContainer = findAvailableContainer(level, villager,
+                villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null),
                 remainingItems);
-            
+
             if (this.targetContainer == null) {
                 stopBehavior(villager);
             } else {
@@ -158,7 +157,7 @@ public class DepositItem extends Behavior<Villager> {
 
     private boolean isAtStorageZone(ServerLevel level, Villager villager, UUID villageId) {
         IVillageZone zone = findZoneContaining(level, villageId, villager.blockPosition());
-        return zone != null && zone.getType() == ZoneType.STORAGE;
+        return zone != null && zone.getType().getID().equals(Storage.ID);
     }
 
     private BlockPos findAvailableContainer(ServerLevel level, Villager villager, UUID villageId, Map<ResourceLocation, Integer> itemsToDeposit) {
@@ -167,19 +166,19 @@ public class DepositItem extends Behavior<Villager> {
         }
 
         IVillageZone zone = findZoneContaining(level, villageId, villager.blockPosition());
-        if (zone == null || zone.getType() != ZoneType.STORAGE) {
+        if (zone == null || !zone.getType().getID().equals(Storage.ID)) {
             return null;
         }
 
-        Optional<List<BlockPos>> pois = zone.getPOIs();
-        if (pois.isEmpty()) {
+        Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
+        if (claims.isEmpty()) {
             return null;
         }
 
-        for (BlockPos containerPos : pois.get()) {
+        for (BlockPos containerPos : claims.keySet()) {
             for (ResourceLocation itemId : itemsToDeposit.keySet()) {
                 net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(itemId);
-                
+
                 if (ContainerHelper.hasAvailableSpace(level, containerPos, item)) {
                     return containerPos;
                 }
@@ -224,7 +223,7 @@ public class DepositItem extends Behavior<Villager> {
         @SuppressWarnings("unchecked")
         Map<ResourceLocation, Integer> itemsToDeposit = villager.getBrain()
             .getMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get()).orElse(null);
-        
+
         if (itemsToDeposit == null || itemsToDeposit.isEmpty()) {
             return;
         }
@@ -251,7 +250,7 @@ public class DepositItem extends Behavior<Villager> {
 
             stack.shrink(deposited);
             int remaining = wantedAmount - deposited;
-            
+
             if (remaining <= 0) {
                 updatedItems.remove(itemId);
             } else {
@@ -293,8 +292,8 @@ public class DepositItem extends Behavior<Villager> {
         return villageCapability.getZones()
                 .stream()
                 .filter(zone -> {
-                    Optional<List<BlockPos>> pois = zone.getPOIs();
-                    return pois.map(list -> list.contains(pos)).orElse(false);
+                    Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
+                    return claims.containsKey(pos);
                 })
                 .findFirst()
                 .orElse(null);

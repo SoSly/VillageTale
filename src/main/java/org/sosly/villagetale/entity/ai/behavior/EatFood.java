@@ -8,7 +8,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.SimpleContainer;
-import org.sosly.villagetale.api.data.IWantedItem;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.helper.ItemMatcher;

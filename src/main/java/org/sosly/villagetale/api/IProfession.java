@@ -10,8 +10,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Schedule;
-import org.sosly.villagetale.api.data.IVillageZone;
-import org.sosly.villagetale.api.data.IWantedItem;
 import org.sosly.villagetale.entity.Villager;
 
 /**

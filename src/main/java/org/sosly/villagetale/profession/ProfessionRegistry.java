@@ -34,4 +34,8 @@ public class ProfessionRegistry {
     public Set<ResourceLocation> getProfessionIDs() {
         return professions.keySet();
     }
+
+    {
+        professions.put(Commoner.ID, new Commoner());
+    }
 }

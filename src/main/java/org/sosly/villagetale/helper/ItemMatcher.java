@@ -1,7 +1,7 @@
 package org.sosly.villagetale.helper;
 
 import net.minecraft.world.item.ItemStack;
-import org.sosly.villagetale.api.data.IWantedItem;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.Villager;
 

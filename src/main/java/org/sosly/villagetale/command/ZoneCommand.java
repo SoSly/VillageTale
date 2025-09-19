@@ -4,10 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -15,6 +12,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -22,19 +20,19 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.data.IVillageZone;
-import org.sosly.villagetale.api.data.ZoneType;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.command.arguments.VillageUUIDArgument;
-import org.sosly.villagetale.command.arguments.ZoneTypeArgument;
 import org.sosly.villagetale.command.arguments.ZoneUUIDArgument;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.data.zones.AABBZone;
-import org.sosly.villagetale.data.zones.BlockPosZone;
-import org.sosly.villagetale.data.zones.PathZone;
-import org.sosly.villagetale.data.zones.RadiusZone;
-import org.sosly.villagetale.data.zones.ZoneFactory;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.zone.Zone;
+import org.sosly.villagetale.zone.shape.Point;
+import org.sosly.villagetale.zone.shape.Rectangle;
+import org.sosly.villagetale.zone.shape.Route;
+import org.sosly.villagetale.zone.shape.Sphere;
+import org.sosly.villagetale.zone.type.TownHall;
 
 public class ZoneCommand {
 
@@ -69,104 +67,100 @@ public class ZoneCommand {
             .then(Commands.argument("villageUUID", VillageUUIDArgument.villageUUID())
                 .suggests((context, builder) -> VillageUUIDArgument.suggest(context, builder))
                 .then(Commands.literal("create")
-                    .then(Commands.literal("aabb")
+                    .then(Commands.literal("rectangle")
                         .then(Commands.argument("pos1", BlockPosArgument.blockPos())
                             .then(Commands.argument("pos2", BlockPosArgument.blockPos())
-                                .then(Commands.argument("type", ZoneTypeArgument.zoneType())
-                                    .suggests((context, builder) -> ZoneTypeArgument.suggest(context, builder))
-                                    .executes(ZoneCommand::createAABBZone)
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                    .suggests((context, builder) -> {
+                                        builder.suggest("storage");
+                                        builder.suggest("home");
+                                        builder.suggest("townhall");
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(ZoneCommand::createRectangleZone)
                                     .then(Commands.argument("name", StringArgumentType.string())
-                                        .executes(ZoneCommand::createAABBZoneWithName))))))
-                    .then(Commands.literal("radius")
+                                        .executes(ZoneCommand::createRectangleZoneWithName))))))
+                    .then(Commands.literal("sphere")
                         .then(Commands.argument("center", BlockPosArgument.blockPos())
                             .then(Commands.argument("radius", IntegerArgumentType.integer(1))
-                                .then(Commands.argument("type", ZoneTypeArgument.zoneType())
-                                    .suggests((context, builder) -> ZoneTypeArgument.suggest(context, builder))
-                                    .executes(ZoneCommand::createRadiusZone)
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                    .suggests((context, builder) -> {
+                                        builder.suggest("storage");
+                                        builder.suggest("home");
+                                        builder.suggest("townhall");
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(ZoneCommand::createSphereZone)
                                     .then(Commands.argument("name", StringArgumentType.string())
-                                        .executes(ZoneCommand::createRadiusZoneWithName))))))
-                    .then(Commands.literal("blockpos")
+                                        .executes(ZoneCommand::createSphereZoneWithName))))))
+                    .then(Commands.literal("point")
                         .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                            .then(Commands.argument("type", ZoneTypeArgument.zoneType())
-                                .suggests((context, builder) -> ZoneTypeArgument.suggest(context, builder))
-                                .executes(ZoneCommand::createBlockPosZone)
+                            .then(Commands.argument("type", StringArgumentType.word())
+                                .suggests((context, builder) -> {
+                                    builder.suggest("storage");
+                                    builder.suggest("home");
+                                    builder.suggest("townhall");
+                                    return builder.buildFuture();
+                                })
+                                .executes(ZoneCommand::createPointZone)
                                 .then(Commands.argument("name", StringArgumentType.string())
-                                    .executes(ZoneCommand::createBlockPosZoneWithName)))))
-                    .then(Commands.literal("path")
-                        .then(Commands.argument("type", ZoneTypeArgument.zoneType())
-                            .suggests((context, builder) -> ZoneTypeArgument.suggest(context, builder))
-                            .executes(ZoneCommand::createPathZone)
+                                    .executes(ZoneCommand::createPointZoneWithName)))))
+                    .then(Commands.literal("route")
+                        .then(Commands.argument("type", StringArgumentType.word())
+                            .suggests((context, builder) -> {
+                                builder.suggest("storage");
+                                builder.suggest("home");
+                                builder.suggest("townhall");
+                                return builder.buildFuture();
+                            })
+                            .executes(ZoneCommand::createRouteZone)
                             .then(Commands.argument("name", StringArgumentType.string())
-                                .executes(ZoneCommand::createPathZoneWithName)))))
+                                .executes(ZoneCommand::createRouteZoneWithName)))))
                 .then(Commands.literal("delete")
                     .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                         .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
                         .executes(ZoneCommand::deleteZone)))
-                .then(Commands.literal("type")
-                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
-                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .then(Commands.argument("zonetype", ZoneTypeArgument.zoneType())
-                            .suggests((context, builder) -> ZoneTypeArgument.suggest(context, builder))
-                            .executes(ZoneCommand::changeZoneType))))
-                .then(Commands.literal("rename")
-                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
-                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .then(Commands.argument("name", StringArgumentType.string())
-                            .executes(ZoneCommand::renameZone))))
+                .then(Commands.literal("list")
+                    .executes(ZoneCommand::listZones))
                 .then(Commands.literal("info")
                     .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                         .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .executes(ZoneCommand::showZoneInfo)))
-                .then(Commands.literal("list")
-                    .executes(ZoneCommand::listZones))
-                .then(Commands.literal("claim")
+                        .executes(ZoneCommand::zoneInfo)))
+                .then(Commands.literal("route")
                     .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                         .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                            .then(Commands.argument("villager", EntityArgument.entity())
-                                .then(Commands.argument("duration", IntegerArgumentType.integer(1))
-                                    .executes(ZoneCommand::claimPosition))))))
-                .then(Commands.literal("release")
-                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
-                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                            .executes(ZoneCommand::releasePosition))))
+                        .then(Commands.literal("add")
+                            .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                .executes(ZoneCommand::addRoutePoint)))
+                        .then(Commands.literal("clear")
+                            .executes(ZoneCommand::clearRoute))))
                 .then(Commands.literal("assign")
                     .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                         .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
                         .then(Commands.argument("villager", EntityArgument.entity())
                             .executes(ZoneCommand::assignVillager))))
                 .then(Commands.literal("unassign")
-                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
-                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .then(Commands.argument("villager", EntityArgument.entity())
-                            .executes(ZoneCommand::unassignVillager))))
-                .then(Commands.literal("path")
-                    .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
-                        .suggests((context, builder) -> ZoneUUIDArgument.suggest(context, builder))
-                        .then(Commands.literal("add")
-                            .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                                .executes(ZoneCommand::addPathPoint)))
-                        .then(Commands.literal("clear")
-                            .executes(ZoneCommand::clearPath))))));
+                    .then(Commands.argument("villager", EntityArgument.entity())
+                        .executes(ZoneCommand::unassignVillager)))));
     }
 
-    private static int createAABBZone(CommandContext<CommandSourceStack> context) {
-        return createAABBZoneInternal(context, null);
+    private static int createRectangleZone(CommandContext<CommandSourceStack> context) {
+        return createRectangleZoneInternal(context, null);
     }
 
-    private static int createAABBZoneWithName(CommandContext<CommandSourceStack> context) {
+    private static int createRectangleZoneWithName(CommandContext<CommandSourceStack> context) {
         String name = StringArgumentType.getString(context, "name");
-        return createAABBZoneInternal(context, name);
+        return createRectangleZoneInternal(context, name);
     }
 
-    private static int createAABBZoneInternal(CommandContext<CommandSourceStack> context, String name) {
+    private static int createRectangleZoneInternal(CommandContext<CommandSourceStack> context, String name) {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
+            String typeString = StringArgumentType.getString(context, "type");
+            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
 
-            if (zoneType == ZoneType.TOWNHALL) {
+            if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
                 return 0;
             }
@@ -176,35 +170,48 @@ public class ZoneCommand {
 
             AABB bounds = new AABB(
                 Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()),
-                Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ())
+                Math.max(pos1.getX(), pos2.getX()) + 1, Math.max(pos1.getY(), pos2.getY()) + 1, Math.max(pos1.getZ(), pos2.getZ()) + 1
             );
 
-            return createZoneInVillage(source, villageId, level -> {
-                return ZoneFactory.createAABBZone(zoneType, name, bounds, level);
-            });
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
+
+            Zone zone = Rectangle.builder(source.getLevel(), capability, capability.getZones().size())
+                .setBounds(bounds)
+                .setType(zoneType)
+                .build();
+
+            if (name != null) {
+                zone.setName(name);
+            }
+
+            capability.addZone(zone);
+            source.sendSuccess(() -> Component.literal("Created rectangle zone: " + zone.getName()), true);
+            return 1;
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to create AABB zone: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to create rectangle zone: " + e.getMessage()));
             return 0;
         }
     }
 
-    private static int createRadiusZone(CommandContext<CommandSourceStack> context) {
-        return createRadiusZoneInternal(context, null);
+    private static int createSphereZone(CommandContext<CommandSourceStack> context) {
+        return createSphereZoneInternal(context, null);
     }
 
-    private static int createRadiusZoneWithName(CommandContext<CommandSourceStack> context) {
+    private static int createSphereZoneWithName(CommandContext<CommandSourceStack> context) {
         String name = StringArgumentType.getString(context, "name");
-        return createRadiusZoneInternal(context, name);
+        return createSphereZoneInternal(context, name);
     }
 
-    private static int createRadiusZoneInternal(CommandContext<CommandSourceStack> context, String name) {
+    private static int createSphereZoneInternal(CommandContext<CommandSourceStack> context, String name) {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
+            String typeString = StringArgumentType.getString(context, "type");
+            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
 
-            if (zoneType == ZoneType.TOWNHALL) {
+            if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
                 return 0;
             }
@@ -212,74 +219,112 @@ public class ZoneCommand {
             BlockPos center = BlockPosArgument.getBlockPos(context, "center");
             int radius = IntegerArgumentType.getInteger(context, "radius");
 
-            return createZoneInVillage(source, villageId, level -> {
-                return ZoneFactory.createRadiusZone(zoneType, name, center, radius, level);
-            });
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
+
+            Zone zone = Sphere.builder(source.getLevel(), capability, capability.getZones().size())
+                .setCenter(center)
+                .setRadius(radius)
+                .setType(zoneType)
+                .build();
+
+            if (name != null) {
+                zone.setName(name);
+            }
+
+            capability.addZone(zone);
+            source.sendSuccess(() -> Component.literal("Created sphere zone: " + zone.getName()), true);
+            return 1;
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to create radius zone: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to create sphere zone: " + e.getMessage()));
             return 0;
         }
     }
 
-    private static int createBlockPosZone(CommandContext<CommandSourceStack> context) {
-        return createBlockPosZoneInternal(context, null);
+    private static int createPointZone(CommandContext<CommandSourceStack> context) {
+        return createPointZoneInternal(context, null);
     }
 
-    private static int createBlockPosZoneWithName(CommandContext<CommandSourceStack> context) {
+    private static int createPointZoneWithName(CommandContext<CommandSourceStack> context) {
         String name = StringArgumentType.getString(context, "name");
-        return createBlockPosZoneInternal(context, name);
+        return createPointZoneInternal(context, name);
     }
 
-    private static int createBlockPosZoneInternal(CommandContext<CommandSourceStack> context, String name) {
+    private static int createPointZoneInternal(CommandContext<CommandSourceStack> context, String name) {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
+            String typeString = StringArgumentType.getString(context, "type");
+            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
 
-            if (zoneType == ZoneType.TOWNHALL) {
+            if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
                 return 0;
             }
 
             BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
 
-            return createZoneInVillage(source, villageId, level -> {
-                return ZoneFactory.createBlockPosZone(zoneType, name, pos, level);
-            });
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
+
+            Zone zone = Point.builder(source.getLevel(), capability, capability.getZones().size())
+                .setPos(pos)
+                .setType(zoneType)
+                .build();
+
+            if (name != null) {
+                zone.setName(name);
+            }
+
+            capability.addZone(zone);
+            source.sendSuccess(() -> Component.literal("Created point zone: " + zone.getName()), true);
+            return 1;
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to create blockpos zone: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to create point zone: " + e.getMessage()));
             return 0;
         }
     }
 
-    private static int createPathZone(CommandContext<CommandSourceStack> context) {
-        return createPathZoneInternal(context, null);
+    private static int createRouteZone(CommandContext<CommandSourceStack> context) {
+        return createRouteZoneInternal(context, null);
     }
 
-    private static int createPathZoneWithName(CommandContext<CommandSourceStack> context) {
+    private static int createRouteZoneWithName(CommandContext<CommandSourceStack> context) {
         String name = StringArgumentType.getString(context, "name");
-        return createPathZoneInternal(context, name);
+        return createRouteZoneInternal(context, name);
     }
 
-    private static int createPathZoneInternal(CommandContext<CommandSourceStack> context, String name) {
+    private static int createRouteZoneInternal(CommandContext<CommandSourceStack> context, String name) {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            ZoneType zoneType = ZoneTypeArgument.getZoneType(context, "type");
+            String typeString = StringArgumentType.getString(context, "type");
+            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
 
-            if (zoneType == ZoneType.TOWNHALL) {
+            if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
                 return 0;
             }
 
-            return createZoneInVillage(source, villageId, level -> {
-                return ZoneFactory.createPathZone(zoneType, name, new ArrayList<>(), level);
-            });
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
+
+            Zone zone = Route.builder(source.getLevel(), capability, capability.getZones().size())
+                .setType(zoneType)
+                .build();
+
+            if (name != null) {
+                zone.setName(name);
+            }
+
+            capability.addZone(zone);
+            source.sendSuccess(() -> Component.literal("Created route zone: " + zone.getName() + " (add points with /vt zone route add)"), true);
+            return 1;
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to create path zone: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to create route zone: " + e.getMessage()));
             return 0;
         }
     }
@@ -290,148 +335,28 @@ public class ZoneCommand {
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
 
-            ServerLevel level = source.getLevel();
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
 
-            IVillageCapability villageCapability = getVillageCapability(source, villageId);
-            if (villageCapability == null) {
+            List<IVillageZone> zones = capability.getZones();
+            IVillageZone toRemove = zones.stream().filter(zone -> zone.getUUID().equals(zoneId)).findFirst().orElse(null);
+
+            if (toRemove == null) {
+                source.sendFailure(Component.literal("Zone not found"));
                 return 0;
             }
 
-            boolean removed = villageCapability.removeZone(zoneId);
-            if (removed) {
-                source.sendSuccess(() ->
-                    Component.literal("Deleted zone " + zoneId), true);
-                return 1;
-            } else {
-                source.sendFailure(Component.literal("Zone not found in village"));
+            if (toRemove.getType().getID().equals(TownHall.ID)) {
+                source.sendFailure(Component.literal("Cannot delete TOWNHALL zones"));
                 return 0;
             }
+
+            zones.remove(toRemove);
+            source.sendSuccess(() -> Component.literal("Deleted zone: " + toRemove.getName()), true);
+            return 1;
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to delete zone: " + e.getMessage()));
-            return 0;
-        }
-    }
-
-    private static int changeZoneType(CommandContext<CommandSourceStack> context) {
-        try {
-            CommandSourceStack source = context.getSource();
-            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
-            ZoneType newZoneType = ZoneTypeArgument.getZoneType(context, "zonetype");
-
-            source.sendFailure(Component.literal("Zone type changing not implemented yet"));
-            return 0;
-
-        } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to change zone type: " + e.getMessage()));
-            return 0;
-        }
-    }
-
-    private static int renameZone(CommandContext<CommandSourceStack> context) {
-        try {
-            CommandSourceStack source = context.getSource();
-            String villageUUIDStr = StringArgumentType.getString(context, "villageUUID");
-            String zoneUUIDStr = StringArgumentType.getString(context, "zoneUUID");
-            String newName = StringArgumentType.getString(context, "name");
-
-            UUID villageId;
-            UUID zoneId;
-            try {
-                villageId = UUID.fromString(villageUUIDStr);
-                zoneId = UUID.fromString(zoneUUIDStr);
-            } catch (IllegalArgumentException e) {
-                source.sendFailure(Component.literal("Invalid UUID format"));
-                return 0;
-            }
-
-            ServerLevel level = source.getLevel();
-
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village not found"));
-                        return 0;
-                    }
-
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            List<IVillageZone> zones = villageCapability.getZones();
-                            for (IVillageZone zone : zones) {
-                                if (zone.getUUID().equals(zoneId)) {
-                                    zone.setName(newName);
-                                    source.sendSuccess(() ->
-                                        Component.literal("Renamed zone to '" + newName + "'"), true);
-                                    return 1;
-                                }
-                            }
-                            source.sendFailure(Component.literal("Zone not found in village"));
-                            return 0;
-                        })
-                        .orElse(0);
-                })
-                .orElse(0);
-
-        } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to rename zone: " + e.getMessage()));
-            return 0;
-        }
-    }
-
-    private static int showZoneInfo(CommandContext<CommandSourceStack> context) {
-        try {
-            CommandSourceStack source = context.getSource();
-            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
-
-            ServerLevel level = source.getLevel();
-
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village not found"));
-                        return 0;
-                    }
-
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            List<IVillageZone> zones = villageCapability.getZones();
-                            for (IVillageZone zone : zones) {
-                                if (zone.getUUID().equals(zoneId)) {
-                                    source.sendSuccess(() ->
-                                        Component.literal("Zone: " + zone.getName()), false);
-                                    source.sendSuccess(() ->
-                                        Component.literal("UUID: (" + zone.getUUID() + ")"), false);
-                                    source.sendSuccess(() ->
-                                        Component.literal("Type: " + zone.getType()), false);
-                                    source.sendSuccess(() ->
-                                        Component.literal("Shape: " + zone.getShape()), false);
-
-                                    showZoneBounds(source, zone);
-                                    showZoneAssignments(source, zone);
-                                    showZoneClaims(source, zone, level);
-
-                                    return 1;
-                                }
-                            }
-                            source.sendFailure(Component.literal("Zone not found in village"));
-                            return 0;
-                        })
-                        .orElse(0);
-                })
-                .orElse(0);
-
-        } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to show zone info: " + e.getMessage()));
             return 0;
         }
     }
@@ -441,42 +366,23 @@ public class ZoneCommand {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
 
-            ServerLevel level = source.getLevel();
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village not found"));
-                        return 0;
-                    }
+            List<IVillageZone> zones = capability.getZones();
+            if (zones.isEmpty()) {
+                source.sendSuccess(() -> Component.literal("No zones in this village"), false);
+                return 1;
+            }
 
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            List<IVillageZone> zones = villageCapability.getZones();
-
-                            if (zones.isEmpty()) {
-                                source.sendSuccess(() ->
-                                    Component.literal("No zones found in village"), false);
-                                return 1;
-                            }
-
-                            source.sendSuccess(() ->
-                                Component.literal("Zones in " + village.getVillageName() + ":"), false);
-
-                            for (IVillageZone zone : zones) {
-                                source.sendSuccess(() ->
-                                    Component.literal("- " + zone.getName() + " (" + zone.getType() + ", " + zone.getShape() + ") (" + zone.getUUID() + ")"), false);
-                            }
-
-                            return zones.size();
-                        })
-                        .orElse(0);
-                })
-                .orElse(0);
+            source.sendSuccess(() -> Component.literal("Zones in village:"), false);
+            for (IVillageZone zone : zones) {
+                source.sendSuccess(() ->
+                    Component.literal("- " + zone.getName() +
+                        " (Type: " + zone.getType().getID() +
+                        ", ID: " + zone.getUUID() + ")"), false);
+            }
+            return 1;
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to list zones: " + e.getMessage()));
@@ -484,317 +390,122 @@ public class ZoneCommand {
         }
     }
 
-    private static int addPathPoint(CommandContext<CommandSourceStack> context) {
-        try {
-            CommandSourceStack source = context.getSource();
-            String villageUUIDStr = StringArgumentType.getString(context, "villageUUID");
-            String zoneUUIDStr = StringArgumentType.getString(context, "zoneUUID");
-            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
-
-            UUID villageId;
-            UUID zoneId;
-            try {
-                villageId = UUID.fromString(villageUUIDStr);
-                zoneId = UUID.fromString(zoneUUIDStr);
-            } catch (IllegalArgumentException e) {
-                source.sendFailure(Component.literal("Invalid UUID format"));
-                return 0;
-            }
-
-            ServerLevel level = source.getLevel();
-
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village not found"));
-                        return 0;
-                    }
-
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            List<IVillageZone> zones = villageCapability.getZones();
-                            for (IVillageZone zone : zones) {
-                                if (zone.getUUID().equals(zoneId) && zone instanceof PathZone pathZone) {
-                                    pathZone.addPoint(pos);
-                                    source.sendSuccess(() ->
-                                        Component.literal("Added point " + pos.toShortString() + " to path zone"), true);
-                                    return 1;
-                                }
-                            }
-                            source.sendFailure(Component.literal("Path zone not found in village"));
-                            return 0;
-                        })
-                        .orElse(0);
-                })
-                .orElse(0);
-
-        } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to add path point: " + e.getMessage()));
-            return 0;
-        }
-    }
-
-    private static int clearPath(CommandContext<CommandSourceStack> context) {
+    private static int zoneInfo(CommandContext<CommandSourceStack> context) {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
 
-            ServerLevel level = source.getLevel();
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
 
-            return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-                .map(manager -> {
-                    VillageInfo village = manager.getVillageById(villageId);
-                    if (village == null) {
-                        source.sendFailure(Component.literal("Village not found"));
-                        return 0;
-                    }
+            IVillageZone zone = capability.getZones().stream().filter(z -> z.getUUID().equals(zoneId)).findFirst().orElse(null);
+            if (zone == null) {
+                source.sendFailure(Component.literal("Zone not found"));
+                return 0;
+            }
 
-                    ChunkPos villageChunk = village.getVillageStartingChunk();
-                    LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
+            source.sendSuccess(() -> Component.literal("=== Zone Info ==="), false);
+            source.sendSuccess(() -> Component.literal("Name: " + zone.getName()), false);
+            source.sendSuccess(() -> Component.literal("UUID: " + zone.getUUID()), false);
+            source.sendSuccess(() -> Component.literal("Type: " + zone.getType().getID()), false);
 
-                    return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY)
-                        .map(villageCapability -> {
-                            List<IVillageZone> zones = villageCapability.getZones();
-                            for (IVillageZone zone : zones) {
-                                if (zone.getUUID().equals(zoneId) && zone instanceof PathZone pathZone) {
-                                    pathZone.clearPath();
-                                    source.sendSuccess(() ->
-                                        Component.literal("Cleared path zone"), true);
-                                    return 1;
-                                }
-                            }
-                            source.sendFailure(Component.literal("Path zone not found in village"));
-                            return 0;
-                        })
-                        .orElse(0);
-                })
-                .orElse(0);
+            if (zone instanceof Zone zImpl) {
+                IZoneShape shape = zImpl.getShape();
+                if (shape instanceof Rectangle rect) {
+                    AABB bounds = rect.getBounds();
+                    source.sendSuccess(() ->
+                        Component.literal("Shape: Rectangle (" +
+                            (int)bounds.minX + "," + (int)bounds.minY + "," + (int)bounds.minZ + " to " +
+                            (int)(bounds.maxX-1) + "," + (int)(bounds.maxY-1) + "," + (int)(bounds.maxZ-1) + ")"), false);
+                } else if (shape instanceof Sphere sphere) {
+                    source.sendSuccess(() ->
+                        Component.literal("Shape: Sphere (center: " + sphere.getCenter().toShortString() +
+                            ", radius: " + sphere.getRadius() + ")"), false);
+                } else if (shape instanceof Point point) {
+                    source.sendSuccess(() ->
+                        Component.literal("Shape: Point (" + point.getPos().toShortString() + ")"), false);
+                } else if (shape instanceof Route route) {
+                    List<BlockPos> path = route.getPath();
+                    source.sendSuccess(() ->
+                        Component.literal("Shape: Route (" + path.size() + " points)"), false);
+                }
+            }
+
+            List<UUID> assigned = zone.getAssignedVillagers();
+            source.sendSuccess(() ->
+                Component.literal("Assigned Villagers: " + assigned.size()), false);
+
+            return 1;
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to clear path: " + e.getMessage()));
+            context.getSource().sendFailure(Component.literal("Failed to get zone info: " + e.getMessage()));
             return 0;
         }
     }
 
-    private static int createZoneInVillage(CommandSourceStack source, UUID villageId, ZoneCreator factory) {
-        ServerLevel level = source.getLevel();
+    private static int addRoutePoint(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
+            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
 
-        return level.getCapability(Capabilities.VILLAGES_CAPABILITY)
-            .map(manager -> {
-                VillageInfo village = manager.getVillageById(villageId);
-                if (village == null) {
-                    source.sendFailure(Component.literal("Village not found"));
-                    return 0;
-                }
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
 
-                ChunkPos villageChunk = village.getVillageStartingChunk();
-                LevelChunk chunk = level.getChunk(villageChunk.x, villageChunk.z);
-
-                var capability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
-                if (capability == null) {
-                    source.sendFailure(Component.literal("Village capability not found at chunk " + villageChunk +
-                        ". The chunk may need to be reloaded. Try leaving and re-entering the area."));
-                    return 0;
-                }
-
-                try {
-                    IVillageZone zone = factory.createZone(level);
-                    capability.addZone(zone);
-
-                    source.sendSuccess(() ->
-                        Component.literal("Created zone '" + zone.getName() + "' (" + zone.getUUID() + ")"), true);
-                    return 1;
-
-                } catch (Exception e) {
-                    source.sendFailure(Component.literal("Failed to create zone: " + e.getMessage()));
-                    return 0;
-                }
-            })
-            .orElse(0);
-    }
-
-    private static void showZoneBounds(CommandSourceStack source, IVillageZone zone) {
-        if (zone instanceof AABBZone aabbZone) {
-            var bounds = aabbZone.getAABB();
-            source.sendSuccess(() ->
-                Component.literal("Bounds: (" + (int)bounds.minX + ", " + (int)bounds.minY + ", " + (int)bounds.minZ +
-                               ") to (" + (int)bounds.maxX + ", " + (int)bounds.maxY + ", " + (int)bounds.maxZ + ")"), false);
-        } else if (zone instanceof RadiusZone radiusZone) {
-            var center = radiusZone.getCenter();
-            source.sendSuccess(() ->
-                Component.literal("Center: " + center.toShortString() + ", Radius: " + radiusZone.getRadius()), false);
-        } else if (zone instanceof BlockPosZone blockPosZone) {
-            var pos = blockPosZone.getBlockPos();
-            source.sendSuccess(() ->
-                Component.literal("Position: " + pos.toShortString()), false);
-        } else if (zone instanceof PathZone pathZone) {
-            var path = pathZone.getPath();
-            if (path.isEmpty()) {
-                source.sendSuccess(() ->
-                    Component.literal("Path: Empty"), false);
-            } else {
-                source.sendSuccess(() ->
-                    Component.literal("Path: " + path.size() + " points"), false);
-                for (int i = 0; i < Math.min(path.size(), 5); i++) {
-                    final int index = i;
-                    source.sendSuccess(() ->
-                        Component.literal("  " + index + ": " + path.get(index).toShortString()), false);
-                }
-                if (path.size() > 5) {
-                    source.sendSuccess(() ->
-                        Component.literal("  ... and " + (path.size() - 5) + " more points"), false);
-                }
-            }
-        }
-    }
-
-    private static void showZonePOIs(CommandSourceStack source, IVillageZone zone, ServerLevel level) {
-        var pois = zone.getPOIs();
-        if (pois.isEmpty()) {
-            source.sendSuccess(() ->
-                Component.literal("POIs: None (zone type: " + zone.getType() + ")"), false);
-        } else {
-            var poiList = pois.get();
-            source.sendSuccess(() ->
-                Component.literal("POIs: " + poiList.size() + " found"), false);
-            for (int i = 0; i < Math.min(poiList.size(), 10); i++) {
-                final int index = i;
-                final BlockPos pos = poiList.get(index);
-                String blockName = getBlockDisplayName(level, pos);
-                source.sendSuccess(() ->
-                    Component.literal("  " + index + ": " + blockName + " at " + pos.toShortString()), false);
-            }
-            if (poiList.size() > 10) {
-                source.sendSuccess(() ->
-                    Component.literal("  ... and " + (poiList.size() - 10) + " more POIs"), false);
-            }
-        }
-    }
-
-    private static String getBlockDisplayName(ServerLevel level, BlockPos pos) {
-        var blockState = level.getBlockState(pos);
-        var block = blockState.getBlock();
-        String blockName = block.getDescriptionId();
-
-        // Convert from translation key to display name
-        if (blockName.startsWith("block.")) {
-            // Remove "block." prefix and convert underscores to spaces
-            String cleanName = blockName.substring(6);
-
-            // Handle mod blocks vs vanilla blocks
-            if (cleanName.contains(".")) {
-                String[] parts = cleanName.split("\\.", 2);
-                String modId = parts[0];
-                String blockId = parts[1];
-
-                if ("villagetale".equals(modId)) {
-                    // Special handling for our blocks
-                    return switch (blockId) {
-                        case "townhall" -> "Town Hall Block";
-                        default -> formatBlockName(blockId);
-                    };
-                } else {
-                    // Other mod blocks
-                    return formatBlockName(blockId) + " (" + modId + ")";
-                }
-            } else {
-                // Vanilla blocks
-                return switch (cleanName) {
-                    case "chest" -> "Chest";
-                    case "barrel" -> "Barrel";
-                    case "shulker_box" -> "Shulker Box";
-                    case "white_bed", "orange_bed", "magenta_bed", "light_blue_bed",
-                         "yellow_bed", "lime_bed", "pink_bed", "gray_bed", "light_gray_bed",
-                         "cyan_bed", "purple_bed", "blue_bed", "brown_bed", "green_bed",
-                         "red_bed", "black_bed" -> {
-                        String color = cleanName.replace("_bed", "");
-                        yield formatBlockName(color) + " Bed";
+            for (IVillageZone zone : capability.getZones()) {
+                if (zone.getUUID().equals(zoneId)) {
+                    if (zone instanceof Zone zImpl && zImpl.getShape() instanceof Route route) {
+                        route.addPoint(pos);
+                        source.sendSuccess(() ->
+                            Component.literal("Added point to route: " + pos.toShortString()), true);
+                        return 1;
+                    } else {
+                        source.sendFailure(Component.literal("Zone is not a route type"));
+                        return 0;
                     }
-                    default -> formatBlockName(cleanName);
-                };
+                }
             }
-        }
 
-        return blockName; // Fallback to raw translation key
-    }
+            source.sendFailure(Component.literal("Zone not found"));
+            return 0;
 
-    private static String formatBlockName(String name) {
-        return java.util.Arrays.stream(name.split("_"))
-            .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
-            .reduce((a, b) -> a + " " + b)
-            .orElse(name);
-    }
-
-    private static void showZoneAssignments(CommandSourceStack source, IVillageZone zone) {
-        List<UUID> assignedVillagers = zone.getAssignedVillagers();
-        if (assignedVillagers.isEmpty()) {
-            source.sendSuccess(() ->
-                Component.literal("Assigned villagers: None"), false);
-        } else {
-            source.sendSuccess(() ->
-                Component.literal("Assigned villagers: " + assignedVillagers.size()), false);
-            for (int i = 0; i < Math.min(assignedVillagers.size(), 10); i++) {
-                final int index = i;
-                final UUID villagerUUID = assignedVillagers.get(index);
-                source.sendSuccess(() ->
-                    Component.literal("  " + index + ": Villager (" + villagerUUID.toString() + ")"), false);
-            }
-            if (assignedVillagers.size() > 10) {
-                source.sendSuccess(() ->
-                    Component.literal("  ... and " + (assignedVillagers.size() - 10) + " more villagers"), false);
-            }
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to add route point: " + e.getMessage()));
+            return 0;
         }
     }
 
-    private static void showZoneClaims(CommandSourceStack source, IVillageZone zone, ServerLevel level) {
-        long currentTime = level.getGameTime();
-        Map<BlockPos, Optional<UUID>> claims = zone.getClaims(currentTime);
+    private static int clearRoute(CommandContext<CommandSourceStack> context) {
+        try {
+            CommandSourceStack source = context.getSource();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
 
-        if (claims.isEmpty()) {
-            source.sendSuccess(() ->
-                Component.literal("Claims: No claimable positions in this zone"), false);
-            return;
-        }
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
 
-        long claimedCount = claims.values().stream().mapToLong(opt -> opt.isPresent() ? 1 : 0).sum();
-        source.sendSuccess(() ->
-            Component.literal("Claims: " + claimedCount + " claimed out of " + claims.size() + " claimable positions"), false);
-
-        showClaimedPositions(source, claims);
-    }
-
-    private static void showClaimedPositions(CommandSourceStack source, Map<BlockPos, Optional<UUID>> claims) {
-        int shownCount = 0;
-        long totalClaimed = 0;
-
-        for (Map.Entry<BlockPos, Optional<UUID>> entry : claims.entrySet()) {
-            Optional<UUID> claimingVillager = entry.getValue();
-            if (claimingVillager.isEmpty()) {
-                continue;
+            for (IVillageZone zone : capability.getZones()) {
+                if (zone.getUUID().equals(zoneId)) {
+                    if (zone instanceof Zone zImpl && zImpl.getShape() instanceof Route route) {
+                        route.clearPath();
+                        source.sendSuccess(() ->
+                            Component.literal("Cleared route points"), true);
+                        return 1;
+                    } else {
+                        source.sendFailure(Component.literal("Zone is not a route type"));
+                        return 0;
+                    }
+                }
             }
 
-            totalClaimed++;
-            if (shownCount < 10) {
-                BlockPos pos = entry.getKey();
-                UUID villagerUUID = claimingVillager.get();
-                final int index = shownCount;
+            source.sendFailure(Component.literal("Zone not found"));
+            return 0;
 
-                source.sendSuccess(() ->
-                    Component.literal("  " + index + ": " + pos.toShortString() +
-                                    " claimed by villager (" + villagerUUID.toString() + ")"), false);
-                shownCount++;
-            }
-        }
-
-        if (totalClaimed > 10) {
-            final long remaining = totalClaimed - 10;
-            source.sendSuccess(() ->
-                Component.literal("  ... and " + remaining + " more claimed positions"), false);
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Failed to clear route: " + e.getMessage()));
+            return 0;
         }
     }
 
@@ -803,29 +514,27 @@ public class ZoneCommand {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
             UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
-            Entity villagerEntity = EntityArgument.getEntity(context, "villager");
+            Entity entity = EntityArgument.getEntity(context, "villager");
 
-            if (!(villagerEntity instanceof Villager villager)) {
-                source.sendFailure(Component.literal("Target entity is not a villager"));
+            if (!(entity instanceof Villager villager)) {
+                source.sendFailure(Component.literal("Entity is not a villager"));
                 return 0;
             }
 
-            IVillageCapability villageCapability = getVillageCapability(source, villageId);
-            if (villageCapability == null) {
-                return 0;
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
+
+            for (IVillageZone zone : capability.getZones()) {
+                if (zone.getUUID().equals(zoneId)) {
+                    zone.addAssignedVillager(villager.getUUID());
+                    source.sendSuccess(() ->
+                        Component.literal("Assigned villager to zone: " + zone.getName()), true);
+                    return 1;
+                }
             }
 
-            boolean assigned = villageCapability.assignVillagerToZone(zoneId, villager.getUUID());
-            if (assigned) {
-                IVillageZone zone = findZone(villageCapability, zoneId);
-                source.sendSuccess(() ->
-                    Component.literal("Assigned villager " + villager.getDisplayName().getString() +
-                                    " to zone " + zone.getName()), true);
-                return 1;
-            } else {
-                source.sendFailure(Component.literal("Zone not found in village"));
-                return 0;
-            }
+            source.sendFailure(Component.literal("Zone not found"));
+            return 0;
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to assign villager: " + e.getMessage()));
@@ -837,115 +546,37 @@ public class ZoneCommand {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
-            Entity villagerEntity = EntityArgument.getEntity(context, "villager");
+            Entity entity = EntityArgument.getEntity(context, "villager");
 
-            if (!(villagerEntity instanceof Villager villager)) {
-                source.sendFailure(Component.literal("Target entity is not a villager"));
+            if (!(entity instanceof Villager villager)) {
+                source.sendFailure(Component.literal("Entity is not a villager"));
                 return 0;
             }
 
-            IVillageCapability villageCapability = getVillageCapability(source, villageId);
-            if (villageCapability == null) {
+            IVillageCapability capability = getVillageCapability(source, villageId);
+            if (capability == null) return 0;
+
+            UUID villagerUuid = villager.getUUID();
+            boolean removed = false;
+
+            for (IVillageZone zone : capability.getZones()) {
+                if (zone.removeAssignedVillager(villagerUuid)) {
+                    source.sendSuccess(() ->
+                        Component.literal("Unassigned villager from zone: " + zone.getName()), true);
+                    removed = true;
+                }
+            }
+
+            if (!removed) {
+                source.sendFailure(Component.literal("Villager was not assigned to any zones"));
                 return 0;
             }
 
-            boolean removed = villageCapability.unassignVillagerFromZone(zoneId, villager.getUUID());
-            if (removed) {
-                IVillageZone zone = findZone(villageCapability, zoneId);
-                source.sendSuccess(() ->
-                    Component.literal("Unassigned villager " + villager.getDisplayName().getString() +
-                                    " from zone " + zone.getName()), true);
-                return 1;
-            } else {
-                source.sendFailure(Component.literal("Villager was not assigned to this zone or zone not found"));
-                return 0;
-            }
+            return 1;
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to unassign villager: " + e.getMessage()));
             return 0;
         }
-    }
-
-    private static int claimPosition(CommandContext<CommandSourceStack> context) {
-        try {
-            CommandSourceStack source = context.getSource();
-            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
-            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
-            Entity villagerEntity = EntityArgument.getEntity(context, "villager");
-            int duration = IntegerArgumentType.getInteger(context, "duration");
-
-            if (!(villagerEntity instanceof Villager villager)) {
-                source.sendFailure(Component.literal("Target entity is not a villager"));
-                return 0;
-            }
-
-            IVillageCapability villageCapability = getVillageCapability(source, villageId);
-            if (villageCapability == null) {
-                return 0;
-            }
-
-            long currentTime = source.getLevel().getGameTime();
-            boolean claimed = villageCapability.claimPositionInZone(zoneId, pos, villager.getUUID(), duration, currentTime);
-            if (claimed) {
-                source.sendSuccess(() ->
-                    Component.literal("Claimed position " + pos.toShortString() +
-                                    " for villager " + villager.getDisplayName().getString() +
-                                    " for " + duration + " ticks"), true);
-                return 1;
-            } else {
-                source.sendFailure(Component.literal("Zone not found or position not claimable"));
-                return 0;
-            }
-
-        } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to claim position: " + e.getMessage()));
-            return 0;
-        }
-    }
-
-    private static int releasePosition(CommandContext<CommandSourceStack> context) {
-        try {
-            CommandSourceStack source = context.getSource();
-            UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            UUID zoneId = ZoneUUIDArgument.getZoneUUID(context, "zoneUUID");
-            BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
-
-            IVillageCapability villageCapability = getVillageCapability(source, villageId);
-            if (villageCapability == null) {
-                return 0;
-            }
-
-            boolean released = villageCapability.releasePositionInZone(zoneId, pos);
-            if (released) {
-                source.sendSuccess(() ->
-                    Component.literal("Released claim on position " + pos.toShortString()), true);
-                return 1;
-            } else {
-                source.sendFailure(Component.literal("Position was not claimed or zone not found"));
-                return 0;
-            }
-
-        } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Failed to release position: " + e.getMessage()));
-            return 0;
-        }
-    }
-
-    private static IVillageZone findZone(IVillageCapability villageCapability, UUID zoneId) {
-        List<IVillageZone> zones = villageCapability.getZones();
-        for (IVillageZone zone : zones) {
-            if (zone.getUUID().equals(zoneId)) {
-                return zone;
-            }
-        }
-        return null;
-    }
-
-    @FunctionalInterface
-    private interface ZoneCreator {
-        IVillageZone createZone(ServerLevel level);
     }
 }

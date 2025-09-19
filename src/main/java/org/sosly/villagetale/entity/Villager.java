@@ -44,6 +44,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
+import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.LivingEntityFoodData;
 import org.sosly.villagetale.data.VillageInfo;
@@ -313,7 +315,7 @@ public class Villager extends PathfinderMob {
             return;
         }
 
-        var villages = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        IVillagesCapability villages = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
         if (villages == null) {
             return;
         }
@@ -326,12 +328,12 @@ public class Villager extends PathfinderMob {
 
             ChunkPos oldVillageChunk = oldVillage.getVillageStartingChunk();
             LevelChunk oldChunk = serverLevel.getChunk(oldVillageChunk.x, oldVillageChunk.z);
-            var oldVillageCapability = oldChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+            IVillageCapability oldVillageCapability = oldChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
             if (oldVillageCapability == null) {
                 return;
             }
 
-            oldVillageCapability.removeVillager(this.getUUID());
+            oldVillageCapability.removeVillagerByUUID(this.getUUID());
         }
 
         VillageInfo newVillage = villages.getVillageById(villageId);
@@ -341,12 +343,12 @@ public class Villager extends PathfinderMob {
 
         ChunkPos newVillageChunk = newVillage.getVillageStartingChunk();
         LevelChunk newChunk = serverLevel.getChunk(newVillageChunk.x, newVillageChunk.z);
-        var newVillageCapability = newChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        IVillageCapability newVillageCapability = newChunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
         if (newVillageCapability == null) {
             return;
         }
 
-        newVillageCapability.assignVillager(this.getUUID());
+        newVillageCapability.addVillagerByUUID(this.getUUID());
         this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
         VillageTale.LOGGER.info("Villager {} assigned to village {}", this.getUUID(), villageId);
     }
@@ -362,13 +364,13 @@ public class Villager extends PathfinderMob {
             return;
         }
 
-        var manager = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
-        if (manager == null) {
+        IVillagesCapability villages = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
             this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
             return;
         }
 
-        VillageInfo village = manager.getVillageById(currentVillageId.get());
+        VillageInfo village = villages.getVillageById(currentVillageId.get());
         if (village == null) {
             this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
             return;
@@ -376,9 +378,9 @@ public class Villager extends PathfinderMob {
 
         ChunkPos villageChunk = village.getVillageStartingChunk();
         LevelChunk chunk = serverLevel.getChunk(villageChunk.x, villageChunk.z);
-        var villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
         if (villageCapability != null) {
-            villageCapability.removeVillager(this.getUUID());
+            villageCapability.removeVillagerByUUID(this.getUUID());
         }
 
         this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());

@@ -3,6 +3,7 @@ package org.sosly.villagetale.entity.ai.sensor;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -16,8 +17,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.data.IVillageZone;
-import org.sosly.villagetale.api.data.ZoneType;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.VillageInfo;
@@ -86,21 +87,22 @@ public class IsItemInStorage extends Sensor<Villager> {
         BlockPos villagerPos = villager.blockPosition();
         return villageCapability.getZones()
                 .stream()
-                .filter(z -> z.getType() == ZoneType.STORAGE)
-                .filter(z -> villagerPos.closerThan(z.getStartPos(), ZONE_DETECTION_DISTANCE))
-                .findFirst().orElse(null);
+                .filter(z -> z.getType().getID().equals(Storage.ID))
+                .filter(z -> villagerPos.closerThan(z.getStartPosition().atY(villagerPos.getY()), ZONE_DETECTION_DISTANCE))
+                .findFirst()
+                .orElse(null);
     }
 
     private void scanStorageZone(ServerLevel level, Villager villager, IVillageZone zone, WantedItem wantedItem, List<UUID> alreadyScanned) {
-        Optional<List<BlockPos>> pois = zone.getPOIs();
-        if (pois.isEmpty()) {
+        Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
+        if (claims.isEmpty()) {
             addToScannedList(villager, zone.getUUID(), alreadyScanned);
             return;
         }
 
         addToScannedList(villager, zone.getUUID(), alreadyScanned);
 
-        for (BlockPos containerPos : pois.get()) {
+        for (BlockPos containerPos : claims.keySet()) {
             ResourceLocation itemId = ContainerHelper.getFirstMatchingItemId(level, containerPos, wantedItem.getMatcher());
             if (itemId == null) {
                 continue;

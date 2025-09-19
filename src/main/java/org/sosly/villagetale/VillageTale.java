@@ -18,7 +18,9 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.event.RegisterProfessionsEvent;
+import org.sosly.villagetale.event.RegisterZoneTypesEvent;
 import org.sosly.villagetale.profession.ProfessionRegistry;
+import org.sosly.villagetale.zone.ZoneRegistry;
 
 @Mod(VillageTale.MOD_ID)
 public class VillageTale {
@@ -43,11 +45,12 @@ public class VillageTale {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Registering extended professions");
         event.enqueueWork(() -> {
+            MinecraftForge.EVENT_BUS.post(new RegisterZoneTypesEvent(ZoneRegistry.INSTANCE));
             MinecraftForge.EVENT_BUS.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
+
+            LOGGER.info("VillageTale setup complete");
         });
-        LOGGER.info("VillageTale setup complete");
     }
 
     @SubscribeEvent

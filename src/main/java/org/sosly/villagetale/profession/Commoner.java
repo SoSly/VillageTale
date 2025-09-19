@@ -10,8 +10,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.data.IVillageZone;
-import org.sosly.villagetale.api.data.IWantedItem;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.Villager;
 
 public class Commoner extends AbstractProfession {

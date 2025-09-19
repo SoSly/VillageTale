@@ -2,6 +2,7 @@ package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -15,8 +16,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.data.IVillageZone;
-import org.sosly.villagetale.api.data.ZoneType;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -135,7 +136,7 @@ public class GoToNearestStorage extends Behavior<Villager> {
             List.of();
 
         for (IVillageZone zone : zones) {
-            if (zone.getType() != ZoneType.STORAGE) {
+            if (!zone.getType().getID().equals(Storage.ID)) {
                 continue;
             }
 
@@ -143,12 +144,12 @@ public class GoToNearestStorage extends Behavior<Villager> {
                 continue;
             }
 
-            Optional<List<BlockPos>> pois = zone.getPOIs();
-            if (pois.isEmpty()) {
+            Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
+            if (claims.isEmpty()) {
                 continue;
             }
 
-            BlockPos zoneStart = zone.getStartPos();
+            BlockPos zoneStart = zone.getStartPosition();
             double distance = villagerPos.distSqr(zoneStart);
 
             if (distance < nearestDistance) {

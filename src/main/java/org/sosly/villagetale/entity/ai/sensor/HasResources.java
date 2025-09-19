@@ -7,7 +7,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.data.IWantedItem;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ItemMatcher;
@@ -50,7 +50,7 @@ public class HasResources extends Sensor<Villager> {
             return;
         }
 
-        var currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        IWantedItem currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
         if (currentWant == null || !currentWant.equals(ItemMatcher.RESOURCES.getFor(villager))) {
             return;
         }
