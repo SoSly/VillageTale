@@ -37,6 +37,10 @@ public class ZoneRegistry {
         return supplier.get();
     }
 
+    public Iterable<ResourceLocation> getZoneTypeIDs() {
+        return TYPES.keySet();
+    }
+
     public IZoneShape shape(ResourceLocation id) {
         Supplier<IZoneShape> supplier = SHAPES.get(id);
         if (supplier == null) {

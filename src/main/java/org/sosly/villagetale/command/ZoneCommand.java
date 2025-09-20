@@ -4,11 +4,15 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -33,8 +37,14 @@ import org.sosly.villagetale.zone.shape.Rectangle;
 import org.sosly.villagetale.zone.shape.Route;
 import org.sosly.villagetale.zone.shape.Sphere;
 import org.sosly.villagetale.zone.type.TownHall;
+import org.sosly.villagetale.zone.ZoneRegistry;
 
 public class ZoneCommand {
+    private static final SuggestionProvider<CommandSourceStack> ZONE_TYPE_SUGGESTIONS =
+        (context, builder) -> SharedSuggestionProvider.suggestResource(
+            StreamSupport.stream(ZoneRegistry.INSTANCE.getZoneTypeIDs().spliterator(), false),
+            builder
+        );
 
     private static IVillageCapability getVillageCapability(CommandSourceStack source, UUID villageId) {
         ServerLevel level = source.getLevel();
@@ -70,49 +80,29 @@ public class ZoneCommand {
                     .then(Commands.literal("rectangle")
                         .then(Commands.argument("pos1", BlockPosArgument.blockPos())
                             .then(Commands.argument("pos2", BlockPosArgument.blockPos())
-                                .then(Commands.argument("type", StringArgumentType.word())
-                                    .suggests((context, builder) -> {
-                                        builder.suggest("storage");
-                                        builder.suggest("home");
-                                        builder.suggest("townhall");
-                                        return builder.buildFuture();
-                                    })
+                                .then(Commands.argument("type", ResourceLocationArgument.id())
+                                    .suggests(ZONE_TYPE_SUGGESTIONS)
                                     .executes(ZoneCommand::createRectangleZone)
                                     .then(Commands.argument("name", StringArgumentType.string())
                                         .executes(ZoneCommand::createRectangleZoneWithName))))))
                     .then(Commands.literal("sphere")
                         .then(Commands.argument("center", BlockPosArgument.blockPos())
                             .then(Commands.argument("radius", IntegerArgumentType.integer(1))
-                                .then(Commands.argument("type", StringArgumentType.word())
-                                    .suggests((context, builder) -> {
-                                        builder.suggest("storage");
-                                        builder.suggest("home");
-                                        builder.suggest("townhall");
-                                        return builder.buildFuture();
-                                    })
+                                .then(Commands.argument("type", ResourceLocationArgument.id())
+                                    .suggests(ZONE_TYPE_SUGGESTIONS)
                                     .executes(ZoneCommand::createSphereZone)
                                     .then(Commands.argument("name", StringArgumentType.string())
                                         .executes(ZoneCommand::createSphereZoneWithName))))))
                     .then(Commands.literal("point")
                         .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                            .then(Commands.argument("type", StringArgumentType.word())
-                                .suggests((context, builder) -> {
-                                    builder.suggest("storage");
-                                    builder.suggest("home");
-                                    builder.suggest("townhall");
-                                    return builder.buildFuture();
-                                })
+                            .then(Commands.argument("type", ResourceLocationArgument.id())
+                                .suggests(ZONE_TYPE_SUGGESTIONS)
                                 .executes(ZoneCommand::createPointZone)
                                 .then(Commands.argument("name", StringArgumentType.string())
                                     .executes(ZoneCommand::createPointZoneWithName)))))
                     .then(Commands.literal("route")
-                        .then(Commands.argument("type", StringArgumentType.word())
-                            .suggests((context, builder) -> {
-                                builder.suggest("storage");
-                                builder.suggest("home");
-                                builder.suggest("townhall");
-                                return builder.buildFuture();
-                            })
+                        .then(Commands.argument("type", ResourceLocationArgument.id())
+                            .suggests(ZONE_TYPE_SUGGESTIONS)
                             .executes(ZoneCommand::createRouteZone)
                             .then(Commands.argument("name", StringArgumentType.string())
                                 .executes(ZoneCommand::createRouteZoneWithName)))))
@@ -157,8 +147,7 @@ public class ZoneCommand {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            String typeString = StringArgumentType.getString(context, "type");
-            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
+            ResourceLocation zoneType = ResourceLocationArgument.getId(context, "type");
 
             if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
@@ -208,8 +197,7 @@ public class ZoneCommand {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            String typeString = StringArgumentType.getString(context, "type");
-            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
+            ResourceLocation zoneType = ResourceLocationArgument.getId(context, "type");
 
             if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
@@ -255,8 +243,7 @@ public class ZoneCommand {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            String typeString = StringArgumentType.getString(context, "type");
-            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
+            ResourceLocation zoneType = ResourceLocationArgument.getId(context, "type");
 
             if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
@@ -300,8 +287,7 @@ public class ZoneCommand {
         try {
             CommandSourceStack source = context.getSource();
             UUID villageId = VillageUUIDArgument.getVillageUUID(context, "villageUUID");
-            String typeString = StringArgumentType.getString(context, "type");
-            ResourceLocation zoneType = new ResourceLocation("villagetale", typeString.toLowerCase());
+            ResourceLocation zoneType = ResourceLocationArgument.getId(context, "type");
 
             if (zoneType.equals(TownHall.ID)) {
                 source.sendFailure(Component.literal("TOWNHALL zones are automatically managed and cannot be created manually"));
