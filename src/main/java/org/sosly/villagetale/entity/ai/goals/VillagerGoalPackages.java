@@ -42,7 +42,6 @@ public class VillagerGoalPackages {
             Pair.of(2, (BehaviorControl<? super Villager>) new EatFood()),
             Pair.of(3, (BehaviorControl<? super Villager>) new GetFromContainer()),
             Pair.of(3, (BehaviorControl<? super Villager>) new DepositItem()),
-            Pair.of(4, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
             Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
         );
     }
@@ -50,22 +49,30 @@ public class VillagerGoalPackages {
     @SuppressWarnings("unchecked")
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getIdlePackage(float speedModifier) {
         return ImmutableList.of(
+            Pair.of(3, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
             Pair.of(5, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
                 Pair.of(RandomStroll.stroll(speedModifier), 2),
                 Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
                 Pair.of(new DoNothing(30, 60), 1)
             ))),
-            getMinimalLookBehavior(),
-            Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
+            getMinimalLookBehavior()
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
+        return ImmutableList.of(
+                Pair.of(3, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
+                getMinimalLookBehavior()
         );
     }
 
     @SuppressWarnings("unchecked")
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getRestPackage(float speedModifier) {
         return ImmutableList.of(
-            Pair.of(2, SetWalkTargetFromBlockMemory.create(MemoryModuleType.HOME, speedModifier, 1, 150, 1200)),
+            Pair.of(2, new SleepInBed()),
             Pair.of(3, GoToAssignedBed.create(speedModifier)),
-            Pair.of(4, new SleepInBed()),
+            Pair.of(4, SetWalkTargetFromBlockMemory.create(MemoryModuleType.HOME, speedModifier, 1, 150, 1200)),
             getMinimalLookBehavior(),
             Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
         );

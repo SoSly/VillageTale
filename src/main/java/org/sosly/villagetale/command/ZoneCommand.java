@@ -324,11 +324,14 @@ public class ZoneCommand {
             IVillageCapability capability = getVillageCapability(source, villageId);
             if (capability == null) return 0;
 
-            List<IVillageZone> zones = capability.getZones();
-            IVillageZone toRemove = zones.stream().filter(zone -> zone.getUUID().equals(zoneId)).findFirst().orElse(null);
+            // First find the zone to check if it exists and get its details
+            IVillageZone toRemove = capability.getZones().stream()
+                .filter(zone -> zone.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
 
             if (toRemove == null) {
-                source.sendFailure(Component.literal("Zone not found"));
+                source.sendFailure(Component.literal("Zone not found with ID: " + zoneId));
                 return 0;
             }
 
@@ -337,12 +340,22 @@ public class ZoneCommand {
                 return 0;
             }
 
-            zones.remove(toRemove);
-            source.sendSuccess(() -> Component.literal("Deleted zone: " + toRemove.getName()), true);
-            return 1;
+            String zoneName = toRemove.getName();
+            
+            // Use the proper removeZone method from the capability
+            boolean removed = capability.removeZone(zoneId);
+            
+            if (removed) {
+                source.sendSuccess(() -> Component.literal("Deleted zone: " + zoneName), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.literal("Failed to remove zone: " + zoneName));
+                return 0;
+            }
 
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to delete zone: " + e.getMessage()));
+            e.printStackTrace();
             return 0;
         }
     }

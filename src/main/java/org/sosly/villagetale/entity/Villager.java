@@ -3,6 +3,7 @@ package org.sosly.villagetale.entity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -143,12 +145,20 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(0.3F));
         brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(0.6F));
         brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(0.6F));
-        brain.addActivity(Activity.WORK, this.getProfession().getWorkPackage(0.6F));
+
+        brain.addActivity(Activity.WORK, getCombinedWorkPackage());
 
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.setActiveActivityIfPossible(Activity.IDLE);
         brain.updateActivityFromSchedule(this.level().getDayTime(), this.level().getGameTime());
+    }
+
+    private ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getCombinedWorkPackage() {
+        ImmutableList.Builder<Pair<Integer, ? extends BehaviorControl<? super Villager>>> builder = ImmutableList.builder();
+        builder.addAll(VillagerGoalPackages.getWorkPackage(0.3F));
+        builder.addAll(this.getProfession().getWorkPackage(0.3F));
+        return builder.build();
     }
 
     @Override
@@ -192,7 +202,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (workZoneId.isPresent()) {
             tag.putString("WorkZoneId", workZoneId.get().toString());
         }
-        
+
         Optional<UUID> homeZoneId = this.brain.getMemory(MemoryModuleTypes.HOME_ZONE.get());
         if (homeZoneId.isPresent()) {
             tag.putString("HomeZoneId", homeZoneId.get().toString());
@@ -234,7 +244,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
             UUID workZoneId = UUID.fromString(tag.getString("WorkZoneId"));
             this.brain.setMemory(MemoryModuleTypes.WORK_ZONE.get(), workZoneId);
         }
-        
+
         if (tag.contains("HomeZoneId")) {
             UUID homeZoneId = UUID.fromString(tag.getString("HomeZoneId"));
             this.brain.setMemory(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId);
