@@ -9,6 +9,9 @@ import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.entity.schedule.Schedule;
+import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
@@ -18,6 +21,8 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.behavior.GoToWorkZone;
+import org.sosly.villagetale.entity.ai.behavior.HarvestCropBehavior;
+import org.sosly.villagetale.entity.ai.behavior.PickUpItems;
 import org.sosly.villagetale.entity.ai.behavior.PlantSeeds;
 import org.sosly.villagetale.entity.ai.behavior.TillSoil;
 import org.sosly.villagetale.profession.AbstractProfession;
@@ -53,6 +58,16 @@ public class Farmer extends AbstractProfession {
     }
 
     @Override
+    public Schedule getSchedule() {
+        return new ScheduleBuilder(new Schedule())
+                .changeActivityAt(0, Activity.WORK)       // WORK  (6 AM - 4 PM, 10-hour work day)
+                .changeActivityAt(10000, Activity.IDLE)   // IDLE  (4 PM - 8 PM, evening social)
+                .changeActivityAt(14000, Activity.REST)   // REST  (8 PM - 4 AM, sleep)
+                .changeActivityAt(22000, Activity.IDLE)   // IDLE  (4 AM - 6 AM, morning wakeup)
+                .build();
+    }
+
+    @Override
     public ImmutableList<SensorType<? extends Sensor<? super Villager>>> getSensors() {
         return ImmutableList.of(
             SensorTypes.IS_FARMLAND.get(),
@@ -63,9 +78,11 @@ public class Farmer extends AbstractProfession {
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-            Pair.of(1, (BehaviorControl<? super Villager>) new PlantSeeds()),
-            Pair.of(2, (BehaviorControl<? super Villager>) new TillSoil()),
-            Pair.of(3, (BehaviorControl<? super Villager>) new GoToWorkZone())
+            Pair.of(1, (BehaviorControl<? super Villager>) new PickUpItems()),
+            Pair.of(11, (BehaviorControl<? super Villager>) new HarvestCropBehavior()),
+            Pair.of(12, (BehaviorControl<? super Villager>) new PlantSeeds()),
+            Pair.of(13, (BehaviorControl<? super Villager>) new TillSoil()),
+            Pair.of(14, (BehaviorControl<? super Villager>) new GoToWorkZone())
         );
     }
 
@@ -73,4 +90,5 @@ public class Farmer extends AbstractProfession {
     public boolean isValidWorkZone(IVillageZone zone) {
         return zone.getType().getID().equals(Farmland.ID);
     }
+
 }

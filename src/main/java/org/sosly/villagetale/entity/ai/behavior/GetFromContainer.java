@@ -25,6 +25,7 @@ import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
+import org.sosly.villagetale.helper.InventoryHelper;
 
 public class GetFromContainer extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 100;
@@ -172,22 +173,7 @@ public class GetFromContainer extends Behavior<Villager> {
         }
 
         SimpleContainer inventory = villager.getInventory();
-
-        if (findFirstEmptySlot(inventory) < 0) {
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer aborting - no empty slots for villager {}", villager.getId());
-            }
-            return;
-        }
-
         int maxToExtract = wantedItem.getAmount();
-        int emptySlot = findFirstEmptySlot(inventory);
-        if (emptySlot < 0) {
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer aborting - no empty slots for villager {}", villager.getId());
-            }
-            return;
-        }
 
         ItemStack extractedItem = ContainerHelper.extractItemFromContainer(level, this.targetContainer, wantedItem.getMatcher(), maxToExtract);
         if (extractedItem.isEmpty()) {
@@ -197,7 +183,12 @@ public class GetFromContainer extends Behavior<Villager> {
             return;
         }
 
-        inventory.setItem(emptySlot, extractedItem);
+        if (!InventoryHelper.tryAddToInventory(inventory, extractedItem)) {
+            if (VillageTale.LOGGER.isDebugEnabled()) {
+                VillageTale.LOGGER.debug("GetFromContainer aborting - couldn't add items to inventory for villager {}", villager.getId());
+            }
+            return;
+        }
 
         if (VillageTale.LOGGER.isDebugEnabled()) {
             VillageTale.LOGGER.debug("GetFromContainer extracted {} x{} for villager {}",
@@ -263,12 +254,4 @@ public class GetFromContainer extends Behavior<Villager> {
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
     }
 
-    private int findFirstEmptySlot(SimpleContainer inventory) {
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            if (inventory.getItem(i).isEmpty()) {
-                return i;
-            }
-        }
-        return -1;
-    }
 }

@@ -33,6 +33,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -51,10 +52,11 @@ import org.sosly.villagetale.data.LivingEntityFoodData;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
+import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 
-public class Villager extends PathfinderMob {
+public class Villager extends PathfinderMob implements InventoryCarrier {
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
     private ImmutableList<MemoryModuleType<?>> memoryTypes;
@@ -402,8 +404,14 @@ public class Villager extends PathfinderMob {
         return this.foodData;
     }
 
+    @Override
     public SimpleContainer getInventory() {
         return this.inventory;
+    }
+    
+    @Override
+    public boolean wantsToPickUp(ItemStack stack) {
+        return InventoryHelper.canAddToInventory(this.inventory, stack);
     }
 
 

@@ -31,6 +31,7 @@ import org.sosly.villagetale.zone.type.Storage;
 public class DepositItem extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
     private static final double INTERACTION_DISTANCE = 2.0D;
+    private static final double ZONE_DETECTION_DISTANCE = 4.0D;
     private static final int CLAIM_DURATION = 60;
     private static final int SEARCH_DURATION = 20;
 
@@ -160,8 +161,35 @@ public class DepositItem extends Behavior<Villager> {
     }
 
     private boolean isAtStorageZone(ServerLevel level, Villager villager, UUID villageId) {
-        IVillageZone zone = findZoneContaining(level, villageId, villager.blockPosition());
-        return zone != null && zone.getType().getID().equals(Storage.ID);
+        return getCurrentStorageZone(level, villager, villageId) != null;
+    }
+    
+    private IVillageZone getCurrentStorageZone(ServerLevel level, Villager villager, UUID villageId) {
+        IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability == null) {
+            return null;
+        }
+
+        VillageInfo village = villagesCapability.getVillageById(villageId);
+        if (village == null) {
+            return null;
+        }
+
+        ChunkPos townHallChunk = new ChunkPos(village.getTownHallPos());
+        LevelChunk chunk = level.getChunk(townHallChunk.x, townHallChunk.z);
+
+        IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (villageCapability == null) {
+            return null;
+        }
+
+        BlockPos villagerPos = villager.blockPosition();
+        return villageCapability.getZones()
+                .stream()
+                .filter(z -> z.getType().getID().equals(Storage.ID))
+                .filter(z -> villagerPos.closerThan(z.getStartPosition().atY(villagerPos.getY()), ZONE_DETECTION_DISTANCE))
+                .findFirst()
+                .orElse(null);
     }
 
     private BlockPos findAvailableContainer(ServerLevel level, Villager villager, UUID villageId, Map<ResourceLocation, Integer> itemsToDeposit) {
@@ -169,8 +197,8 @@ public class DepositItem extends Behavior<Villager> {
             return null;
         }
 
-        IVillageZone zone = findZoneContaining(level, villageId, villager.blockPosition());
-        if (zone == null || !zone.getType().getID().equals(Storage.ID)) {
+        IVillageZone zone = getCurrentStorageZone(level, villager, villageId);
+        if (zone == null) {
             return null;
         }
 
@@ -198,7 +226,7 @@ public class DepositItem extends Behavior<Villager> {
             return false;
         }
 
-        IVillageZone zone = findZoneContaining(level, villageId, this.targetContainer);
+        IVillageZone zone = getCurrentStorageZone(level, villager, villageId);
         if (zone == null) {
             return false;
         }

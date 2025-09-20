@@ -18,7 +18,7 @@ import org.sosly.villagetale.helper.ItemMatcher;
 
 public class HasItemsToDeposit extends Sensor<Villager> {
     private static final int NEARLY_FULL_THRESHOLD = 4;
-    private static final int LARGE_QUANTITY_THRESHOLD = 32;
+    private static final int LARGE_QUANTITY_THRESHOLD = 16;
     private static final int FOOD_TO_KEEP = 3;
 
     public HasItemsToDeposit() {
@@ -54,10 +54,12 @@ public class HasItemsToDeposit extends Sensor<Villager> {
         boolean nearlyFull = usedSlots >= NEARLY_FULL_THRESHOLD;
 
         boolean hasLargeQuantityOfNonEssentials = hasLargeQuantityOfNonEssentials(villager);
+        
+        boolean hasExcessResources = hasExcessResources(villager);
 
         boolean isEvening = villager.getBrain().isActive(Activity.IDLE);
 
-        return nearlyFull || hasLargeQuantityOfNonEssentials || isEvening;
+        return nearlyFull || hasLargeQuantityOfNonEssentials || hasExcessResources || isEvening;
     }
 
     private int countUsedSlots(Villager villager) {
@@ -89,6 +91,28 @@ public class HasItemsToDeposit extends Sensor<Villager> {
 
         return itemCounts.values().stream().anyMatch(count -> count >= LARGE_QUANTITY_THRESHOLD);
     }
+    
+    private boolean hasExcessResources(Villager villager) {
+        int wantedAmount = ItemMatcher.RESOURCES.getFor(villager).getAmount();
+        if (wantedAmount <= 0) {
+            return false;
+        }
+        
+        for (int i = 0; i < villager.getInventory().getContainerSize(); i++) {
+            ItemStack stack = villager.getInventory().getItem(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            
+            if (ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(stack)) {
+                if (stack.getCount() > wantedAmount) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
 
     private Map<ResourceLocation, Integer> calculateItemsToDeposit(Villager villager) {
         Map<ResourceLocation, Integer> itemsToDeposit = new HashMap<>();
@@ -111,6 +135,16 @@ public class HasItemsToDeposit extends Sensor<Villager> {
             int totalCount = entry.getValue();
             ItemStack testStack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
 
+            // Check if this matches resources (like seeds for farmers)
+            if (ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(testStack)) {
+                int wantedAmount = ItemMatcher.RESOURCES.getFor(villager).getAmount();
+                if (totalCount > wantedAmount) {
+                    itemsToDeposit.put(itemId, totalCount - wantedAmount);
+                }
+                continue;
+            }
+            
+            // Check if this is a tool - keep only what's needed
             if (isEssentialItem(testStack, villager)) {
                 continue;
             }
