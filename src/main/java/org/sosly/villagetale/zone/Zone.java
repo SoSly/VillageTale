@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -213,6 +214,16 @@ public class Zone implements IVillageZone {
             tag.put("shape_data", shapeData);
         }
 
+        if (!villagers.isEmpty()) {
+            ListTag villagersList = new ListTag();
+            for (UUID villagerUUID : villagers) {
+                CompoundTag villagerTag = new CompoundTag();
+                villagerTag.putUUID("villager", villagerUUID);
+                villagersList.add(villagerTag);
+            }
+            tag.put("villagers", villagersList);
+        }
+
         return tag;
     }
 
@@ -234,6 +245,14 @@ public class Zone implements IVillageZone {
             shape.deserializeNBT(tag.getCompound("shape_data"));
         }
         this.shape = shape;
+
+        if (tag.contains("villagers")) {
+            ListTag villagersList = tag.getList("villagers", 10);
+            for (int i = 0; i < villagersList.size(); i++) {
+                UUID villagerUUID = villagersList.getCompound(i).getUUID("villager");
+                this.villagers.add(villagerUUID);
+            }
+        }
     }
 
     private Optional<List<BlockPos>> getPOIs() {

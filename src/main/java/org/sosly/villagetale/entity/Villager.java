@@ -179,6 +179,11 @@ public class Villager extends PathfinderMob {
         if (profession.isPresent()) {
             tag.putString("Profession", profession.get().toString());
         }
+
+        Optional<UUID> workZoneId = this.brain.getMemory(MemoryModuleTypes.WORK_ZONE.get());
+        if (workZoneId.isPresent()) {
+            tag.putString("WorkZoneId", workZoneId.get().toString());
+        }
     }
 
     @Override
@@ -211,6 +216,11 @@ public class Villager extends PathfinderMob {
             profession = ResourceLocation.tryParse(tag.getString("Profession"));
         }
         this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), profession);
+
+        if (tag.contains("WorkZoneId")) {
+            UUID workZoneId = UUID.fromString(tag.getString("WorkZoneId"));
+            this.brain.setMemory(MemoryModuleTypes.WORK_ZONE.get(), workZoneId);
+        }
 
         if (this.level() instanceof ServerLevel) {
             this.refreshBrain((ServerLevel) this.level());
