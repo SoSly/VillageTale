@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -57,15 +56,6 @@ public class PickUpItems extends Behavior<Villager> {
 
         if (items.isEmpty()) {
             return false;
-        }
-
-        // Debug: Check for multiple items at same position
-        if (items.size() > 1) {
-            BlockPos firstPos = items.get(0).blockPosition();
-            long samePos = items.stream().filter(i -> i.blockPosition().equals(firstPos)).count();
-            if (samePos > 1) {
-                System.out.println("PickUpItems: Found " + samePos + " items at position " + firstPos);
-            }
         }
 
         targetItem = items.stream()

@@ -104,10 +104,12 @@ public class HasItemsToDeposit extends Sensor<Villager> {
                 continue;
             }
             
-            if (ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(stack)) {
-                if (stack.getCount() > wantedAmount) {
-                    return true;
-                }
+            if (!ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(stack)) {
+                continue;
+            }
+            
+            if (stack.getCount() > wantedAmount) {
+                return true;
             }
         }
         
@@ -135,7 +137,6 @@ public class HasItemsToDeposit extends Sensor<Villager> {
             int totalCount = entry.getValue();
             ItemStack testStack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
 
-            // Check if this matches resources (like seeds for farmers)
             if (ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(testStack)) {
                 int wantedAmount = ItemMatcher.RESOURCES.getFor(villager).getAmount();
                 if (totalCount > wantedAmount) {
@@ -144,17 +145,21 @@ public class HasItemsToDeposit extends Sensor<Villager> {
                 continue;
             }
             
-            // Check if this is a tool - keep only what's needed
             if (isEssentialItem(testStack, villager)) {
                 continue;
             }
 
-            if (testStack.isEdible() && foodKept < FOOD_TO_KEEP) {
-                int toKeep = Math.min(totalCount, FOOD_TO_KEEP - foodKept);
-                foodKept += toKeep;
-                totalCount -= toKeep;
+            if (!testStack.isEdible() || foodKept >= FOOD_TO_KEEP) {
+                if (totalCount > 0) {
+                    itemsToDeposit.put(itemId, totalCount);
+                }
+                continue;
             }
-
+            
+            int toKeep = Math.min(totalCount, FOOD_TO_KEEP - foodKept);
+            foodKept += toKeep;
+            totalCount -= toKeep;
+            
             if (totalCount > 0) {
                 itemsToDeposit.put(itemId, totalCount);
             }
