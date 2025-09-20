@@ -21,12 +21,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolActions;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
 
 public class TillSoil extends Behavior<Villager> {
-    private static final double INTERACTION_DISTANCE = 4.0D;
     private static final int TILLING_DURATION = 40;
     private static final int BEHAVIOR_DURATION = 100;
 
@@ -76,7 +76,7 @@ ItemStack tool = getTool(villager);
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, getTool(villager));
 
-        if (villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
         }
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
@@ -102,7 +102,7 @@ ItemStack tool = getTool(villager);
             return;
         }
 
-        if (!villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (!villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
         }
 
@@ -163,7 +163,7 @@ ItemStack tool = getTool(villager);
             return null;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
         if (zone == null) {
             return null;
         }

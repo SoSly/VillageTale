@@ -1,7 +1,6 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,12 +17,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
 
 public class HarvestCropBehavior extends Behavior<Villager> {
-    private static final double INTERACTION_DISTANCE = 4.0D;
     private static final int HARVEST_DURATION = 40;
     private static final int BEHAVIOR_DURATION = 100;
 
@@ -74,7 +73,7 @@ public class HarvestCropBehavior extends Behavior<Villager> {
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, getTool(villager));
 
-        if (villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
         }
 
@@ -101,7 +100,7 @@ public class HarvestCropBehavior extends Behavior<Villager> {
             return;
         }
 
-        if (!villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (!villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
         }
 
@@ -164,7 +163,7 @@ public class HarvestCropBehavior extends Behavior<Villager> {
             return null;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
         if (zone == null) {
             return null;
         }

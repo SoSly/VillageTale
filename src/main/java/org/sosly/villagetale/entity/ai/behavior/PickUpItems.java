@@ -14,14 +14,13 @@ import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 
 public class PickUpItems extends Behavior<Villager> {
-    private static final double SCAN_RADIUS = 16.0D;
-    private static final double COLLECTION_DISTANCE = 3.0D;
     private static final int SCAN_INTERVAL = 20;
     private static final int BEHAVIOR_DURATION = 40;
 
@@ -48,7 +47,7 @@ public class PickUpItems extends Behavior<Villager> {
             return false;
         }
 
-        AABB searchBox = new AABB(villager.blockPosition()).inflate(SCAN_RADIUS);
+        AABB searchBox = new AABB(villager.blockPosition()).inflate(CommonConfig.scanRadius);
         List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, searchBox,
             item -> !item.isRemoved() && item.isAlive()
                 && zone.containsPosition(item.blockPosition())
@@ -98,7 +97,7 @@ public class PickUpItems extends Behavior<Villager> {
             return;
         }
 
-        if (!targetItem.position().closerThan(villager.blockPosition().getCenter(), COLLECTION_DISTANCE)) {
+        if (!targetItem.position().closerThan(villager.blockPosition().getCenter(), CommonConfig.collectionDistance)) {
             villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(targetItem.position(), 0.5F, 3));
             return;
@@ -121,6 +120,6 @@ public class PickUpItems extends Behavior<Villager> {
             return null;
         }
 
-        return VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        return VillagesHelper.getZoneById(level, villageId, workplaceId);
     }
 }

@@ -19,6 +19,7 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.capability.Capabilities;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.data.WantedItem;
@@ -29,7 +30,6 @@ import org.sosly.villagetale.helper.InventoryHelper;
 
 public class GetFromContainer extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 100;
-    private static final double INTERACTION_DISTANCE = 2.0D;
     private static final int CLAIM_DURATION = 60;
     private static final int SEARCH_DURATION = 20;
 
@@ -94,7 +94,7 @@ public class GetFromContainer extends Behavior<Villager> {
             return;
         }
 
-        if (!villager.blockPosition().closerThan(this.targetContainer, INTERACTION_DISTANCE)) {
+        if (!villager.blockPosition().closerThan(this.targetContainer, CommonConfig.interactionDistance)) {
             return;
         }
 

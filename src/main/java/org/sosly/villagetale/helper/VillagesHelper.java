@@ -9,7 +9,6 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.entity.Villager;
 
 public class VillagesHelper {
     public static IVillageCapability getVillageCapability(ServerLevel level, UUID uuid) {
@@ -33,14 +32,14 @@ public class VillagesHelper {
         return village;
     }
 
-    public static IVillageZone getWorkZone(ServerLevel level, Villager villager, UUID villageId, UUID workplaceId) {
+    public static IVillageZone getZoneById(ServerLevel level, UUID villageId, UUID zoneId) {
         IVillageCapability village = VillagesHelper.getVillageCapability(level, villageId);
         if (village == null) {
             return null;
         }
 
         return village.getZones().stream()
-                .filter(z -> z.getUUID().equals(workplaceId))
+                .filter(z -> z.getUUID().equals(zoneId))
                 .findFirst()
                 .orElse(null);
     }

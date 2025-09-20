@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
@@ -23,21 +22,12 @@ public class IsFarmland extends Sensor<Villager> {
 
     @Override
     protected void doTick(ServerLevel level, Villager villager) {
-        if (villager.getVillage().isEmpty()) {
-            return;
-        }
-
-        IVillageCapability village = VillagesHelper.getVillageCapability(level, villager.getVillage().get());
-        if (village == null) {
-            return;
-        }
-
         UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
         if (workplaceId == null) {
             return;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villager.getVillage().get(), workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villager.getVillage().get(), workplaceId);
         if (zone == null) {
             return;
         }

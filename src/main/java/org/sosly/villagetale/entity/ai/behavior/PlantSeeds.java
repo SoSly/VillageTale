@@ -15,15 +15,14 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
 
 public class PlantSeeds extends Behavior<Villager> {
-    private static final double INTERACTION_DISTANCE = 4.0D;
     private static final int PLANTING_DURATION = 30;
     private static final int BEHAVIOR_DURATION = 60;
 
@@ -72,7 +71,7 @@ public class PlantSeeds extends Behavior<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
 
-        if (villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
         }
 
@@ -98,7 +97,7 @@ public class PlantSeeds extends Behavior<Villager> {
             return;
         }
 
-        if (!villager.blockPosition().closerThan(pos, INTERACTION_DISTANCE)) {
+        if (!villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
         }
 
@@ -167,7 +166,7 @@ public class PlantSeeds extends Behavior<Villager> {
             return null;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
         if (zone == null) {
             return null;
         }

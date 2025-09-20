@@ -9,13 +9,13 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
 
 public class GoToWorkZone extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
-    private static final double ARRIVAL_DISTANCE = 4.0;
 
     public GoToWorkZone() {
         super(ImmutableMap.of(
@@ -33,7 +33,7 @@ public class GoToWorkZone extends Behavior<Villager> {
             return false;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
         if (zone == null) {
             return false;
         }
@@ -49,7 +49,7 @@ public class GoToWorkZone extends Behavior<Villager> {
             return;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
 
         if (zone == null) {
             VillageTale.LOGGER.warn("No zone found for workplace " + workplaceId);
@@ -69,12 +69,12 @@ public class GoToWorkZone extends Behavior<Villager> {
             return false;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkZone(level, villager, villageId, workplaceId);
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
         if (zone == null) {
             return false;
         }
 
         return !villager.blockPosition()
-                .closerThan(zone.getStartPosition().atY(villager.getBlockY()), ARRIVAL_DISTANCE);
+                .closerThan(zone.getStartPosition().atY(villager.getBlockY()), CommonConfig.interactionDistance);
     }
 }

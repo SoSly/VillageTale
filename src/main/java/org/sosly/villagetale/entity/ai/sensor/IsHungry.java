@@ -40,9 +40,11 @@ public class IsHungry extends Sensor<Villager> {
 
     private void updateMemoryIfChanged(Villager villager, MemoryModuleType<Boolean> memoryType, boolean newValue) {
         Boolean currentValue = villager.getBrain().getMemory(memoryType).orElse(null);
-        if (currentValue == null || !currentValue.equals(newValue)) {
-            villager.getBrain().setMemory(memoryType, newValue);
+        if (currentValue != null && currentValue.equals(newValue)) {
+            return;
         }
+
+        villager.getBrain().setMemory(memoryType, newValue);
     }
 
     @Override

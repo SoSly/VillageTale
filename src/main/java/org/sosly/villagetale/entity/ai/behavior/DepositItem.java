@@ -22,6 +22,7 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.capability.Capabilities;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -30,13 +31,10 @@ import org.sosly.villagetale.zone.type.Storage;
 
 public class DepositItem extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
-    private static final double INTERACTION_DISTANCE = 2.0D;
-    private static final double ZONE_DETECTION_DISTANCE = 4.0D;
     private static final int CLAIM_DURATION = 60;
     private static final int SEARCH_DURATION = 20;
 
     private BlockPos targetContainer;
-    private boolean atStorageZone;
     private boolean containerClaimed;
     private int searchTicks;
     private IVillageZone claimedZone;
@@ -74,7 +72,6 @@ public class DepositItem extends Behavior<Villager> {
 
     @Override
     protected void start(ServerLevel level, Villager villager, long gameTime) {
-        this.atStorageZone = true;
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;
@@ -104,7 +101,7 @@ public class DepositItem extends Behavior<Villager> {
             return;
         }
 
-        if (!villager.blockPosition().closerThan(this.targetContainer, INTERACTION_DISTANCE)) {
+        if (!villager.blockPosition().closerThan(this.targetContainer, CommonConfig.interactionDistance)) {
             return;
         }
 
@@ -163,7 +160,7 @@ public class DepositItem extends Behavior<Villager> {
     private boolean isAtStorageZone(ServerLevel level, Villager villager, UUID villageId) {
         return getCurrentStorageZone(level, villager, villageId) != null;
     }
-    
+
     private IVillageZone getCurrentStorageZone(ServerLevel level, Villager villager, UUID villageId) {
         IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
         if (villagesCapability == null) {
@@ -187,7 +184,7 @@ public class DepositItem extends Behavior<Villager> {
         return villageCapability.getZones()
                 .stream()
                 .filter(z -> z.getType().getID().equals(Storage.ID))
-                .filter(z -> villagerPos.closerThan(z.getStartPosition().atY(villagerPos.getY()), ZONE_DETECTION_DISTANCE))
+                .filter(z -> villagerPos.closerThan(z.getStartPosition().atY(villagerPos.getY()), CommonConfig.interactionDistance))
                 .findFirst()
                 .orElse(null);
     }
@@ -348,7 +345,6 @@ public class DepositItem extends Behavior<Villager> {
 
     private void resetState() {
         this.targetContainer = null;
-        this.atStorageZone = false;
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;

@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
@@ -21,7 +22,6 @@ import org.sosly.villagetale.zone.type.Storage;
 
 public class GoToNearestStorage extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
-    private static final double ARRIVAL_DISTANCE = 4.0D;
 
     private BlockPos targetStoragePos;
 
@@ -62,7 +62,7 @@ public class GoToNearestStorage extends Behavior<Villager> {
             return false;
         }
 
-        if (villager.blockPosition().closerThan(targetStorage, ARRIVAL_DISTANCE)) {
+        if (villager.blockPosition().closerThan(targetStorage, CommonConfig.interactionDistance)) {
             return false;
         }
 
@@ -92,7 +92,7 @@ public class GoToNearestStorage extends Behavior<Villager> {
         }
 
         return !villager.blockPosition()
-                .closerThan(this.targetStoragePos, ARRIVAL_DISTANCE);
+                .closerThan(this.targetStoragePos, CommonConfig.interactionDistance);
     }
 
     private BlockPos findNearestStorage(ServerLevel level, Villager villager, UUID villageId, boolean excludeScanned) {

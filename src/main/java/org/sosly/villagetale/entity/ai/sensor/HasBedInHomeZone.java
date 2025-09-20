@@ -19,7 +19,6 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
-import org.sosly.villagetale.zone.type.Home;
 
 public class HasBedInHomeZone extends Sensor<Villager> {
     private static final int CLAIM_DURATION = 24000;
@@ -81,13 +80,12 @@ public class HasBedInHomeZone extends Sensor<Villager> {
             return null;
         }
 
-        for (IVillageZone zone : villageCapability.getZones()) {
-            if (zone.getUUID().equals(homeZoneId) && zone.getType().getID().equals(Home.ID)) {
-                return zone;
-            }
+        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, homeZoneId);
+        if (zone == null) {
+            return null;
         }
 
-        return null;
+        return zone;
     }
 
     private BlockPos findNearestBed(List<BlockPos> beds, BlockPos villagerPos) {

@@ -6,13 +6,16 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.sosly.villagetale.block.BlockTypes;
 import org.sosly.villagetale.block.entity.BlockEntityTypes;
 import org.sosly.villagetale.command.VillageTaleCommand;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.EntityTypes;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -40,6 +43,8 @@ public class VillageTale {
 
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::onEntityAttributeCreation);
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.build());
 
         MinecraftForge.EVENT_BUS.register(this);
     }
