@@ -13,12 +13,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -42,6 +44,8 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
@@ -53,8 +57,8 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
 import org.sosly.villagetale.helper.InventoryHelper;
-import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.ProfessionRegistry;
+import org.sosly.villagetale.profession.professions.Commoner;
 
 public class Villager extends PathfinderMob implements InventoryCarrier {
     private final LivingEntityFoodData foodData;
@@ -70,6 +74,8 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         this.getNavigation().setCanFloat(true);
         this.setCanPickUpLoot(true);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -186,6 +192,11 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (workZoneId.isPresent()) {
             tag.putString("WorkZoneId", workZoneId.get().toString());
         }
+        
+        Optional<UUID> homeZoneId = this.brain.getMemory(MemoryModuleTypes.HOME_ZONE.get());
+        if (homeZoneId.isPresent()) {
+            tag.putString("HomeZoneId", homeZoneId.get().toString());
+        }
     }
 
     @Override
@@ -222,6 +233,11 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (tag.contains("WorkZoneId")) {
             UUID workZoneId = UUID.fromString(tag.getString("WorkZoneId"));
             this.brain.setMemory(MemoryModuleTypes.WORK_ZONE.get(), workZoneId);
+        }
+        
+        if (tag.contains("HomeZoneId")) {
+            UUID homeZoneId = UUID.fromString(tag.getString("HomeZoneId"));
+            this.brain.setMemory(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId);
         }
 
         if (this.level() instanceof ServerLevel) {
@@ -408,7 +424,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     public SimpleContainer getInventory() {
         return this.inventory;
     }
-    
+
     @Override
     public boolean wantsToPickUp(ItemStack stack) {
         return InventoryHelper.canAddToInventory(this.inventory, stack);
@@ -442,6 +458,18 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         return bedPos.relative(blockState.getValue(BedBlock.FACING));
     }
 
+    @Override
+    public boolean canBeLeashed(@NotNull Player player) {
+        return false;
+    }
+
+    @Override
+    public @NotNull Vec3 getRopeHoldPosition(float partialTicks) {
+        float f = Mth.lerp(partialTicks, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180F);
+        Vec3 vec3 = new Vec3(0.0D, this.getBoundingBox().getYsize() - 1.0D, 0.2D);
+        return this.getPosition(partialTicks).add(vec3.yRot(-f));
+    }
+
     protected static class DefaultVillagerBrain {
         protected static ImmutableList<MemoryModuleType<?>> getMemoryModules() {
             return ImmutableList.of(
@@ -454,6 +482,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
                 MemoryModuleType.LOOK_TARGET,
                 MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
                 MemoryModuleType.PATH,
+                MemoryModuleType.DOORS_TO_CLOSE,
                 MemoryModuleType.HURT_BY,
                 MemoryModuleType.HURT_BY_ENTITY,
                 MemoryModuleType.NEAREST_HOSTILE,
@@ -464,6 +493,8 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
                 MemoryModuleTypes.IS_STARVING.get(),
                 MemoryModuleTypes.PROFESSION.get(),
                 MemoryModuleTypes.VILLAGE.get(),
+                MemoryModuleTypes.WORK_ZONE.get(),
+                MemoryModuleTypes.HOME_ZONE.get(),
                 MemoryModuleTypes.BUSY.get()
             );
         }
@@ -479,7 +510,8 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
                 SensorTypes.HAS_TOOL.get(),
                 SensorTypes.HAS_RESOURCE.get(),
                 SensorTypes.IS_ITEM_IN_STORAGE.get(),
-                SensorTypes.HAS_ITEMS_TO_DEPOSIT.get()
+                SensorTypes.HAS_ITEMS_TO_DEPOSIT.get(),
+                SensorTypes.HAS_BED_IN_HOME_ZONE.get()
             );
         }
     }

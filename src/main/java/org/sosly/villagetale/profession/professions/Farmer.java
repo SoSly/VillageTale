@@ -52,8 +52,7 @@ public class Farmer extends AbstractProfession {
         return ImmutableList.of(
             MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get(),
             MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(),
-            MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(),
-            MemoryModuleTypes.WORK_ZONE.get()
+            MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get()
         );
     }
 

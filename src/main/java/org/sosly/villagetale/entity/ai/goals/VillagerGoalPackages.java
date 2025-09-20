@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
+import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetAwayFrom;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
+import net.minecraft.world.entity.ai.behavior.SleepInBed;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.behavior.UpdateActivityFromSchedule;
 import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
@@ -23,7 +25,6 @@ import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
 import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorage;
 import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
-import org.sosly.villagetale.entity.ai.behavior.SleepInBed;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
 import org.sosly.villagetale.entity.ai.behavior.WakeUp;
 
@@ -33,6 +34,7 @@ public class VillagerGoalPackages {
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getCorePackage() {
         return ImmutableList.of(
             Pair.of(0, (BehaviorControl<? super Villager>) new Swim(0.8F)),
+            Pair.of(0, (BehaviorControl<? super Villager>) InteractWithDoor.create()),
             Pair.of(0, (BehaviorControl<? super Villager>) new LookAtTargetSink(45, 90)),
             Pair.of(0, VillagerPanicTrigger.create()),
             Pair.of(1, (BehaviorControl<? super Villager>) new MoveToTargetSink()),

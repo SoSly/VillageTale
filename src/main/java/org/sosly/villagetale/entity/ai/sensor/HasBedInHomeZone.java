@@ -1,0 +1,121 @@
+package org.sosly.villagetale.entity.ai.sensor;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.entity.MemoryModuleTypes;
+import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.helper.VillagesHelper;
+import org.sosly.villagetale.zone.type.Home;
+
+public class HasBedInHomeZone extends Sensor<Villager> {
+    private static final int CLAIM_DURATION = 24000;
+
+    public HasBedInHomeZone() {
+        super(200);
+    }
+
+    @Override
+    protected void doTick(ServerLevel level, Villager villager) {
+        if (villager.getBrain().hasMemoryValue(MemoryModuleType.HOME)) {
+            return;
+        }
+
+        Optional<UUID> homeZoneId = villager.getBrain().getMemory(MemoryModuleTypes.HOME_ZONE.get());
+        Optional<UUID> villageId = villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get());
+
+        if (homeZoneId.isEmpty() || villageId.isEmpty()) {
+            return;
+        }
+
+        IVillageZone zone = findHomeZone(level, villageId.get(), homeZoneId.get());
+        if (zone == null) {
+            return;
+        }
+
+        List<BlockPos> availableBeds = zone.getAvailableClaims(level.getGameTime(), Optional.of((state) -> state.is(BlockTags.BEDS)));
+
+        if (availableBeds.isEmpty()) {
+            return;
+        }
+
+        BlockPos nearest = findNearestBed(availableBeds, villager.blockPosition());
+        if (nearest == null) {
+            return;
+        }
+
+        if (!zone.claim(nearest, villager.getUUID(), CLAIM_DURATION, level.getGameTime())) {
+            return;
+        }
+
+        BlockPos bedHead = getBedHeadPosition(level, nearest);
+        villager.getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), bedHead));
+        VillageTale.LOGGER.info("Villager {} claimed bed at {} in home zone {}",
+                villager.getUUID(), bedHead, zone.getName());
+    }
+
+    @Override
+    public Set<MemoryModuleType<?>> requires() {
+        return Set.of(
+            MemoryModuleTypes.HOME_ZONE.get(),
+            MemoryModuleTypes.VILLAGE.get()
+        );
+    }
+
+    private IVillageZone findHomeZone(ServerLevel level, UUID villageId, UUID homeZoneId) {
+        IVillageCapability villageCapability = VillagesHelper.getVillageCapability(level, villageId);
+        if (villageCapability == null) {
+            return null;
+        }
+
+        for (IVillageZone zone : villageCapability.getZones()) {
+            if (zone.getUUID().equals(homeZoneId) && zone.getType().getID().equals(Home.ID)) {
+                return zone;
+            }
+        }
+
+        return null;
+    }
+
+    private BlockPos findNearestBed(List<BlockPos> beds, BlockPos villagerPos) {
+        BlockPos nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (BlockPos bed : beds) {
+            double distance = bed.distSqr(villagerPos);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = bed;
+            }
+        }
+
+        return nearest;
+    }
+
+    private BlockPos getBedHeadPosition(ServerLevel level, BlockPos bedPos) {
+        BlockState blockState = level.getBlockState(bedPos);
+        if (!(blockState.getBlock() instanceof BedBlock)) {
+            return bedPos;
+        }
+
+        BedPart bedPart = blockState.getValue(BedBlock.PART);
+        if (bedPart != BedPart.FOOT) {
+            return bedPos;
+        }
+
+        return bedPos.relative(blockState.getValue(BedBlock.FACING));
+    }
+}

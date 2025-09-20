@@ -513,6 +513,12 @@ public class ZoneCommand {
             for (IVillageZone zone : capability.getZones()) {
                 if (zone.getUUID().equals(zoneId)) {
                     zone.addAssignedVillager(villager.getUUID());
+                    
+                    if (zone.getType().getID().equals(org.sosly.villagetale.zone.type.Home.ID)) {
+                        villager.getBrain().setMemory(org.sosly.villagetale.entity.MemoryModuleTypes.HOME_ZONE.get(), zoneId);
+                        villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+                    }
+                    
                     source.sendSuccess(() ->
                         Component.literal("Assigned villager to zone: " + zone.getName()), true);
                     return 1;
@@ -547,6 +553,11 @@ public class ZoneCommand {
 
             for (IVillageZone zone : capability.getZones()) {
                 if (zone.removeAssignedVillager(villagerUuid)) {
+                    if (zone.getType().getID().equals(org.sosly.villagetale.zone.type.Home.ID)) {
+                        villager.getBrain().eraseMemory(org.sosly.villagetale.entity.MemoryModuleTypes.HOME_ZONE.get());
+                        villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+                    }
+                    
                     source.sendSuccess(() ->
                         Component.literal("Unassigned villager from zone: " + zone.getName()), true);
                     removed = true;

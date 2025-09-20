@@ -124,7 +124,8 @@ public class Zone implements IVillageZone {
 
     @Override
     public Map<BlockPos, Optional<UUID>> getClaims(long currentTime) {
-        this.claims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
+        this.claims.entrySet()
+                .removeIf(entry -> entry.getValue().isExpired(currentTime));
 
         Optional<List<BlockPos>> pois = getPOIs();
         if (pois.isEmpty()) {
@@ -144,7 +145,7 @@ public class Zone implements IVillageZone {
         return getClaims(currentTime).entrySet().stream()
                 .filter(entry -> entry.getValue().isPresent())
                 .filter(claim -> blockFilter
-                    .map(filter -> filter.test(this.level.getBlockState(claim.getKey())))
+                    .map(filter -> filter.test(this.village.getChunk().getLevel().getBlockState(claim.getKey())))
                     .orElse(true))
                 .flatMap(entry -> entry.getValue().map(uuid -> Map.entry(entry.getKey(), uuid)).stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -155,7 +156,7 @@ public class Zone implements IVillageZone {
         return getClaims(currentTime).entrySet().stream()
             .filter(claim -> claim.getValue().isEmpty())
             .filter(claim -> blockFilter
-                .map(filter -> filter.test(this.level.getBlockState(claim.getKey())))
+                .map(filter -> filter.test(this.village.getChunk().getLevel().getBlockState(claim.getKey())))
                 .orElse(true))
             .map(Map.Entry::getKey)
             .collect(Collectors.toList());
