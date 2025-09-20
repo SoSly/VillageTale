@@ -13,8 +13,10 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.config.CommonConfig;
+import org.sosly.villagetale.data.TimedWantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
@@ -43,6 +45,13 @@ public class GoToNearestStorage extends Behavior<Villager> {
 
         if (!hasWantedItem && !hasItemsToDeposit) {
             return false;
+        }
+
+        if (hasWantedItem) {
+            IWantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+            if (wantedItem != null && isInCouldNotFindList(level, villager, wantedItem)) {
+                return false;
+            }
         }
 
         UUID villageId = villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null);
@@ -134,5 +143,19 @@ public class GoToNearestStorage extends Behavior<Villager> {
         }
 
         return nearestZoneCenter;
+    }
+
+    private boolean isInCouldNotFindList(ServerLevel level, Villager villager, IWantedItem wantedItem) {
+        List<TimedWantedItem> couldNotFind = villager.getBrain().getMemory(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get())
+            .orElse(null);
+
+        if (couldNotFind == null || couldNotFind.isEmpty()) {
+            return false;
+        }
+
+        long currentTime = level.getGameTime();
+        return couldNotFind.stream()
+            .filter(item -> !item.isExpired(currentTime))
+            .anyMatch(item -> item.matches(wantedItem));
     }
 }

@@ -14,6 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.data.FoundItem;
+import org.sosly.villagetale.data.TimedWantedItem;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.api.serialization.Codecs;
 
@@ -29,6 +30,10 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<Boolean>> CAN_EAT =
         MEMORY_MODULE_TYPES.register("can_eat",
                 () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+    
+    public static final RegistryObject<MemoryModuleType<List<TimedWantedItem>>> COULD_NOT_FIND_ITEM =
+        MEMORY_MODULE_TYPES.register("could_not_find_item",
+                () -> new MemoryModuleType<>(Optional.empty()));
 
     public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
             MEMORY_MODULE_TYPES.register("found_item",
