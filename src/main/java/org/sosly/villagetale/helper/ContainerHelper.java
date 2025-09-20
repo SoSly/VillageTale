@@ -44,7 +44,7 @@ public class ContainerHelper {
         }
     }
 
-    public static ItemStack extractItemFromContainer(ServerLevel level, BlockPos containerPos, Predicate<ItemStack> itemMatcher) {
+    public static ItemStack extractItemFromContainer(ServerLevel level, BlockPos containerPos, Predicate<ItemStack> itemMatcher, int maxAmount) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
         if (!(blockEntity instanceof Container container)) {
             return ItemStack.EMPTY;
@@ -54,8 +54,9 @@ public class ContainerHelper {
             ItemStack stack = container.getItem(i);
             if (itemMatcher.test(stack)) {
                 ItemStack extracted = stack.copy();
-                extracted.setCount(1);
-                stack.shrink(1);
+                int toExtract = Math.min(stack.getCount(), maxAmount);
+                extracted.setCount(toExtract);
+                stack.shrink(toExtract);
                 container.setChanged();
                 return extracted;
             }
@@ -134,17 +135,17 @@ public class ContainerHelper {
                 remainingToDeposit -= depositAmount;
                 continue;
             }
-            
+
             if (!ItemStack.isSameItemSameTags(existingStack, itemToDeposit)) {
                 continue;
             }
-            
+
             int spaceAvailable = existingStack.getMaxStackSize() - existingStack.getCount();
             int depositAmount = Math.min(remainingToDeposit, spaceAvailable);
             if (depositAmount <= 0) {
                 continue;
             }
-            
+
             existingStack.grow(depositAmount);
             deposited += depositAmount;
             remainingToDeposit -= depositAmount;

@@ -43,7 +43,8 @@ public class DepositItem extends Behavior<Villager> {
     public DepositItem() {
         super(ImmutableMap.of(
             MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), MemoryStatus.VALUE_PRESENT,
-            MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT
+            MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT,
+            MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), BEHAVIOR_DURATION);
     }
 
@@ -76,6 +77,8 @@ public class DepositItem extends Behavior<Villager> {
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;
+
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
 
         if (this.targetContainer != null) {
             villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
@@ -151,6 +154,7 @@ public class DepositItem extends Behavior<Villager> {
 
     @Override
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
+        villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         releaseContainer();
         resetState();
     }

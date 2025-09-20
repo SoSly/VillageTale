@@ -51,25 +51,33 @@ public class Farmland implements IZoneType {
     }
 
     public static boolean isPlantableBlock(Level level, BlockPos pos) {
+        BlockState above = level.getBlockState(pos);
+        if (!above.isAir()) {
+            return false;
+        }
+        
         CropBlock crop = (CropBlock) Blocks.WHEAT;
-        BlockState state = crop.defaultBlockState();
-
-        return crop.canSurvive(state, level, pos);
+        BlockState cropState = crop.defaultBlockState();
+        return crop.canSurvive(cropState, level, pos);
     }
 
     public static boolean isTillableBlock(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         BlockState above = level.getBlockState(pos.above());
-        ItemStack hoe = new ItemStack(Items.WOODEN_HOE);
 
         if (!above.isAir()) {
             return false;
         }
 
+        if (state.is(Blocks.ROOTED_DIRT)) {
+            return true;
+        }
+
+        ItemStack hoe = new ItemStack(Items.WOODEN_HOE);
         BlockState tilled = state.getToolModifiedState(
-                new UseOnContext(level, null, InteractionHand.MAIN_HAND, hoe,
-                        new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false)),
-                ToolActions.HOE_TILL,false);
+            new UseOnContext(level, null, InteractionHand.MAIN_HAND, hoe,
+                new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false)),
+            ToolActions.HOE_TILL, true);
 
         return tilled != null;
     }

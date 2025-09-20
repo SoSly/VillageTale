@@ -30,7 +30,7 @@ public class HasResources extends Sensor<Villager> {
         int resourceCount = countResources(villager, requiredResources);
         int minimumThreshold = requiredResources.getMinimum();
         int targetAmount = requiredResources.getAmount();
-        boolean needsMoreResources = resourceCount < minimumThreshold;
+        boolean needsMoreResources = resourceCount <= minimumThreshold;
         boolean hasTargetAmount = resourceCount >= targetAmount;
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 

@@ -60,6 +60,10 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<UUID>> WORK_ZONE =
             MEMORY_MODULE_TYPES.register("work_zone",
                     () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+    
+    public static final RegistryObject<MemoryModuleType<Boolean>> BUSY =
+            MEMORY_MODULE_TYPES.register("busy",
+                    () -> new MemoryModuleType<>(Optional.empty()));
 
     // Farmer Memories
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_TILLABLE_SOIL =

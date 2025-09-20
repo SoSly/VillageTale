@@ -18,6 +18,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.behavior.GoToWorkZone;
+import org.sosly.villagetale.entity.ai.behavior.PlantSeeds;
 import org.sosly.villagetale.entity.ai.behavior.TillSoil;
 import org.sosly.villagetale.profession.AbstractProfession;
 import org.sosly.villagetale.zone.type.Farmland;
@@ -62,8 +63,9 @@ public class Farmer extends AbstractProfession {
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-            Pair.of(1, (BehaviorControl<? super Villager>) new TillSoil()),
-            Pair.of(2, (BehaviorControl<? super Villager>) new GoToWorkZone())
+            Pair.of(1, (BehaviorControl<? super Villager>) new PlantSeeds()),
+            Pair.of(2, (BehaviorControl<? super Villager>) new TillSoil()),
+            Pair.of(3, (BehaviorControl<? super Villager>) new GoToWorkZone())
         );
     }
 

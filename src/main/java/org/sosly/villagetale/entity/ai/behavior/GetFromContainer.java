@@ -42,7 +42,8 @@ public class GetFromContainer extends Behavior<Villager> {
         super(ImmutableMap.of(
             MemoryModuleTypes.FOUND_ITEM.get(), MemoryStatus.VALUE_PRESENT,
             MemoryModuleTypes.WANTED_ITEM.get(), MemoryStatus.VALUE_PRESENT,
-            MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT
+            MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT,
+            MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), BEHAVIOR_DURATION);
     }
 
@@ -69,6 +70,7 @@ public class GetFromContainer extends Behavior<Villager> {
         this.searchTicks = 0;
         this.claimedZone = null;
 
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(this.targetContainer, 0.5F, 1));
 
@@ -126,6 +128,7 @@ public class GetFromContainer extends Behavior<Villager> {
 
     @Override
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
+        villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         releaseContainer();
         clearMemories(villager);
         resetState();
@@ -178,45 +181,29 @@ public class GetFromContainer extends Behavior<Villager> {
         }
 
         int maxToExtract = wantedItem.getAmount();
-        int extracted = 0;
-
-        while (extracted < maxToExtract) {
-            int emptySlot = findFirstEmptySlot(inventory);
-            if (emptySlot < 0) {
-                if (VillageTale.LOGGER.isDebugEnabled()) {
-                    VillageTale.LOGGER.debug("GetFromContainer stopping - inventory full for villager {}", villager.getId());
-                }
-                break;
-            }
-
-            ItemStack extractedItem = ContainerHelper.extractItemFromContainer(level, this.targetContainer, wantedItem.getMatcher());
-            if (extractedItem.isEmpty()) {
-                if (VillageTale.LOGGER.isDebugEnabled()) {
-                    VillageTale.LOGGER.debug("GetFromContainer stopping - no more matching items for villager {}", villager.getId());
-                }
-                break;
-            }
-
-            int takeAmount = Math.min(extractedItem.getCount(), maxToExtract - extracted);
-            extractedItem.setCount(takeAmount);
-
-            inventory.setItem(emptySlot, extractedItem);
-            extracted += takeAmount;
-
+        int emptySlot = findFirstEmptySlot(inventory);
+        if (emptySlot < 0) {
             if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer extracted {} x{} for villager {}",
-                    extractedItem.getItem(), takeAmount, villager.getId());
+                VillageTale.LOGGER.debug("GetFromContainer aborting - no empty slots for villager {}", villager.getId());
             }
+            return;
         }
 
-        if (extracted > 0) {
+        ItemStack extractedItem = ContainerHelper.extractItemFromContainer(level, this.targetContainer, wantedItem.getMatcher(), maxToExtract);
+        if (extractedItem.isEmpty()) {
             if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer total extracted: {} items for villager {}",
-                    extracted, villager.getId());
+                VillageTale.LOGGER.debug("GetFromContainer stopping - no matching items for villager {}", villager.getId());
             }
-        } else if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("GetFromContainer extracted nothing for villager {}", villager.getId());
+            return;
         }
+
+        inventory.setItem(emptySlot, extractedItem);
+
+        if (VillageTale.LOGGER.isDebugEnabled()) {
+            VillageTale.LOGGER.debug("GetFromContainer extracted {} x{} for villager {}",
+                extractedItem.getItem(), extractedItem.getCount(), villager.getId());
+        }
+
     }
 
     private IVillageZone findZoneContaining(ServerLevel level, UUID villageId, BlockPos pos) {

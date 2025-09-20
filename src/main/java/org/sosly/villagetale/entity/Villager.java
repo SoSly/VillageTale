@@ -445,7 +445,8 @@ public class Villager extends PathfinderMob {
                 MemoryModuleTypes.IS_HUNGRY.get(),
                 MemoryModuleTypes.IS_STARVING.get(),
                 MemoryModuleTypes.PROFESSION.get(),
-                MemoryModuleTypes.VILLAGE.get()
+                MemoryModuleTypes.VILLAGE.get(),
+                MemoryModuleTypes.BUSY.get()
             );
         }
 
