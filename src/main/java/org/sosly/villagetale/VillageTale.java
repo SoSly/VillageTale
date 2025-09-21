@@ -13,7 +13,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.sosly.villagetale.block.BlockTypes;
-import org.sosly.villagetale.block.entity.BlockEntityTypes;
 import org.sosly.villagetale.command.VillageTaleCommand;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.EntityTypes;
@@ -37,7 +36,6 @@ public class VillageTale {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         BlockTypes.register(modEventBus);
-        BlockEntityTypes.register(modEventBus);
         EntityTypes.register(modEventBus);
         MemoryModuleTypes.register(modEventBus);
         SensorTypes.register(modEventBus);
@@ -53,7 +51,7 @@ public class VillageTale {
     private void setup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             NetworkHandler.init();
-            
+
             MinecraftForge.EVENT_BUS.post(new RegisterZoneTypesEvent(ZoneRegistry.INSTANCE));
             MinecraftForge.EVENT_BUS.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
 

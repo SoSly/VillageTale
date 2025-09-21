@@ -12,11 +12,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -29,12 +27,12 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.block.entity.TownHallBlockEntity;
+import net.minecraft.world.level.ChunkPos;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.zone.type.TownHall;
 
-public class TownHallBlock extends BaseEntityBlock {
+public class TownHallBlock extends Block {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     private static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
@@ -70,17 +68,22 @@ public class TownHallBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof TownHallBlockEntity townHall)) {
+        if (!(level instanceof ServerLevel serverLevel)) {
             return InteractionResult.FAIL;
         }
 
-        if (townHall.getVillageId() == null) {
+        IVillagesCapability villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability == null) {
+            return InteractionResult.FAIL;
+        }
+
+        VillageInfo village = villagesCapability.getVillageAt(new ChunkPos(pos));
+        if (village == null || village.getTownHallPos() == null || !village.getTownHallPos().equals(pos)) {
             player.sendSystemMessage(Component.literal("This Town Hall is not connected to a village"));
             return InteractionResult.SUCCESS;
         }
 
-        player.sendSystemMessage(Component.literal("Town Hall GUI not yet implemented. Village ID: " + townHall.getVillageId()));
+        player.sendSystemMessage(Component.literal("Town Hall GUI not yet implemented. Village: " + village.getVillageName()));
         return InteractionResult.SUCCESS;
     }
 
@@ -91,14 +94,7 @@ public class TownHallBlock extends BaseEntityBlock {
             return;
         }
 
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof TownHallBlockEntity townHall) || !(level instanceof ServerLevel serverLevel)) {
-            super.onRemove(state, level, pos, newState, isMoving);
-            return;
-        }
-
-        UUID villageId = townHall.getVillageId();
-        if (villageId == null) {
+        if (!(level instanceof ServerLevel serverLevel)) {
             super.onRemove(state, level, pos, newState, isMoving);
             return;
         }
@@ -109,8 +105,8 @@ public class TownHallBlock extends BaseEntityBlock {
             return;
         }
 
-        VillageInfo village = villagesCapability.getVillageById(villageId);
-        if (village == null) {
+        VillageInfo village = villagesCapability.getVillageAt(new ChunkPos(pos));
+        if (village == null || village.getTownHallPos() == null || !village.getTownHallPos().equals(pos)) {
             super.onRemove(state, level, pos, newState, isMoving);
             return;
         }
@@ -130,17 +126,117 @@ public class TownHallBlock extends BaseEntityBlock {
             return;
         }
 
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof TownHallBlockEntity townHall) {
-            townHall.onPlaced(player);
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        onPlaced(serverLevel, pos, player);
+    }
+
+    private void onPlaced(ServerLevel level, BlockPos pos, Player player) {
+        ChunkPos chunkPos = new ChunkPos(pos);
+        
+        IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY)
+                .orElseThrow(NullPointerException::new);
+        handleVillageSetup(level, pos, chunkPos, player, villagesCapability);
+    }
+
+    private void handleVillageSetup(ServerLevel level, BlockPos pos, ChunkPos chunkPos, Player player,
+                                   IVillagesCapability villagesCapability) {
+        VillageInfo existingVillage = villagesCapability.getVillageAt(chunkPos);
+
+        if (existingVillage != null) {
+            handleExistingVillage(level, pos, existingVillage, player);
+            return;
+        }
+
+        createNewVillage(level, pos, chunkPos, player, villagesCapability);
+    }
+
+    private void handleExistingVillage(ServerLevel level, BlockPos pos, VillageInfo village, Player player) {
+        BlockPos existingTownHall = village.getTownHallPos();
+
+        if (existingTownHall != null) {
+            VillageTale.LOGGER.error("Cannot place Town Hall at {} - village {} already has one at {}", pos, village.getVillageName(), existingTownHall);
+            if (player != null) {
+                player.sendSystemMessage(Component.translatable("villagetale.townhall.already_exists", village.getVillageName(), existingTownHall.toShortString()));
+            }
+            level.destroyBlock(pos, true);
+            return;
+        }
+
+        IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY)
+                .orElseThrow(NullPointerException::new);
+        villagesCapability.updateTownHallPos(village.getVillageId(), pos);
+        createTownHallZone(level, village);
+
+        VillageTale.LOGGER.info("Added town hall for village {} at {}", village.getVillageName(), pos);
+
+        if (player != null) {
+            player.sendSystemMessage(Component.literal("Added town hall for village " + village.getVillageName()));
         }
     }
 
+    private void createNewVillage(ServerLevel level, BlockPos pos, ChunkPos chunkPos, Player player,
+                                 IVillagesCapability villagesCapability) {
+        String villageName = player != null
+            ? Component.translatable("villagetale.village.default_name", player.getName().getString()).getString()
+            : "Village_" + System.currentTimeMillis();
 
-    @Nullable
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new TownHallBlockEntity(pos, state);
+        UUID newVillageId = villagesCapability.createVillage(pos, villageName, 3);
+
+        if (newVillageId == null) {
+            VillageTale.LOGGER.error("Failed to create village at {} - likely too close to another village", pos);
+            if (player != null) {
+                player.sendSystemMessage(Component.translatable("villagetale.townhall.too_close"));
+            }
+            level.destroyBlock(pos, true);
+            return;
+        }
+
+        IVillageCapability cap = level.getChunk(chunkPos.x, chunkPos.z).getCapability(Capabilities.VILLAGE_CAPABILITY)
+                .orElseThrow(NullPointerException::new);
+        cap.setUUID(newVillageId);
+        cap.setName(villageName);
+
+        VillageInfo village = villagesCapability.getVillageById(newVillageId);
+        if (village != null) {
+            createTownHallZone(level, village);
+        }
+
+        VillageTale.LOGGER.info("Created village {} at {} with ID {} and town hall at {}",
+            villageName, chunkPos, newVillageId, pos);
+    }
+
+    private void createTownHallZone(ServerLevel level, VillageInfo info) {
+        LevelChunk chunk = level.getChunk(info.getVillageStartingChunk().x, info.getVillageStartingChunk().z);
+        IVillageCapability village = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+        if (village == null) {
+            return;
+        }
+
+        List<IVillageZone> zones = village.getZones();
+        IVillageZone oldTownHall = zones.stream()
+                .filter(zone -> zone.getType().getID() == TownHall.ID)
+                .findAny()
+                .orElse(null);
+        if (oldTownHall != null) {
+            village.removeZone(oldTownHall.getUUID());
+        }
+
+        BlockPos townHallPos = info.getTownHallPos();
+        if (townHallPos == null) {
+            return;
+        }
+
+        IVillageZone townHallZone = org.sosly.villagetale.zone.shape.Point.builder(level, village, zones.size())
+            .setPos(townHallPos)
+            .setType(TownHall.ID)
+            .build();
+        townHallZone.setName("Town Hall");
+
+        village.addZone(townHallZone);
+        VillageTale.LOGGER.info("Created TownHall zone at {} for village {}", townHallPos, village.getName());
     }
 
     private void removeTownHallZone(ServerLevel level, VillageInfo info) {
