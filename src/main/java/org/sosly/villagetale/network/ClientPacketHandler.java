@@ -3,6 +3,9 @@ package org.sosly.villagetale.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.HashMap;
@@ -30,5 +33,17 @@ public class ClientPacketHandler {
 
     public static void clearCache() {
         professionCache.clear();
+    }
+    
+    public static void handleEquipmentSync(VillagerEquipmentSyncPacket packet) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        
+        Entity entity = mc.level.getEntity(packet.getEntityId());
+        if (entity instanceof LivingEntity livingEntity) {
+            livingEntity.setItemInHand(packet.getHand(), packet.getItemStack());
+        }
     }
 }

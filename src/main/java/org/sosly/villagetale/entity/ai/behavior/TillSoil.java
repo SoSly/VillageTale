@@ -25,6 +25,7 @@ import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
+import org.sosly.villagetale.network.NetworkHandler;
 
 public class TillSoil extends Behavior<Villager> {
     private static final int TILLING_DURATION = 40;
@@ -74,7 +75,9 @@ ItemStack tool = getTool(villager);
             return;
         }
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
-        villager.setItemInHand(InteractionHand.MAIN_HAND, getTool(villager));
+        ItemStack tool = getTool(villager);
+        villager.setItemInHand(InteractionHand.MAIN_HAND, tool);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, tool);
 
         if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
@@ -87,6 +90,7 @@ ItemStack tool = getTool(villager);
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         pos = null;
         tillTicks = 0;
     }

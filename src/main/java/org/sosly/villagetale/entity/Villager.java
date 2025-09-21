@@ -16,8 +16,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -27,7 +31,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
@@ -39,7 +42,6 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -66,11 +68,25 @@ import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.profession.professions.Commoner;
 
 public class Villager extends PathfinderMob implements InventoryCarrier {
+    private static final EntityDataAccessor<Byte> DATA_VILLAGER_ARM_POSE = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.BYTE);
+
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
     private ImmutableList<MemoryModuleType<?>> memoryTypes;
 
     private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes;
+    private VillagerArmPose armPose = VillagerArmPose.NEUTRAL;
+
+    public static enum VillagerArmPose {
+        CROSSED,
+        ATTACKING,
+        SPELLCASTING,
+        BOW_AND_ARROW,
+        CROSSBOW_HOLD,
+        CROSSBOW_CHARGE,
+        CELEBRATING,
+        NEUTRAL;
+    }
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         super(entityType, level);
@@ -81,6 +97,12 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.setCanPickUpLoot(true);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_VILLAGER_ARM_POSE, (byte)VillagerArmPose.NEUTRAL.ordinal());
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -171,6 +193,20 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.level().getProfiler().pop();
         this.foodData.tick(this);
         super.customServerAiStep();
+    }
+
+    public VillagerArmPose getArmPose() {
+        if (this.level().isClientSide()) {
+            return VillagerArmPose.values()[this.entityData.get(DATA_VILLAGER_ARM_POSE)];
+        }
+        return this.armPose;
+    }
+
+    public void setArmPose(VillagerArmPose pose) {
+        this.armPose = pose;
+        if (!this.level().isClientSide()) {
+            this.entityData.set(DATA_VILLAGER_ARM_POSE, (byte)pose.ordinal());
+        }
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.helper.ItemMatcher;
+import org.sosly.villagetale.network.NetworkHandler;
 
 public class EatFood extends Behavior<Villager> {
     private static final int EATING_DURATION = 32;
@@ -51,7 +52,9 @@ public class EatFood extends Behavior<Villager> {
     @Override
     protected void start(ServerLevel level, Villager villager, long gameTime) {
         this.eatingTime = 0;
-        villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, this.foodToEat.copy());
+        ItemStack foodCopy = this.foodToEat.copy();
+        villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, foodCopy);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, net.minecraft.world.InteractionHand.MAIN_HAND, foodCopy);
         villager.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
         playEatingSound(level, villager);
     }
@@ -74,6 +77,7 @@ public class EatFood extends Behavior<Villager> {
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
         villager.stopUsingItem();
         villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
         if (this.foodToEat.isEmpty()) {
             this.foodToEat = ItemStack.EMPTY;

@@ -8,6 +8,8 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.entity.Villager;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -28,6 +30,14 @@ public class NetworkHandler {
             VillagerProfessionSyncPacket::decode,
             VillagerProfessionSyncPacket::handle
         );
+        
+        CHANNEL.registerMessage(
+            packetId++,
+            VillagerEquipmentSyncPacket.class,
+            VillagerEquipmentSyncPacket::encode,
+            VillagerEquipmentSyncPacket::decode,
+            VillagerEquipmentSyncPacket::handle
+        );
     }
 
     public static void syncProfessionToPlayer(Villager villager, ServerPlayer player) {
@@ -39,6 +49,11 @@ public class NetworkHandler {
     public static void syncProfessionToNearbyPlayers(Villager villager) {
         ResourceLocation professionId = villager.getProfession().getID();
         VillagerProfessionSyncPacket packet = new VillagerProfessionSyncPacket(villager.getId(), professionId);
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> villager), packet);
+    }
+    
+    public static void syncEquipmentToNearbyPlayers(Villager villager, InteractionHand hand, ItemStack itemStack) {
+        VillagerEquipmentSyncPacket packet = new VillagerEquipmentSyncPacket(villager.getId(), hand, itemStack);
         CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> villager), packet);
     }
 }
