@@ -32,10 +32,8 @@ public class IsHungry extends Sensor<Villager> {
         updateMemoryIfChanged(villager, MemoryModuleTypes.IS_HUNGRY.get(), isHungry);
         updateMemoryIfChanged(villager, MemoryModuleTypes.IS_STARVING.get(), isStarving);
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("IsHungry for villager {}: foodLevel={}, canEat={}, isHungry={}, isStarving={}",
-                villager.getId(), foodLevel, canEat, isHungry, isStarving);
-        }
+        VillageTale.LOGGER.debug("IsHungry for villager {}: foodLevel={}, canEat={}, isHungry={}, isStarving={}",
+            villager.getId(), foodLevel, canEat, isHungry, isStarving);
     }
 
     private void updateMemoryIfChanged(Villager villager, MemoryModuleType<Boolean> memoryType, boolean newValue) {

@@ -51,9 +51,7 @@ public class HasWorkZone extends Sensor<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WORK_ZONE.get(), zone.get().getUUID(), 200);
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HasWorkZone: " + villager );
-        }
+        VillageTale.LOGGER.debug("HasWorkZone: " + villager );
     }
 
     @Override

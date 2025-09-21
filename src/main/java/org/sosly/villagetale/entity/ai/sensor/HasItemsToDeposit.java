@@ -43,10 +43,8 @@ public class HasItemsToDeposit extends Sensor<Villager> {
 
         villager.getBrain().setMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), itemsToDeposit);
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HasItemsToDeposit set ITEMS_TO_DEPOSIT for villager {} with {} items",
-                villager.getId(), itemsToDeposit.size());
-        }
+        VillageTale.LOGGER.debug("HasItemsToDeposit set ITEMS_TO_DEPOSIT for villager {} with {} items",
+            villager.getId(), itemsToDeposit.size());
     }
 
     private boolean shouldTriggerDeposit(Villager villager) {

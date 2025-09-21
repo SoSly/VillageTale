@@ -118,10 +118,8 @@ public class IsItemInStorage extends Sensor<Villager> {
             villager.getBrain().setMemory(MemoryModuleTypes.FOUND_ITEM.get(), foundItem);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("IsItemInStorage found item {} at {} for villager {}",
-                    itemId, containerPos, villager.getId());
-            }
+            VillageTale.LOGGER.debug("IsItemInStorage found item {} at {} for villager {}",
+                itemId, containerPos, villager.getId());
             return;
         }
     }
@@ -132,10 +130,8 @@ public class IsItemInStorage extends Sensor<Villager> {
         updatedList.add(zoneId);
         villager.getBrain().setMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get(), updatedList);
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("IsItemInStorage added zone {} to scanned list for villager {}",
-                zoneId, villager.getId());
-        }
+        VillageTale.LOGGER.debug("IsItemInStorage added zone {} to scanned list for villager {}",
+            zoneId, villager.getId());
     }
 
     private void checkIfAllStoragesScanned(ServerLevel level, Villager villager, UUID villageId, WantedItem wantedItem) {
@@ -172,10 +168,8 @@ public class IsItemInStorage extends Sensor<Villager> {
             addToCouldNotFindList(level, villager, wantedItem);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("IsItemInStorage checked all {} storage zones, could not find item for villager {}",
-                    totalStorageZones, villager.getId());
-            }
+            VillageTale.LOGGER.debug("IsItemInStorage checked all {} storage zones, could not find item for villager {}",
+                totalStorageZones, villager.getId());
         }
     }
 

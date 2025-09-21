@@ -75,10 +75,8 @@ public class GetFromContainer extends Behavior<Villager> {
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(this.targetContainer, 0.5F, 1));
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("GetFromContainer started walking to {} for villager {}",
-                this.targetContainer, villager.getId());
-        }
+        VillageTale.LOGGER.debug("GetFromContainer started walking to {} for villager {}",
+            this.targetContainer, villager.getId());
     }
 
     @Override
@@ -148,20 +146,16 @@ public class GetFromContainer extends Behavior<Villager> {
 
         boolean claimed = zone.claim(this.targetContainer, villager.getUUID(), CLAIM_DURATION, gameTime);
         if (!claimed) {
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer failed to claim container at {} for villager {}",
-                    this.targetContainer, villager.getId());
-            }
+            VillageTale.LOGGER.debug("GetFromContainer failed to claim container at {} for villager {}",
+                this.targetContainer, villager.getId());
             return false;
         }
 
         this.containerClaimed = true;
         this.claimedZone = zone;
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("GetFromContainer claimed container at {} for villager {}",
-                this.targetContainer, villager.getId());
-        }
+        VillageTale.LOGGER.debug("GetFromContainer claimed container at {} for villager {}",
+            this.targetContainer, villager.getId());
 
         return true;
     }
@@ -177,23 +171,17 @@ public class GetFromContainer extends Behavior<Villager> {
 
         ItemStack extractedItem = ContainerHelper.extractItemFromContainer(level, this.targetContainer, wantedItem.getMatcher(), maxToExtract);
         if (extractedItem.isEmpty()) {
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer stopping - no matching items for villager {}", villager.getId());
-            }
+            VillageTale.LOGGER.debug("GetFromContainer stopping - no matching items for villager {}", villager.getId());
             return;
         }
 
         if (!InventoryHelper.tryAddToInventory(inventory, extractedItem)) {
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer aborting - couldn't add items to inventory for villager {}", villager.getId());
-            }
+            VillageTale.LOGGER.debug("GetFromContainer aborting - couldn't add items to inventory for villager {}", villager.getId());
             return;
         }
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("GetFromContainer extracted {} x{} for villager {}",
-                extractedItem.getItem(), extractedItem.getCount(), villager.getId());
-        }
+        VillageTale.LOGGER.debug("GetFromContainer extracted {} x{} for villager {}",
+            extractedItem.getItem(), extractedItem.getCount(), villager.getId());
 
     }
 
@@ -230,10 +218,8 @@ public class GetFromContainer extends Behavior<Villager> {
         if (this.containerClaimed && this.claimedZone != null && this.targetContainer != null) {
             boolean released = this.claimedZone.release(this.targetContainer);
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("GetFromContainer {} container at {}",
-                    released ? "released" : "failed to release", this.targetContainer);
-            }
+            VillageTale.LOGGER.debug("GetFromContainer {} container at {}",
+                released ? "released" : "failed to release", this.targetContainer);
         }
     }
 

@@ -39,10 +39,8 @@ public class HasResources extends Sensor<Villager> {
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("HasResources set WANTED_ITEM to RESOURCES for villager {} (has {}, need >= {})",
-                    villager.getId(), resourceCount, minimumThreshold);
-            }
+            VillageTale.LOGGER.debug("HasResources set WANTED_ITEM to RESOURCES for villager {} (has {}, need >= {})",
+                villager.getId(), resourceCount, minimumThreshold);
             return;
         }
 
@@ -57,10 +55,8 @@ public class HasResources extends Sensor<Villager> {
 
         villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HasResources cleared WANTED_ITEM for villager {} (has {}, reached target {})",
-                villager.getId(), resourceCount, targetAmount);
-        }
+        VillageTale.LOGGER.debug("HasResources cleared WANTED_ITEM for villager {} (has {}, reached target {})",
+            villager.getId(), resourceCount, targetAmount);
     }
 
     private int countResources(Villager villager, IWantedItem requiredResources) {

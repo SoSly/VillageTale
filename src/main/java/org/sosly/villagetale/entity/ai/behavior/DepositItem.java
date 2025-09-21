@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
@@ -49,7 +50,6 @@ public class DepositItem extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
-        @SuppressWarnings("unchecked")
         Map<ResourceLocation, Integer> itemsToDeposit = villager.getBrain()
             .getMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get()).orElse(null);
 
@@ -71,7 +71,7 @@ public class DepositItem extends Behavior<Villager> {
     }
 
     @Override
-    protected void start(ServerLevel level, Villager villager, long gameTime) {
+    protected void start(@NotNull ServerLevel level, Villager villager, long gameTime) {
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;
@@ -82,21 +82,19 @@ public class DepositItem extends Behavior<Villager> {
             villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(this.targetContainer, 0.5F, 1));
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("DepositItem started walking to {} for villager {}",
-                    this.targetContainer, villager.getId());
-            }
+            VillageTale.LOGGER.debug("DepositItem started walking to {} for villager {}",
+                this.targetContainer, villager.getId());
         }
     }
 
     @Override
-    protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
+    protected boolean canStillUse(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         return this.targetContainer != null &&
                villager.getBrain().hasMemoryValue(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get());
     }
 
     @Override
-    protected void tick(ServerLevel level, Villager villager, long gameTime) {
+    protected void tick(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         if (this.targetContainer == null) {
             return;
         }
@@ -118,24 +116,25 @@ public class DepositItem extends Behavior<Villager> {
 
         depositItems(level, villager);
 
-        @SuppressWarnings("unchecked")
         Map<ResourceLocation, Integer> remainingItems = villager.getBrain()
             .getMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get()).orElse(null);
 
         if (remainingItems == null || remainingItems.isEmpty()) {
             clearMemories(villager);
             stopBehavior(villager);
-        } else {
-            this.targetContainer = findAvailableContainer(level, villager,
-                villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null),
-                remainingItems);
-
-            if (this.targetContainer == null) {
-                stopBehavior(villager);
-            } else {
-                resetForNewContainer(villager);
-            }
+            return;
         }
+
+        this.targetContainer = findAvailableContainer(level, villager,
+            villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null),
+            remainingItems);
+
+        if (this.targetContainer == null) {
+            stopBehavior(villager);
+            return;
+        }
+
+        resetForNewContainer(villager);
     }
 
     private void handleArrival(ServerLevel level, Villager villager, long gameTime) {
@@ -230,20 +229,16 @@ public class DepositItem extends Behavior<Villager> {
 
         boolean claimed = zone.claim(this.targetContainer, villager.getUUID(), CLAIM_DURATION, gameTime);
         if (!claimed) {
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("DepositItem failed to claim container at {} for villager {}",
-                    this.targetContainer, villager.getId());
-            }
+            VillageTale.LOGGER.debug("DepositItem failed to claim container at {} for villager {}",
+                this.targetContainer, villager.getId());
             return false;
         }
 
         this.containerClaimed = true;
         this.claimedZone = zone;
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("DepositItem claimed container at {} for villager {}",
-                this.targetContainer, villager.getId());
-        }
+        VillageTale.LOGGER.debug("DepositItem claimed container at {} for villager {}",
+            this.targetContainer, villager.getId());
 
         return true;
     }
@@ -286,10 +281,8 @@ public class DepositItem extends Behavior<Villager> {
                 updatedItems.put(itemId, remaining);
             }
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("DepositItem deposited {} x{} for villager {}",
-                    itemId, deposited, villager.getId());
-            }
+            VillageTale.LOGGER.debug("DepositItem deposited {} x{} for villager {}",
+                itemId, deposited, villager.getId());
         }
 
         if (updatedItems.isEmpty()) {
@@ -299,44 +292,16 @@ public class DepositItem extends Behavior<Villager> {
         }
     }
 
-    private IVillageZone findZoneContaining(ServerLevel level, UUID villageId, BlockPos pos) {
-        IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
-        if (villagesCapability == null) {
-            return null;
-        }
-
-        VillageInfo village = villagesCapability.getVillageById(villageId);
-        if (village == null) {
-            return null;
-        }
-
-        ChunkPos townHallChunk = new ChunkPos(village.getTownHallPos());
-        LevelChunk chunk = level.getChunk(townHallChunk.x, townHallChunk.z);
-
-        IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
-        if (villageCapability == null) {
-            return null;
-        }
-
-        return villageCapability.getZones()
-                .stream()
-                .filter(zone -> {
-                    Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
-                    return claims.containsKey(pos);
-                })
-                .findFirst()
-                .orElse(null);
-    }
-
     private void releaseContainer() {
-        if (this.containerClaimed && this.claimedZone != null && this.targetContainer != null) {
-            boolean released = this.claimedZone.release(this.targetContainer);
-
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("DepositItem {} container at {}",
-                    released ? "released" : "failed to release", this.targetContainer);
-            }
+        if (!this.containerClaimed || this.claimedZone == null || this.targetContainer == null) {
+            return;
         }
+
+
+        boolean released = this.claimedZone.release(this.targetContainer);
+
+        VillageTale.LOGGER.debug("DepositItem {} container at {}",
+            released ? "released" : "failed to release", this.targetContainer);
     }
 
     private void clearMemories(Villager villager) {

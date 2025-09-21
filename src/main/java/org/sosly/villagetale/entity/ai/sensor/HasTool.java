@@ -35,9 +35,7 @@ public class HasTool extends Sensor<Villager> {
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 
-            if (VillageTale.LOGGER.isDebugEnabled()) {
-                VillageTale.LOGGER.debug("HasTool set WANTED_ITEM to PROFESSION_TOOL for villager {}", villager.getId());
-            }
+            VillageTale.LOGGER.debug("HasTool set WANTED_ITEM to PROFESSION_TOOL for villager {}", villager.getId());
             return;
         }
 
@@ -52,9 +50,7 @@ public class HasTool extends Sensor<Villager> {
 
         villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
 
-        if (VillageTale.LOGGER.isDebugEnabled()) {
-            VillageTale.LOGGER.debug("HasTool cleared WANTED_ITEM for villager {}", villager.getId());
-        }
+        VillageTale.LOGGER.debug("HasTool cleared WANTED_ITEM for villager {}", villager.getId());
     }
 
     private boolean hasTool(Villager villager, IWantedItem requiredTool) {
