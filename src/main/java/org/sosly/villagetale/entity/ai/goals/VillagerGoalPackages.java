@@ -90,7 +90,7 @@ public class VillagerGoalPackages {
 
     @SuppressWarnings("unchecked")
     private static Pair<Integer, BehaviorControl<? super Villager>> getMinimalLookBehavior() {
-        return Pair.of(5, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
+        return Pair.of(5, new RunOne<>(ImmutableList.of(
             Pair.of(SetEntityLookTarget.create(net.minecraft.world.entity.EntityType.PLAYER, 8.0F), 2),
             Pair.of(new DoNothing(30, 60), 8)
         )));

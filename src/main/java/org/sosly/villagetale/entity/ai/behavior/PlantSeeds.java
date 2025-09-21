@@ -1,13 +1,11 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -16,11 +14,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
+import org.sosly.villagetale.network.NetworkHandler;
 
 public class PlantSeeds extends Behavior<Villager> {
     private static final int PLANTING_DURATION = 30;
@@ -29,6 +30,9 @@ public class PlantSeeds extends Behavior<Villager> {
     boolean claimed;
     BlockPos pos;
     int plantTicks;
+
+    ItemStack seeds = ItemStack.EMPTY;
+    IVillageZone workplace;
 
     public PlantSeeds() {
         super(ImmutableMap.of(
@@ -39,37 +43,41 @@ public class PlantSeeds extends Behavior<Villager> {
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
-        if (getSeeds(villager).isEmpty()) {
+    protected boolean checkExtraStartConditions(@NotNull ServerLevel level, @NotNull Villager villager) {
+        ItemStack seeds = InventoryHelper.getSeeds(villager);
+        if (seeds.isEmpty()) {
             return false;
         }
 
-        IVillageZone zone = getZone(level, villager);
+        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
         if (zone == null) {
             return false;
         }
 
-        return zone.containsPosition(villager.blockPosition());
+        if (!zone.containsPosition(villager.blockPosition())) {
+            return false;
+        }
+
+        this.seeds = seeds;
+        this.workplace = zone;
+        return true;
     }
 
     @Override
-    protected void start(ServerLevel level, Villager villager, long gameTime) {
-        IVillageZone zone = getZone(level, villager);
-        if (zone == null) {
-            return;
-        }
-
+    protected void start(@NotNull ServerLevel level, Villager villager, long gameTime) {
         pos = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get()).orElse(null);
         if (pos == null) {
             return;
         }
 
-        claimed = zone.claim(pos, villager.getUUID(), BEHAVIOR_DURATION, gameTime);
+        claimed = workplace.claim(pos, villager.getUUID(), BEHAVIOR_DURATION, gameTime);
         if (!claimed) {
             return;
         }
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
+        villager.setItemInHand(InteractionHand.MAIN_HAND, seeds);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, seeds);
 
         if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
@@ -80,19 +88,25 @@ public class PlantSeeds extends Behavior<Villager> {
     }
 
     @Override
-    protected void stop(ServerLevel level, Villager villager, long gameTime) {
+    protected void stop(@NotNull ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
-        pos = null;
-        plantTicks = 0;
+        villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get());
+
+        this.pos = null;
+        this.plantTicks = 0;
+        this.seeds = ItemStack.EMPTY;
+        this.workplace = null;
     }
 
     @Override
-    protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
+    protected boolean canStillUse(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         return claimed;
     }
 
     @Override
-    protected void tick(ServerLevel level, Villager villager, long gameTime) {
+    protected void tick(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         if (!claimed || pos == null) {
             return;
         }
@@ -109,14 +123,8 @@ public class PlantSeeds extends Behavior<Villager> {
                     pos.getY() + 0.5,
                     pos.getZ() + 0.5
                 );
-                villager.swing(villager.getUsedItemHand());
+                villager.swing(InteractionHand.MAIN_HAND);
             }
-            return;
-        }
-
-        ItemStack seeds = getSeeds(villager);
-        if (seeds.isEmpty()) {
-            claimed = false;
             return;
         }
 
@@ -131,17 +139,6 @@ public class PlantSeeds extends Behavior<Villager> {
         claimed = false;
     }
 
-    private ItemStack getSeeds(Villager villager) {
-        Container inventory = villager.getInventory();
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            if (stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
-                return stack;
-            }
-        }
-        return ItemStack.EMPTY;
-    }
-
     private BlockState getCropBlockForSeed(ItemStack seed) {
         if (seed.is(Items.WHEAT_SEEDS)) {
             return Blocks.WHEAT.defaultBlockState();
@@ -153,24 +150,5 @@ public class PlantSeeds extends Behavior<Villager> {
             return Blocks.POTATOES.defaultBlockState();
         }
         return null;
-    }
-
-    private IVillageZone getZone(ServerLevel level, Villager villager) {
-        if (villager.getVillage().isEmpty()) {
-            return null;
-        }
-
-        UUID villageId = villager.getVillage().get();
-        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
-        if (workplaceId == null) {
-            return null;
-        }
-
-        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
-        if (zone == null) {
-            return null;
-        }
-
-        return zone;
     }
 }

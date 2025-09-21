@@ -1,13 +1,10 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -16,10 +13,12 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.NetworkHandler;
 
@@ -31,6 +30,9 @@ public class HarvestCropBehavior extends Behavior<Villager> {
     BlockPos pos;
     int harvestTicks;
 
+    ItemStack tool = ItemStack.EMPTY;
+    IVillageZone workplace;
+
     public HarvestCropBehavior() {
         super(ImmutableMap.of(
                 MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
@@ -40,39 +42,39 @@ public class HarvestCropBehavior extends Behavior<Villager> {
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
-        ItemStack tool = getTool(villager);
+    protected boolean checkExtraStartConditions(@NotNull ServerLevel level, @NotNull Villager villager) {
+        ItemStack tool = InventoryHelper.getTool(villager);
         if (tool.isEmpty()) {
             return false;
         }
 
-        IVillageZone zone = getZone(level, villager);
+        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
         if (zone == null) {
             return false;
         }
 
-        return zone.containsPosition(villager.blockPosition());
+        if (!zone.containsPosition(villager.blockPosition())) {
+            return false;
+        }
+
+        this.tool = tool;
+        this.workplace = zone;
+        return true;
     }
 
     @Override
-    protected void start(ServerLevel level, Villager villager, long gameTime) {
-        IVillageZone zone = getZone(level, villager);
-        if (zone == null) {
-            return;
-        }
-
+    protected void start(@NotNull ServerLevel level, Villager villager, long gameTime) {
         pos = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get()).orElse(null);
         if (pos == null) {
             return;
         }
 
-        claimed = zone.claim(pos, villager.getUUID(), BEHAVIOR_DURATION, gameTime);
+        claimed = workplace.claim(pos, villager.getUUID(), BEHAVIOR_DURATION, gameTime);
         if (!claimed) {
             return;
         }
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
-        ItemStack tool = getTool(villager);
         villager.setItemInHand(InteractionHand.MAIN_HAND, tool);
         NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, tool);
 
@@ -85,21 +87,25 @@ public class HarvestCropBehavior extends Behavior<Villager> {
     }
 
     @Override
-    protected void stop(ServerLevel level, Villager villager, long gameTime) {
+    protected void stop(@NotNull ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        pos = null;
-        harvestTicks = 0;
+        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());
+
+        this.pos = null;
+        this.harvestTicks = 0;
+        this.tool = ItemStack.EMPTY;
+        this.workplace = null;
     }
 
     @Override
-    protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
+    protected boolean canStillUse(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         return claimed;
     }
 
     @Override
-    protected void tick(ServerLevel level, Villager villager, long gameTime) {
+    protected void tick(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         if (!claimed || pos == null) {
             return;
         }
@@ -116,7 +122,7 @@ public class HarvestCropBehavior extends Behavior<Villager> {
                     pos.getY() + 0.5,
                     pos.getZ() + 0.5
                 );
-                villager.swing(villager.getUsedItemHand());
+                villager.swing(InteractionHand.MAIN_HAND);
             }
             return;
         }
@@ -135,7 +141,6 @@ public class HarvestCropBehavior extends Behavior<Villager> {
         level.destroyBlock(pos, true);
         level.playSound(null, pos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
 
-        ItemStack tool = getTool(villager);
         tool.setDamageValue(tool.getDamageValue() + 1);
         if (tool.getDamageValue() >= tool.getMaxDamage()) {
             tool.shrink(1);
@@ -144,34 +149,5 @@ public class HarvestCropBehavior extends Behavior<Villager> {
 
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());
         claimed = false;
-    }
-
-    private ItemStack getTool(Villager villager) {
-        Container inventory = villager.getInventory();
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            if (inventory.getItem(i).is(ItemTags.HOES)) {
-                return inventory.getItem(i);
-            }
-        }
-        return ItemStack.EMPTY;
-    }
-
-    private IVillageZone getZone(ServerLevel level, Villager villager) {
-        if (villager.getVillage().isEmpty()) {
-            return null;
-        }
-
-        UUID villageId = villager.getVillage().get();
-        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
-        if (workplaceId == null) {
-            return null;
-        }
-
-        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
-        if (zone == null) {
-            return null;
-        }
-
-        return zone;
     }
 }

@@ -1,13 +1,12 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import org.sosly.villagetale.VillageTale;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -26,14 +25,8 @@ public class GoToWorkZone extends Behavior<Villager> {
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
-        UUID villageId = villager.getVillage().get();
-        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
-        if (workplaceId == null) {
-            return false;
-        }
-
-        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
+    protected boolean checkExtraStartConditions(@NotNull ServerLevel level, @NotNull Villager villager) {
+        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
         if (zone == null) {
             return false;
         }
@@ -42,17 +35,9 @@ public class GoToWorkZone extends Behavior<Villager> {
     }
 
     @Override
-    protected void start(ServerLevel level, Villager villager, long gameTime) {
-        UUID villageId = villager.getVillage().get();
-        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
-        if (workplaceId == null) {
-            return;
-        }
-
-        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
-
+    protected void start(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
+        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
         if (zone == null) {
-            VillageTale.LOGGER.warn("No zone found for workplace " + workplaceId);
             return;
         }
 
@@ -61,14 +46,8 @@ public class GoToWorkZone extends Behavior<Villager> {
     }
 
     @Override
-    protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
-        UUID villageId = villager.getVillage().get();
-        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
-        if (workplaceId == null) {
-            return false;
-        }
-
-        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workplaceId);
+    protected boolean canStillUse(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
+        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
         if (zone == null) {
             return false;
         }
