@@ -22,6 +22,7 @@ import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.event.RegisterProfessionsEvent;
 import org.sosly.villagetale.event.RegisterZoneTypesEvent;
+import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -51,6 +52,8 @@ public class VillageTale {
 
     private void setup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            NetworkHandler.init();
+            
             MinecraftForge.EVENT_BUS.post(new RegisterZoneTypesEvent(ZoneRegistry.INSTANCE));
             MinecraftForge.EVENT_BUS.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
 

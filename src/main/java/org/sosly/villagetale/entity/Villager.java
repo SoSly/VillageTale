@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -59,6 +61,7 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
 import org.sosly.villagetale.helper.InventoryHelper;
+import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.profession.professions.Commoner;
 
@@ -250,8 +253,9 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
             this.brain.setMemory(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId);
         }
 
-        if (this.level() instanceof ServerLevel) {
-            this.refreshBrain((ServerLevel) this.level());
+        if (this.level() instanceof ServerLevel serverLevel) {
+            this.refreshBrain(serverLevel);
+            NetworkHandler.syncProfessionToNearbyPlayers(this);
         }
     }
 
@@ -333,6 +337,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         this.refreshBrain(serverLevel);
+        NetworkHandler.syncProfessionToNearbyPlayers(this);
     }
 
     public Optional<UUID> getVillage() {
@@ -471,6 +476,12 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     @Override
     public boolean canBeLeashed(@NotNull Player player) {
         return false;
+    }
+
+    @Override
+    public void startSeenByPlayer(ServerPlayer player) {
+        super.startSeenByPlayer(player);
+        NetworkHandler.syncProfessionToPlayer(this, player);
     }
 
     @Override
