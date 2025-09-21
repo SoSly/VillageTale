@@ -24,8 +24,6 @@ import org.sosly.villagetale.zone.type.Storage;
 
 public class GoToNearestStorage extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
-    private static final double CLOSE_ENOUGH_DISTANCE = 2.0d;
-
     private BlockPos targetStoragePos;
 
     public GoToNearestStorage() {
@@ -72,7 +70,7 @@ public class GoToNearestStorage extends Behavior<Villager> {
             return false;
         }
 
-        if (villager.blockPosition().closerThan(targetStorage, CLOSE_ENOUGH_DISTANCE)) {
+        if (villager.blockPosition().closerThan(targetStorage, CommonConfig.interactionDistance)) {
             return false;
         }
 

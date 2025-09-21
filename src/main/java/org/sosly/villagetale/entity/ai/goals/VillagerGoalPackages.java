@@ -64,7 +64,7 @@ public class VillagerGoalPackages {
     @SuppressWarnings("unchecked")
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-                Pair.of(3, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
+                Pair.of(5, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
                 Pair.of(15, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
                         Pair.of(ZoneBoundRandomStroll.create(speedModifier), 2),
                         Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
