@@ -10,25 +10,24 @@ import java.util.stream.StreamSupport;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.command.Result;
 import org.sosly.villagetale.command.arguments.VillageUUIDArgument;
+import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
 import org.sosly.villagetale.command.arguments.ZoneUUIDArgument;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
 public class ZoneCommand {
-    
+
     private static final SuggestionProvider<CommandSourceStack> ZONE_TYPE_SUGGESTIONS =
             (context, builder) -> SharedSuggestionProvider.suggestResource(
                     StreamSupport.stream(ZoneRegistry.INSTANCE.getZoneTypeIDs().spliterator(), false),
@@ -48,7 +47,7 @@ public class ZoneCommand {
                                                                 .executes(ZoneCommand::createRectangleZone)
                                                                 .then(Commands.argument("name", StringArgumentType.string())
                                                                         .executes(ZoneCommand::createRectangleZoneWithName))))))
-                                
+
                                 .then(Commands.literal("sphere")
                                         .then(Commands.argument("center", BlockPosArgument.blockPos())
                                                 .then(Commands.argument("radius", IntegerArgumentType.integer(1))
@@ -57,7 +56,7 @@ public class ZoneCommand {
                                                                 .executes(ZoneCommand::createSphereZone)
                                                                 .then(Commands.argument("name", StringArgumentType.string())
                                                                         .executes(ZoneCommand::createSphereZoneWithName))))))
-                                
+
                                 .then(Commands.literal("point")
                                         .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                                 .then(Commands.argument("type", ResourceLocationArgument.id())
@@ -65,27 +64,27 @@ public class ZoneCommand {
                                                         .executes(ZoneCommand::createPointZone)
                                                         .then(Commands.argument("name", StringArgumentType.string())
                                                                 .executes(ZoneCommand::createPointZoneWithName)))))
-                                
+
                                 .then(Commands.literal("route")
                                         .then(Commands.argument("type", ResourceLocationArgument.id())
                                                 .suggests(ZONE_TYPE_SUGGESTIONS)
                                                 .executes(ZoneCommand::createRouteZone)
                                                 .then(Commands.argument("name", StringArgumentType.string())
                                                         .executes(ZoneCommand::createRouteZoneWithName)))))
-                        
+
                         .then(Commands.literal("delete")
                                 .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                                         .suggests(ZoneUUIDArgument::suggest)
                                         .executes(ZoneCommand::deleteZone)))
-                        
+
                         .then(Commands.literal("list")
                                 .executes(ZoneCommand::listZones))
-                        
+
                         .then(Commands.literal("info")
                                 .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                                         .suggests(ZoneUUIDArgument::suggest)
                                         .executes(ZoneCommand::zoneInfo)))
-                        
+
                         .then(Commands.literal("route")
                                 .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                                         .suggests(ZoneUUIDArgument::suggest)
@@ -94,15 +93,17 @@ public class ZoneCommand {
                                                         .executes(ZoneCommand::addRoutePoint)))
                                         .then(Commands.literal("clear")
                                                 .executes(ZoneCommand::clearRoute))))
-                        
+
                         .then(Commands.literal("assign")
                                 .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                                         .suggests(ZoneUUIDArgument::suggest)
-                                        .then(Commands.argument("villager", EntityArgument.entity())
+                                        .then(Commands.argument("villager", VillagerUUIDArgument.villagerUUID())
+                                                .suggests(VillagerUUIDArgument::suggest)
                                                 .executes(ZoneCommand::assignVillager))))
-                        
+
                         .then(Commands.literal("unassign")
-                                .then(Commands.argument("villager", EntityArgument.entity())
+                                .then(Commands.argument("villager", VillagerUUIDArgument.villagerUUID())
+                                        .suggests(VillagerUUIDArgument::suggest)
                                         .executes(ZoneCommand::unassignVillager)))));
     }
 
@@ -306,13 +307,7 @@ public class ZoneCommand {
             ServerLevel level = ctx.getSource().getLevel();
             UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
             UUID zoneId = ZoneUUIDArgument.getZoneUUID(ctx, "zoneUUID");
-            Entity entity = EntityArgument.getEntity(ctx, "villager");
-
-            if (!(entity instanceof Villager villager)) {
-                return Result.failure(Component.translatable(
-                        String.format("%s.command.zone.entity_not_villager", VillageTale.MOD_ID)))
-                        .send(ctx.getSource());
-            }
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "villager");
 
             Result result = ZoneService.assignVillager(level, villageId, zoneId, villager);
             return result.send(ctx.getSource(), true);
@@ -327,13 +322,7 @@ public class ZoneCommand {
         try {
             ServerLevel level = ctx.getSource().getLevel();
             UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
-            Entity entity = EntityArgument.getEntity(ctx, "villager");
-
-            if (!(entity instanceof Villager villager)) {
-                return Result.failure(Component.translatable(
-                        String.format("%s.command.zone.entity_not_villager", VillageTale.MOD_ID)))
-                        .send(ctx.getSource());
-            }
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "villager");
 
             Result result = ZoneService.unassignVillager(level, villageId, villager);
             return result.send(ctx.getSource(), true);
