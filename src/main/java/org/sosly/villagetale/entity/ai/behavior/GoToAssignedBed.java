@@ -1,31 +1,53 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import org.sosly.villagetale.entity.Villager;
 
-public class GoToAssignedBed {
-    public static BehaviorControl<Villager> create(float speedModifier) {
-        return BehaviorBuilder.create(instance ->
-            instance.group(
-                instance.present(MemoryModuleType.HOME),
-                instance.absent(MemoryModuleType.WALK_TARGET)
-            ).apply(instance, (home, walkTarget) ->
-                (level, villager, gameTime) -> {
-                    GlobalPos homePos = instance.get(home);
-                    BlockPos bedPos = homePos.pos();
+public class GoToAssignedBed extends Behavior<Villager> {
+    private static final double ARRIVAL_DISTANCE = 2.0D;
+    private static final int WALK_PRECISION = 1;
+    private final float speedModifier;
 
-                    if (!bedPos.closerToCenterThan(villager.position(), 2.0D)) {
-                        walkTarget.set(new WalkTarget(bedPos, speedModifier, 1));
-                        return true;
-                    }
-                    return false;
-                }
-            )
-        );
+    public GoToAssignedBed(float speedModifier) {
+        super(ImmutableMap.of(
+            MemoryModuleType.HOME, MemoryStatus.VALUE_PRESENT,
+            MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT
+        ));
+        this.speedModifier = speedModifier;
+    }
+
+    public static BehaviorControl<Villager> create(float speedModifier) {
+        return new GoToAssignedBed(speedModifier);
+    }
+
+    @Override
+    protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
+        GlobalPos homePos = villager.getBrain().getMemory(MemoryModuleType.HOME).orElse(null);
+        if (homePos == null) {
+            return false;
+        }
+
+        BlockPos bedPos = homePos.pos();
+        return !bedPos.closerToCenterThan(villager.position(), ARRIVAL_DISTANCE);
+    }
+
+    @Override
+    protected void start(ServerLevel level, Villager villager, long gameTime) {
+        GlobalPos homePos = villager.getBrain().getMemory(MemoryModuleType.HOME).orElse(null);
+        if (homePos == null) {
+            return;
+        }
+
+        BlockPos bedPos = homePos.pos();
+        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(bedPos, speedModifier, WALK_PRECISION));
     }
 }
