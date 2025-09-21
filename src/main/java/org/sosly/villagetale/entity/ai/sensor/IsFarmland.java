@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -58,7 +59,7 @@ public class IsFarmland extends Sensor<Villager> {
     }
 
     @Override
-    public Set<MemoryModuleType<?>> requires() {
+    public @NotNull Set<MemoryModuleType<?>> requires() {
         return ImmutableSet.of(
             MemoryModuleTypes.WORK_ZONE.get(),
             MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(),

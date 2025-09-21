@@ -24,9 +24,11 @@ import org.sosly.villagetale.entity.ai.behavior.EatFood;
 import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
 import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorage;
+import org.sosly.villagetale.entity.ai.behavior.GoToWorkZone;
 import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
 import org.sosly.villagetale.entity.ai.behavior.WakeUp;
+import org.sosly.villagetale.entity.ai.behavior.ZoneBoundRandomStroll;
 
 public class VillagerGoalPackages {
 
@@ -51,8 +53,8 @@ public class VillagerGoalPackages {
         return ImmutableList.of(
             Pair.of(3, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
             Pair.of(5, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
-                Pair.of(RandomStroll.stroll(speedModifier), 2),
-                Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
+                    Pair.of(RandomStroll.stroll(speedModifier), 2),
+                    Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
                 Pair.of(new DoNothing(30, 60), 1)
             ))),
             getMinimalLookBehavior()
@@ -63,6 +65,12 @@ public class VillagerGoalPackages {
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
                 Pair.of(3, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
+                Pair.of(15, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
+                        Pair.of(ZoneBoundRandomStroll.create(speedModifier), 2),
+                        Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
+                        Pair.of(new DoNothing(30, 60), 1)
+                ))),
+                Pair.of(99, (BehaviorControl<? super Villager>) new GoToWorkZone()),
                 getMinimalLookBehavior()
         );
     }

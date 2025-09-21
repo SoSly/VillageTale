@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
@@ -67,7 +68,7 @@ public class HasBedInHomeZone extends Sensor<Villager> {
     }
 
     @Override
-    public Set<MemoryModuleType<?>> requires() {
+    public @NotNull Set<MemoryModuleType<?>> requires() {
         return Set.of(
             MemoryModuleTypes.HOME_ZONE.get(),
             MemoryModuleTypes.VILLAGE.get()

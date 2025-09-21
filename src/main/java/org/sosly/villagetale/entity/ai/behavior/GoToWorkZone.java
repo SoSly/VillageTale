@@ -56,7 +56,6 @@ public class GoToWorkZone extends Behavior<Villager> {
             return;
         }
 
-        VillageTale.LOGGER.info(String.format("Going to work zone %s", workplaceId));
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(zone.getStartPosition(), 0.5F, 2));
     }

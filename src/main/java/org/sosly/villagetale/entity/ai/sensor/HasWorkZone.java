@@ -6,6 +6,7 @@ import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
@@ -56,7 +57,7 @@ public class HasWorkZone extends Sensor<Villager> {
     }
 
     @Override
-    public Set<MemoryModuleType<?>> requires() {
+    public @NotNull Set<MemoryModuleType<?>> requires() {
         return ImmutableSet.of(
             MemoryModuleTypes.WORK_ZONE.get()
         );

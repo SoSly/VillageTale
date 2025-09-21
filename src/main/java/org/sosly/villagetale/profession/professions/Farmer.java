@@ -20,7 +20,6 @@ import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
-import org.sosly.villagetale.entity.ai.behavior.GoToWorkZone;
 import org.sosly.villagetale.entity.ai.behavior.HarvestCropBehavior;
 import org.sosly.villagetale.entity.ai.behavior.PickUpItems;
 import org.sosly.villagetale.entity.ai.behavior.PlantSeeds;
@@ -80,8 +79,7 @@ public class Farmer extends AbstractProfession {
             Pair.of(1, (BehaviorControl<? super Villager>) new PickUpItems()),
             Pair.of(11, (BehaviorControl<? super Villager>) new HarvestCropBehavior()),
             Pair.of(12, (BehaviorControl<? super Villager>) new PlantSeeds()),
-            Pair.of(13, (BehaviorControl<? super Villager>) new TillSoil()),
-            Pair.of(14, (BehaviorControl<? super Villager>) new GoToWorkZone())
+            Pair.of(13, (BehaviorControl<? super Villager>) new TillSoil())
         );
     }
 
