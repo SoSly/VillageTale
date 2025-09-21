@@ -13,7 +13,6 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.village.VillageProvider;
-import org.sosly.villagetale.capability.villages.VillagesCapability;
 import org.sosly.villagetale.capability.villages.VillagesProvider;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -43,14 +42,7 @@ public class Capabilities {
 
     @SubscribeEvent
     public static void onAttachLevelCapabilities(AttachCapabilitiesEvent<Level> event) {
-        Level level = event.getObject();
-
         VillagesProvider provider = new VillagesProvider();
-
-        // todo: fix this so we are using IVillagesCapability
-        VillagesCapability villages = (VillagesCapability) provider.getCapability(VILLAGES_CAPABILITY, null).resolve().get();
-        villages.setOwnerLevel(level);
-
         event.addCapability(VILLAGES_CAPABILITY_KEY, provider);
     }
 }

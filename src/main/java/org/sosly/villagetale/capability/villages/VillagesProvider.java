@@ -41,18 +41,18 @@ public class VillagesProvider implements ICapabilitySerializable<CompoundTag> {
         for (VillageInfo village : capability.getVillages()) {
             villageList.add(village.serializeNBT());
         }
-        tag.put("Villages", villageList);
+        tag.put("villages", villageList);
 
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        if (!tag.contains("Villages", Tag.TAG_LIST)) {
+        if (!tag.contains("villages", Tag.TAG_LIST)) {
             return;
         }
 
-        ListTag villageList = tag.getList("Villages", Tag.TAG_COMPOUND);
+        ListTag villageList = tag.getList("villages", Tag.TAG_COMPOUND);
         for (int i = 0; i < villageList.size(); i++) {
             CompoundTag villageTag = villageList.getCompound(i);
             VillageInfo village = VillageInfo.deserializeNBT(villageTag);

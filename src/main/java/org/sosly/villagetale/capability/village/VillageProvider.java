@@ -9,7 +9,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.capability.Capabilities;
@@ -32,10 +31,6 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
         }
 
         return holder.cast();
-    }
-
-    public void invalidate() {
-        holder.invalidate();
     }
 
     @Override

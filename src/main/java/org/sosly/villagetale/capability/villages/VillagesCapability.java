@@ -1,24 +1,23 @@
 package org.sosly.villagetale.capability.villages;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.data.VillageInfo;
-
-import java.lang.ref.WeakReference;
-import java.util.*;
 
 public class VillagesCapability implements IVillagesCapability {
 
     private final Map<UUID, VillageInfo> villages;
     private final Map<String, UUID> villagesByName;
-    private WeakReference<Level> ownerLevel;
 
     public VillagesCapability() {
         this.villages = new HashMap<>();
         this.villagesByName = new HashMap<>();
-        this.ownerLevel = new WeakReference<>(null);
     }
 
     @Override
@@ -140,11 +139,6 @@ public class VillagesCapability implements IVillagesCapability {
         village.setTownHallPos(newPos);
         return true;
     }
-
-    public void setOwnerLevel(Level level) {
-        this.ownerLevel = new WeakReference<>(level);
-    }
-
 
     public void loadVillage(VillageInfo village) {
         if (village == null) {
