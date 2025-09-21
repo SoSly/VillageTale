@@ -18,6 +18,7 @@ import net.minecraft.world.entity.ai.behavior.UpdateActivityFromSchedule;
 import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
 import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.behavior.DepositItem;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
@@ -65,6 +66,7 @@ public class VillagerGoalPackages {
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
                 Pair.of(5, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
+                Pair.of(10, SetWalkTargetFromBlockMemory.create(MemoryModuleTypes.WORK_POS.get(), speedModifier, 3, 100, 1200)),
                 Pair.of(15, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
                         Pair.of(ZoneBoundRandomStroll.create(speedModifier), 2),
                         Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),

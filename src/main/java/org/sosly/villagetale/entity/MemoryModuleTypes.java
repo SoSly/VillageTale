@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -65,6 +66,10 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<UUID>> WORK_ZONE =
             MEMORY_MODULE_TYPES.register("work_zone",
                     () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+    
+    public static final RegistryObject<MemoryModuleType<GlobalPos>> WORK_POS =
+            MEMORY_MODULE_TYPES.register("work_pos",
+                    () -> new MemoryModuleType<>(Optional.of(GlobalPos.CODEC)));
     
     public static final RegistryObject<MemoryModuleType<UUID>> HOME_ZONE =
             MEMORY_MODULE_TYPES.register("home_zone",
