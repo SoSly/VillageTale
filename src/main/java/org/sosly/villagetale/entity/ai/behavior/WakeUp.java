@@ -11,7 +11,7 @@ import org.sosly.villagetale.entity.Villager;
 
 public class WakeUp extends Behavior<Villager> {
     private static final float DAILY_EXHAUSTION = 24.0f;
-    private static final long EXHAUSTION_COOLDOWN = 24000L;
+    private static final long EXHAUSTION_COOLDOWN = 2000L;
 
     public WakeUp() {
         super(ImmutableMap.of(
@@ -36,5 +36,6 @@ public class WakeUp extends Behavior<Villager> {
     protected void start(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         villager.getFoodData().addExhaustion(DAILY_EXHAUSTION);
         villager.getBrain().setMemory(MemoryModuleTypes.LAST_DAILY_EXHAUSTION.get(), gameTime);
+        villager.stopSleeping();
     }
 }
