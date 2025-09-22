@@ -18,8 +18,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.command.Result;
+import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.command.arguments.VillageUUIDArgument;
 import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
 import org.sosly.villagetale.command.arguments.ZoneUUIDArgument;
@@ -104,7 +106,21 @@ public class ZoneCommand {
                         .then(Commands.literal("unassign")
                                 .then(Commands.argument("villager", VillagerUUIDArgument.villagerUUID())
                                         .suggests(VillagerUUIDArgument::suggest)
-                                        .executes(ZoneCommand::unassignVillager)))));
+                                        .executes(ZoneCommand::unassignVillager)))
+                        
+                        .then(Commands.literal("filter")
+                                .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
+                                        .suggests(ZoneUUIDArgument::suggest)
+                                        .then(Commands.literal("add")
+                                                .then(Commands.argument("item", ResourceLocationArgument.id())
+                                                        .executes(ZoneCommand::addFilterItem)))
+                                        .then(Commands.literal("remove")
+                                                .then(Commands.argument("item", ResourceLocationArgument.id())
+                                                        .executes(ZoneCommand::removeFilterItem)))
+                                        .then(Commands.literal("clear")
+                                                .executes(ZoneCommand::clearFilter))
+                                        .then(Commands.literal("list")
+                                                .executes(ZoneCommand::listFilter))))));
     }
 
     private static int createRectangleZone(CommandContext<CommandSourceStack> ctx) {
@@ -329,6 +345,68 @@ public class ZoneCommand {
         } catch (Exception e) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.zone.unassign_villager_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+    
+    private static int addFilterItem(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerLevel level = ctx.getSource().getLevel();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(ctx, "zoneUUID");
+            ResourceLocation itemId = ResourceLocationArgument.getId(ctx, "item");
+            
+            Result result = ZoneService.addFilterItem(level, villageId, zoneId, itemId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.add_filter_item_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+    
+    private static int removeFilterItem(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerLevel level = ctx.getSource().getLevel();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(ctx, "zoneUUID");
+            ResourceLocation itemId = ResourceLocationArgument.getId(ctx, "item");
+            
+            Result result = ZoneService.removeFilterItem(level, villageId, zoneId, itemId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.remove_filter_item_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+    
+    private static int clearFilter(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerLevel level = ctx.getSource().getLevel();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(ctx, "zoneUUID");
+            
+            Result result = ZoneService.clearFilter(level, villageId, zoneId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.clear_filter_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+    
+    private static int listFilter(CommandContext<CommandSourceStack> ctx) {
+        try {
+            ServerLevel level = ctx.getSource().getLevel();
+            UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
+            UUID zoneId = ZoneUUIDArgument.getZoneUUID(ctx, "zoneUUID");
+            
+            Result result = ZoneService.listFilter(level, villageId, zoneId);
+            return result.send(ctx.getSource());
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.list_filter_error", VillageTale.MOD_ID), e.getMessage()))
                     .send(ctx.getSource());
         }
     }

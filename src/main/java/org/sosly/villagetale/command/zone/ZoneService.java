@@ -1,11 +1,16 @@
 package org.sosly.villagetale.command.zone;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
@@ -349,5 +354,155 @@ public class ZoneService {
 
         return Result.success(Component.translatable(
                 String.format("%s.command.zone.villager_unassigned", VillageTale.MOD_ID), zoneName));
+    }
+
+    public static Result addFilterItem(ServerLevel level, UUID villageId, UUID zoneId, ResourceLocation itemId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        // Check if valid item and create ItemStack
+        Item item = BuiltInRegistries.ITEM.get(itemId);
+        if (item == null || item == Items.AIR) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.invalid_item", VillageTale.MOD_ID), itemId));
+        }
+
+        ItemStack newStack = new ItemStack(item);
+        List<ItemStack> currentItems = zone.getFilter();
+
+        // Check if already exists
+        for (ItemStack existing : currentItems) {
+            if (ItemStack.isSameItem(existing, newStack)) {
+                return Result.failure(Component.translatable(
+                        String.format("%s.command.zone.filter_item_already_exists", VillageTale.MOD_ID), itemId));
+            }
+        }
+
+        List<ItemStack> updatedItems = new ArrayList<>(currentItems);
+        updatedItems.add(newStack);
+        zone.setFilter(updatedItems);
+
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.filter_item_added", VillageTale.MOD_ID), itemId, zone.getName()));
+    }
+
+    public static Result removeFilterItem(ServerLevel level, UUID villageId, UUID zoneId, ResourceLocation itemId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        // Create ItemStack to match against
+        Item item = BuiltInRegistries.ITEM.get(itemId);
+        if (item == null || item == Items.AIR) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.invalid_item", VillageTale.MOD_ID), itemId));
+        }
+
+        ItemStack targetStack = new ItemStack(item);
+        List<ItemStack> currentItems = zone.getFilter();
+        List<ItemStack> updatedItems = new ArrayList<>();
+        boolean found = false;
+
+        for (ItemStack existing : currentItems) {
+            if (ItemStack.isSameItem(existing, targetStack)) {
+                found = true;
+            } else {
+                updatedItems.add(existing);
+            }
+        }
+
+        if (!found) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.filter_item_not_found", VillageTale.MOD_ID), itemId));
+        }
+
+        zone.setFilter(updatedItems);
+
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.filter_item_removed", VillageTale.MOD_ID), itemId, zone.getName()));
+    }
+
+    public static Result clearFilter(ServerLevel level, UUID villageId, UUID zoneId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        zone.setFilter(new ArrayList<>());
+
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.filter_cleared", VillageTale.MOD_ID), zone.getName()));
+    }
+
+    public static Result listFilter(ServerLevel level, UUID villageId, UUID zoneId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        List<ItemStack> wantedItems = zone.getFilter();
+
+        if (wantedItems.isEmpty()) {
+            return Result.success(Component.translatable(
+                    String.format("%s.command.zone.no_filter_items", VillageTale.MOD_ID), zone.getName()));
+        }
+
+        // Build a list of item names
+        List<String> itemNames = new ArrayList<>();
+        for (ItemStack stack : wantedItems) {
+            itemNames.add(stack.getItem().builtInRegistryHolder().key().location().toString());
+        }
+
+        String itemList = String.join(", ", itemNames);
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.filter_list", VillageTale.MOD_ID),
+                zone.getName(), itemList));
     }
 }

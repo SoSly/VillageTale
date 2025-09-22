@@ -3,7 +3,10 @@ package org.sosly.villagetale.helper;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.entity.Villager;
+
+import java.util.List;
 
 public class InventoryHelper {
 
@@ -69,6 +72,33 @@ public class InventoryHelper {
                 return stack;
             }
         }
+        return ItemStack.EMPTY;
+    }
+
+    public static ItemStack getSeeds(Villager villager, IVillageZone zone) {
+        if (zone == null) {
+            return getSeeds(villager);
+        }
+
+        List<ItemStack> wantedItems = zone.getFilter();
+        if (wantedItems.isEmpty()) {
+            return getSeeds(villager);
+        }
+
+        Container inventory = villager.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
+                continue;
+            }
+
+            for (ItemStack wanted : wantedItems) {
+                if (ItemStack.isSameItem(wanted, stack)) {
+                    return stack;
+                }
+            }
+        }
+
         return ItemStack.EMPTY;
     }
 

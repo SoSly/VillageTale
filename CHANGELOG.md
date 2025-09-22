@@ -21,13 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Four zone shapes available: rectangle, sphere, point, or route
 - Many zone types available:
     farmland, home, storage, townhall
+- Zones can be filtered to only accept specific items (e.g., wheat-only farms)
 
 **Commands**
-- `/vw assign` - Assign homes to villagers
-- `/vw hunger` - Check villager hunger status
-- `/vw exhaust` - Add exhaustion to villagers (for testing)
-- `/vw village create/remove/list/info` - Manage villages
-- `/vw villager <targets> profession [<profession>]` - View or set villager professions
-- `/vw zone create/delete/rename/info/list` - Manage village zones
-- `/vw zone path add/clear` - Build custom path-shaped zones
-- `/vw zone claim/release` - Temporarily claim positions within zones for villagers
+- `/vt assign` - Assign homes to villagers
+- `/vt hunger` - Check villager hunger status
+- `/vt exhaust` - Add exhaustion to villagers (for testing)
+- `/vt village create/remove/list/info` - Manage villages
+- `/vt villager <targets> profession [<profession>]` - View or set villager professions
+- `/vt zone create/delete/rename/info/list` - Manage village zones
+- `/vt zone path add/clear` - Build custom path-shaped zones
+- `/vt zone claim/release` - Temporarily claim positions within zones for villagers
+- `/vt zone filter add/remove/clear/list` - Control what items zones accept (e.g., limit farmland to specific crops)

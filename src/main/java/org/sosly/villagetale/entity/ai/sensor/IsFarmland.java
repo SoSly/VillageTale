@@ -47,7 +47,7 @@ public class IsFarmland extends Sensor<Villager> {
             .findAny();
         harvestable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), blockPos));
 
-        ItemStack seeds = InventoryHelper.getSeeds(villager);
+        ItemStack seeds = InventoryHelper.getSeeds(villager, zone);
         if (!seeds.isEmpty()) {
             Optional<BlockPos> plantable = claims
                 .stream()

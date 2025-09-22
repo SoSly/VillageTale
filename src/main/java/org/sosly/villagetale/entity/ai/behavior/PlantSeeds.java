@@ -47,13 +47,13 @@ public class PlantSeeds extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(@NotNull ServerLevel level, @NotNull Villager villager) {
-        ItemStack seeds = InventoryHelper.getSeeds(villager);
-        if (seeds.isEmpty()) {
+        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
+        if (zone == null) {
             return false;
         }
 
-        IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
-        if (zone == null) {
+        ItemStack seeds = InventoryHelper.getSeeds(villager, zone);
+        if (seeds.isEmpty()) {
             return false;
         }
 

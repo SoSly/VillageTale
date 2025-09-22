@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 
@@ -48,7 +49,7 @@ public interface IVillageZone {
      * @return true if position is within zone boundaries
      */
     boolean containsPosition(BlockPos pos);
-    
+
     /**
      * Checks if the specified position is within this zone's boundaries with a buffer.
      * @param pos Block position to check
@@ -143,4 +144,19 @@ public interface IVillageZone {
      * @return true if the position was claimed and released, false otherwise
      */
     boolean release(BlockPos pos);
+
+    /**
+     * Gets the item filter for this zone.
+     * Empty list means all items are acceptable for zone operations.
+     * Non-empty list restricts operations to only these specific items.
+     * Usage varies by zone type (e.g., crops to plant for farmland, items to store for storage).
+     * @return List of allowed items as ItemStacks
+     */
+    List<ItemStack> getFilter();
+
+    /**
+     * Sets the item filter for this zone.
+     * @param filter List of allowed items as ItemStacks
+     */
+    void setFilter(List<ItemStack> filter);
 }

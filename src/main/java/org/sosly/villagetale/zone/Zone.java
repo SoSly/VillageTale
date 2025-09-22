@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.IVillageZone;
@@ -31,6 +32,7 @@ public class Zone implements IVillageZone {
     private List<UUID> villagers = new ArrayList<>();
     private Map<BlockPos, Claim> claims = new HashMap<>();
     private String name;
+    private List<ItemStack> filter = new ArrayList<>();
 
     public Zone(Level level) {
         this.level = level;
@@ -190,7 +192,7 @@ public class Zone implements IVillageZone {
     public boolean containsPosition(BlockPos pos) {
         return this.shape.containsPosition(pos);
     }
-    
+
     @Override
     public boolean containsPosition(BlockPos pos, int buffer) {
         return this.shape.containsPosition(pos, buffer);
@@ -199,6 +201,17 @@ public class Zone implements IVillageZone {
     @Override
     public BlockPos getStartPosition() {
         return this.shape.getStartPosition();
+    }
+
+    @Override
+    public List<ItemStack> getFilter() {
+        return filter;
+    }
+
+    @Override
+    public void setFilter(List<ItemStack> filter) {
+        this.filter = filter;
+        markDirty();
     }
 
     public CompoundTag serializeNBT() {
@@ -230,6 +243,15 @@ public class Zone implements IVillageZone {
             tag.put("villagers", villagersList);
         }
 
+        if (!filter.isEmpty()) {
+            ListTag filter = new ListTag();
+            for (ItemStack stack : this.filter) {
+                CompoundTag itemTag = stack.save(new CompoundTag());
+                filter.add(itemTag);
+            }
+            tag.put("filter", filter);
+        }
+
         return tag;
     }
 
@@ -257,6 +279,18 @@ public class Zone implements IVillageZone {
             for (int i = 0; i < villagersList.size(); i++) {
                 UUID villagerUUID = villagersList.getCompound(i).getUUID("villager");
                 this.villagers.add(villagerUUID);
+            }
+        }
+
+        if (tag.contains("filter")) {
+            ListTag filter = tag.getList("filter", 10);
+            this.filter = new ArrayList<>();
+            for (int i = 0; i < filter.size(); i++) {
+                CompoundTag itemTag = filter.getCompound(i);
+                ItemStack stack = ItemStack.of(itemTag);
+                if (!stack.isEmpty()) {
+                    this.filter.add(stack);
+                }
             }
         }
     }
