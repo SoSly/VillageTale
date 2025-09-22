@@ -10,8 +10,11 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -140,14 +143,9 @@ public class PlantSeeds extends Behavior<Villager> {
     }
 
     private BlockState getCropBlockForSeed(ItemStack seed) {
-        if (seed.is(Items.WHEAT_SEEDS)) {
-            return Blocks.WHEAT.defaultBlockState();
-        } else if (seed.is(Items.BEETROOT_SEEDS)) {
-            return Blocks.BEETROOTS.defaultBlockState();
-        } else if (seed.is(Items.CARROT)) {
-            return Blocks.CARROTS.defaultBlockState();
-        } else if (seed.is(Items.POTATO)) {
-            return Blocks.POTATOES.defaultBlockState();
+        if (seed.getItem() instanceof BlockItem blockItem) {
+            Block block = blockItem.getBlock();
+            return block.defaultBlockState();
         }
         return null;
     }

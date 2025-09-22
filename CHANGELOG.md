@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Villagers**
 - New custom Villager entity
 - Villager profession system with many professions available:
-    Commoner (unemployed), Farmer
+    - Commoner (unemployed)
+    - Farmer (tills soil, plants seeds, harvests crops)
 
 **Villages & Zones**
 - Town Hall block - establish your village (automatically named after you)

@@ -9,10 +9,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.zone.type.Farmland;
 
@@ -45,11 +47,14 @@ public class IsFarmland extends Sensor<Villager> {
             .findAny();
         harvestable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), blockPos));
 
-        Optional<BlockPos> plantable = claims
-            .stream()
-            .filter(pos -> Farmland.isPlantableBlock(level, pos))
-            .findAny();
-        plantable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), blockPos));
+        ItemStack seeds = InventoryHelper.getSeeds(villager);
+        if (!seeds.isEmpty()) {
+            Optional<BlockPos> plantable = claims
+                .stream()
+                .filter(pos -> Farmland.isPlantableBlock(level, pos, seeds))
+                .findAny();
+            plantable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), blockPos));
+        }
 
         Optional<BlockPos> tillable = claims
             .stream()

@@ -5,10 +5,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -51,11 +53,23 @@ public class Farmland implements IZoneType {
     }
 
     public static boolean isPlantableBlock(Level level, BlockPos pos) {
+        return isPlantableBlock(level, pos, new ItemStack(Items.WHEAT_SEEDS))
+            || isPlantableBlock(level, pos, new ItemStack(Items.NETHER_WART))
+            || isPlantableBlock(level, pos, new ItemStack(Items.SWEET_BERRIES));
+    }
+
+    public static boolean isPlantableBlock(Level level, BlockPos pos, ItemStack seed) {
         BlockState above = level.getBlockState(pos);
         if (!above.isAir()) {
             return false;
         }
-        
+
+        if (seed.getItem() instanceof BlockItem blockItem) {
+            Block block = blockItem.getBlock();
+            BlockState blockState = block.defaultBlockState();
+            return block.canSurvive(blockState, level, pos);
+        }
+
         CropBlock crop = (CropBlock) Blocks.WHEAT;
         BlockState cropState = crop.defaultBlockState();
         return crop.canSurvive(cropState, level, pos);
