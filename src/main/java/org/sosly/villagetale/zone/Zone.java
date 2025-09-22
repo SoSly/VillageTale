@@ -190,6 +190,11 @@ public class Zone implements IVillageZone {
     public boolean containsPosition(BlockPos pos) {
         return this.shape.containsPosition(pos);
     }
+    
+    @Override
+    public boolean containsPosition(BlockPos pos, int buffer) {
+        return this.shape.containsPosition(pos, buffer);
+    }
 
     @Override
     public BlockPos getStartPosition() {

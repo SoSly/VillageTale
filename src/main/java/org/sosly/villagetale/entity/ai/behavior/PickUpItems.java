@@ -48,10 +48,14 @@ public class PickUpItems extends Behavior<Villager> {
         }
 
         AABB searchBox = new AABB(villager.blockPosition()).inflate(CommonConfig.scanRadius);
-        List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, searchBox,
-            item -> !item.isRemoved() && item.isAlive()
-                && zone.containsPosition(item.blockPosition())
-                && InventoryHelper.canAddToInventory(villager.getInventory(), item.getItem()));
+        List<ItemEntity> allItems = level.getEntitiesOfClass(ItemEntity.class, searchBox);
+        
+        List<ItemEntity> items = allItems.stream()
+            .filter(item -> !item.isRemoved() && item.isAlive()
+                && (zone.containsPosition(item.blockPosition()) || 
+                    zone.containsPosition(item.blockPosition(), 1))  // Check with 1 block buffer
+                && InventoryHelper.canAddToInventory(villager.getInventory(), item.getItem()))
+            .toList();
 
         if (items.isEmpty()) {
             return false;
@@ -72,7 +76,7 @@ public class PickUpItems extends Behavior<Villager> {
 
         Vec3 targetPos = targetItem.position();
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(targetPos, 0.5F, 3));
+            new WalkTarget(targetPos, 0.5F, 1));
     }
 
     @Override
@@ -97,15 +101,16 @@ public class PickUpItems extends Behavior<Villager> {
             return;
         }
 
-        if (!targetItem.position().closerThan(villager.blockPosition().getCenter(), CommonConfig.collectionDistance)) {
+        double distance = targetItem.position().distanceTo(villager.blockPosition().getCenter());
+
+        if (distance > CommonConfig.collectionDistance) {
             villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(targetItem.position(), 0.5F, 3));
+                new WalkTarget(targetItem.position(), 0.5F, 1));
             return;
         }
 
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         InventoryCarrier.pickUpItem(villager, villager, targetItem);
-
         targetItem = null;
     }
 

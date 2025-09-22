@@ -45,6 +45,17 @@ public class Sphere implements IZoneShape {
         double distanceSquared = center.distSqr(pos);
         return distanceSquared <= radius * radius;
     }
+    
+    @Override
+    public boolean containsPosition(BlockPos pos, int buffer) {
+        if (center == null || pos == null) {
+            return false;
+        }
+
+        double distanceSquared = center.distSqr(pos);
+        int expandedRadius = radius + buffer;
+        return distanceSquared <= expandedRadius * expandedRadius;
+    }
 
     @Override
     public ResourceLocation getID() {

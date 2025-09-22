@@ -48,6 +48,23 @@ public interface IVillageZone {
      * @return true if position is within zone boundaries
      */
     boolean containsPosition(BlockPos pos);
+    
+    /**
+     * Checks if the specified position is within this zone's boundaries with a buffer.
+     * @param pos Block position to check
+     * @param buffer Number of blocks to expand the zone boundary (in X and Z directions)
+     * @return true if position is within the expanded zone boundaries
+     */
+    default boolean containsPosition(BlockPos pos, int buffer) {
+        for (int x = -buffer; x <= buffer; x++) {
+            for (int z = -buffer; z <= buffer; z++) {
+                if (containsPosition(pos.offset(x, 0, z))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * Gets the starting/reference position for this zone.

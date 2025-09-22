@@ -37,6 +37,11 @@ public class Rectangle implements IZoneShape {
     public boolean containsPosition(BlockPos pos) {
         return bounds.contains(pos.getX(), pos.getY(), pos.getZ());
     }
+    
+    @Override
+    public boolean containsPosition(BlockPos pos, int buffer) {
+        return bounds.inflate(buffer, 0, buffer).contains(pos.getX(), pos.getY(), pos.getZ());
+    }
 
     @Override
     public ResourceLocation getID() {

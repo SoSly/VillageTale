@@ -9,6 +9,10 @@ import net.minecraft.world.level.Level;
 
 public interface IZoneShape {
     boolean containsPosition(BlockPos pos);
+    
+    default boolean containsPosition(BlockPos pos, int buffer) {
+        return containsPosition(pos);
+    }
 
     ResourceLocation getID();
 
