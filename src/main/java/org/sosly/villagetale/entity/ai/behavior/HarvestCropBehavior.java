@@ -25,6 +25,7 @@ import org.sosly.villagetale.network.NetworkHandler;
 public class HarvestCropBehavior extends Behavior<Villager> {
     private static final int HARVEST_DURATION = 40;
     private static final int BEHAVIOR_DURATION = 100;
+    private static final float WORK_EXHAUSTION = 0.6f;
 
     boolean claimed;
     BlockPos pos;
@@ -140,6 +141,7 @@ public class HarvestCropBehavior extends Behavior<Villager> {
 
         level.destroyBlock(pos, true);
         level.playSound(null, pos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+        villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
 
         tool.setDamageValue(tool.getDamageValue() + 1);
         if (tool.getDamageValue() >= tool.getMaxDamage()) {

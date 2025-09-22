@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.sosly.villagetale.block.BlockTypes;
 import org.sosly.villagetale.command.VillageTaleCommand;
 import org.sosly.villagetale.config.CommonConfig;
+import org.sosly.villagetale.entity.Activities;
 import org.sosly.villagetale.entity.EntityTypes;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -39,6 +40,7 @@ public class VillageTale {
         EntityTypes.register(modEventBus);
         MemoryModuleTypes.register(modEventBus);
         SensorTypes.register(modEventBus);
+        Activities.register(modEventBus);
 
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::onEntityAttributeCreation);

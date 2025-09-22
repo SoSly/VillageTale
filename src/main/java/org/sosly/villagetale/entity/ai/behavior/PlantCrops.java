@@ -11,11 +11,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
@@ -26,9 +23,10 @@ import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.NetworkHandler;
 
-public class PlantSeeds extends Behavior<Villager> {
+public class PlantCrops extends Behavior<Villager> {
     private static final int PLANTING_DURATION = 30;
     private static final int BEHAVIOR_DURATION = 60;
+    private static final float WORK_EXHAUSTION = 0.4f;
 
     boolean claimed;
     BlockPos pos;
@@ -37,7 +35,7 @@ public class PlantSeeds extends Behavior<Villager> {
     ItemStack seeds = ItemStack.EMPTY;
     IVillageZone workplace;
 
-    public PlantSeeds() {
+    public PlantCrops() {
         super(ImmutableMap.of(
                 MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
                 MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), MemoryStatus.VALUE_PRESENT,
@@ -131,10 +129,11 @@ public class PlantSeeds extends Behavior<Villager> {
             return;
         }
 
-        BlockState cropBlock = getCropBlockForSeed(seeds);
+        BlockState cropBlock = getCropBlock(seeds);
         if (cropBlock != null) {
             level.setBlock(pos, cropBlock, 3);
             level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
+            villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
             seeds.shrink(1);
         }
 
@@ -142,8 +141,8 @@ public class PlantSeeds extends Behavior<Villager> {
         claimed = false;
     }
 
-    private BlockState getCropBlockForSeed(ItemStack seed) {
-        if (seed.getItem() instanceof BlockItem blockItem) {
+    private BlockState getCropBlock(ItemStack crop) {
+        if (crop.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             return block.defaultBlockState();
         }

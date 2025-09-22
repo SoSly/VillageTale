@@ -9,7 +9,6 @@ import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.command.Result;
 import org.sosly.villagetale.command.arguments.VillageUUIDArgument;
+import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 
@@ -31,7 +31,8 @@ public class VillagerCommand {
 
     public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
         parentCommand.then(Commands.literal("villager")
-                .then(Commands.argument("targets", EntityArgument.entities())
+                .then(Commands.argument("target", VillagerUUIDArgument.villagerUUID())
+                        .suggests(VillagerUUIDArgument::suggest)
                         .then(Commands.literal("village")
                                 .executes(VillagerCommand::queryVillageAssignment)
                                 .then(Commands.argument("villageUUID", VillageUUIDArgument.villageUUID())
@@ -55,8 +56,8 @@ public class VillagerCommand {
 
     private static int queryVillageAssignment(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
-            Result result = VillagerService.queryVillageAssignment(entities);
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
+            Result result = VillagerService.queryVillageAssignment(villager);
             return result.send(ctx.getSource());
         } catch (Exception e) {
             return Result.failure(Component.translatable(
@@ -67,11 +68,11 @@ public class VillagerCommand {
 
     private static int assignVillage(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
             UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
             ServerLevel level = ctx.getSource().getLevel();
             
-            Result result = VillagerService.assignVillage(level, entities, villageId);
+            Result result = VillagerService.assignVillage(level, villager, villageId);
             return result.send(ctx.getSource(), true);
         } catch (Exception e) {
             return Result.failure(Component.translatable(
@@ -82,8 +83,8 @@ public class VillagerCommand {
 
     private static int queryProfession(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
-            Result result = VillagerService.queryProfession(entities);
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
+            Result result = VillagerService.queryProfession(villager);
             return result.send(ctx.getSource());
         } catch (Exception e) {
             return Result.failure(Component.translatable(
@@ -94,10 +95,10 @@ public class VillagerCommand {
 
     private static int setProfession(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
             ResourceLocation professionId = ResourceLocationArgument.getId(ctx, "profession");
             
-            Result result = VillagerService.setProfession(entities, professionId);
+            Result result = VillagerService.setProfession(villager, professionId);
             return result.send(ctx.getSource(), true);
         } catch (Exception e) {
             return Result.failure(Component.translatable(
@@ -108,8 +109,8 @@ public class VillagerCommand {
 
     private static int displayHunger(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
-            Result result = VillagerService.displayHunger(entities);
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
+            Result result = VillagerService.displayHunger(villager);
             return result.send(ctx.getSource());
         } catch (Exception e) {
             return Result.failure(Component.translatable(
@@ -120,10 +121,10 @@ public class VillagerCommand {
 
     private static int addExhaustion(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
             float amount = FloatArgumentType.getFloat(ctx, "exhaustion");
             
-            Result result = VillagerService.addExhaustion(entities, amount);
+            Result result = VillagerService.addExhaustion(villager, amount);
             return result.send(ctx.getSource(), true);
         } catch (Exception e) {
             return Result.failure(Component.translatable(
@@ -134,22 +135,16 @@ public class VillagerCommand {
 
     private static int displayInfo(CommandContext<CommandSourceStack> ctx) {
         try {
-            Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
             CommandSourceStack source = ctx.getSource();
             ServerLevel level = source.getLevel();
 
-            for (Entity entity : entities) {
-                if (!(entity instanceof Villager villager)) {
-                    continue;
-                }
-
-                VillagerService.displayDetailedInfo(
-                        villager,
-                        level,
-                        Component.literal("=== Villager Information ==="),
-                        component -> source.sendSuccess(() -> component, false)
-                );
-            }
+            VillagerService.displayDetailedInfo(
+                    villager,
+                    level,
+                    Component.literal("=== Villager Information ==="),
+                    component -> source.sendSuccess(() -> component, false)
+            );
 
             return 1;
         } catch (Exception e) {

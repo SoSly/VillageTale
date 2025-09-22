@@ -36,24 +36,37 @@ public class VillagerGoalPackages {
     @SuppressWarnings("unchecked")
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getCorePackage() {
         return ImmutableList.of(
-            Pair.of(0, (BehaviorControl<? super Villager>) new Swim(0.8F)),
-            Pair.of(0, (BehaviorControl<? super Villager>) InteractWithDoor.create()),
-            Pair.of(0, (BehaviorControl<? super Villager>) new LookAtTargetSink(45, 90)),
+            Pair.of(0, new Swim(0.8F)),
+            Pair.of(0, InteractWithDoor.create()),
+            Pair.of(0, new LookAtTargetSink(45, 90)),
             Pair.of(0, VillagerPanicTrigger.create()),
-            Pair.of(1, (BehaviorControl<? super Villager>) new MoveToTargetSink()),
-            Pair.of(1, WakeUp.create()),
-            Pair.of(2, (BehaviorControl<? super Villager>) new EatFood()),
-            Pair.of(3, (BehaviorControl<? super Villager>) new GetFromContainer()),
-            Pair.of(3, (BehaviorControl<? super Villager>) new DepositItem()),
-            Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
+            Pair.of(1, new MoveToTargetSink()),
+            Pair.of(1, new WakeUp()),
+            Pair.of(2, new EatFood()),
+            Pair.of(3, new GetFromContainer()),
+            Pair.of(3, new DepositItem()),
+            Pair.of(99, UpdateActivityFromSchedule.create())
         );
     }
 
     @SuppressWarnings("unchecked")
-    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getIdlePackage(float speedModifier) {
+    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getMorningIdlePackage(float speedModifier) {
         return ImmutableList.of(
-            Pair.of(3, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
-            Pair.of(5, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
+            Pair.of(3, new GoToNearestStorage()),
+            Pair.of(5, new RunOne<>(ImmutableList.of(
+                    Pair.of(RandomStroll.stroll(speedModifier), 2),
+                    Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
+                Pair.of(new DoNothing(30, 60), 1)
+            ))),
+            getMinimalLookBehavior()
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getEveningIdlePackage(float speedModifier) {
+        return ImmutableList.of(
+            Pair.of(3, new GoToNearestStorage()),
+            Pair.of(5, new RunOne<>(ImmutableList.of(
                     Pair.of(RandomStroll.stroll(speedModifier), 2),
                     Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
                 Pair.of(new DoNothing(30, 60), 1)
@@ -65,14 +78,14 @@ public class VillagerGoalPackages {
     @SuppressWarnings("unchecked")
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-                Pair.of(5, (BehaviorControl<? super Villager>) new GoToNearestStorage()),
+                Pair.of(5, new GoToNearestStorage()),
                 Pair.of(10, SetWalkTargetFromBlockMemory.create(MemoryModuleTypes.WORK_POS.get(), speedModifier, 3, 100, 1200)),
-                Pair.of(15, (BehaviorControl<? super Villager>) new RunOne<>(ImmutableList.of(
+                Pair.of(15, new RunOne<>(ImmutableList.of(
                         Pair.of(ZoneBoundRandomStroll.create(speedModifier), 2),
                         Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 3), 2),
                         Pair.of(new DoNothing(30, 60), 1)
                 ))),
-                Pair.of(99, (BehaviorControl<? super Villager>) new GoToWorkZone()),
+                Pair.of(99, new GoToWorkZone()),
                 getMinimalLookBehavior()
         );
     }
@@ -84,7 +97,7 @@ public class VillagerGoalPackages {
             Pair.of(3, GoToAssignedBed.create(speedModifier)),
             Pair.of(4, SetWalkTargetFromBlockMemory.create(MemoryModuleType.HOME, speedModifier, 1, 150, 1200)),
             getMinimalLookBehavior(),
-            Pair.of(99, (BehaviorControl<? super Villager>) UpdateActivityFromSchedule.create())
+            Pair.of(99, UpdateActivityFromSchedule.create())
         );
     }
 
@@ -100,11 +113,11 @@ public class VillagerGoalPackages {
     public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getPanicPackage(float speedModifier) {
         float panicSpeed = speedModifier * 1.5F;
         return ImmutableList.of(
-            Pair.of(0, (BehaviorControl<? super Villager>) VillagerCalmDown.create()),
+            Pair.of(0, VillagerCalmDown.create()),
             Pair.of(0, VillagerPanicTrigger.create()),
-            Pair.of(1, (BehaviorControl<? super Villager>) SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_HOSTILE, panicSpeed, 6, false)),
-            Pair.of(1, (BehaviorControl<? super Villager>) SetWalkTargetAwayFrom.entity(MemoryModuleType.HURT_BY_ENTITY, panicSpeed, 6, false)),
-            Pair.of(3, (BehaviorControl<? super Villager>) VillageBoundRandomStroll.create(panicSpeed, 2, 2)),
+            Pair.of(1, SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_HOSTILE, panicSpeed, 6, false)),
+            Pair.of(1, SetWalkTargetAwayFrom.entity(MemoryModuleType.HURT_BY_ENTITY, panicSpeed, 6, false)),
+            Pair.of(3, VillageBoundRandomStroll.create(panicSpeed, 2, 2)),
             getMinimalLookBehavior()
         );
     }

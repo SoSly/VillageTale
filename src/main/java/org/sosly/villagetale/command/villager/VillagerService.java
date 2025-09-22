@@ -24,6 +24,17 @@ import org.sosly.villagetale.profession.ProfessionRegistry;
 
 public class VillagerService {
 
+    public static Result queryVillageAssignment(Villager villager) {
+        Optional<UUID> villageId = villager.getVillage();
+        if (villageId.isPresent()) {
+            return Result.success(Component.literal(String.format("Villager %s is assigned to village %s",
+                    villager.getDisplayName().getString(), villageId.get())));
+        } else {
+            return Result.success(Component.literal(String.format("Villager %s is not assigned to any village",
+                    villager.getDisplayName().getString())));
+        }
+    }
+
     public static Result queryVillageAssignment(Collection<? extends Entity> entities) {
         int checkedCount = 0;
         StringBuilder message = new StringBuilder();
@@ -50,6 +61,24 @@ public class VillagerService {
         }
 
         return Result.success(Component.literal(message.toString().trim()));
+    }
+
+    public static Result assignVillage(ServerLevel level, Villager villager, UUID villageId) {
+        IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        VillageInfo village = villages.getVillageById(villageId);
+        if (village == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.village_not_found", VillageTale.MOD_ID), villageId));
+        }
+
+        villager.setVillage(villageId);
+        return Result.success(Component.translatable(
+                String.format("%s.command.villager.assigned", VillageTale.MOD_ID), 1, village.getVillageName()));
     }
 
     public static Result assignVillage(ServerLevel level, Collection<? extends Entity> entities, UUID villageId) {
@@ -82,6 +111,12 @@ public class VillagerService {
                 String.format("%s.command.villager.assigned", VillageTale.MOD_ID), assignedCount, village.getVillageName()));
     }
 
+    public static Result queryProfession(Villager villager) {
+        IProfession profession = villager.getProfession();
+        return Result.success(Component.literal(String.format("Villager %s has profession: %s",
+                villager.getDisplayName().getString(), profession.getID())));
+    }
+
     public static Result queryProfession(Collection<? extends Entity> entities) {
         int checkedCount = 0;
         StringBuilder message = new StringBuilder();
@@ -103,6 +138,19 @@ public class VillagerService {
         }
 
         return Result.success(Component.literal(message.toString().trim()));
+    }
+
+    public static Result setProfession(Villager villager, ResourceLocation professionId) {
+        Optional<IProfession> professionOpt = ProfessionRegistry.INSTANCE.getProfession(professionId);
+        if (professionOpt.isEmpty()) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.unknown_profession", VillageTale.MOD_ID), professionId));
+        }
+
+        IProfession profession = professionOpt.get();
+        villager.setProfession(profession.getID());
+        return Result.success(Component.translatable(
+                String.format("%s.command.villager.profession_set", VillageTale.MOD_ID), 1, professionId));
     }
 
     public static Result setProfession(Collection<? extends Entity> entities, ResourceLocation professionId) {
@@ -131,6 +179,17 @@ public class VillagerService {
                 String.format("%s.command.villager.profession_set", VillageTale.MOD_ID), changedCount, professionId));
     }
 
+    public static Result displayHunger(Villager villager) {
+        LivingEntityFoodData foodData = villager.getFoodData();
+        return Result.success(Component.literal(String.format(
+                "Villager %s: Hunger %d/20, Saturation %.1f, Exhaustion %.1f",
+                villager.getDisplayName().getString(),
+                foodData.getFoodLevel(),
+                foodData.getSaturationLevel(),
+                foodData.getExhaustionLevel()
+        )));
+    }
+
     public static Result displayHunger(Collection<? extends Entity> entities) {
         int checkedCount = 0;
         StringBuilder message = new StringBuilder();
@@ -155,6 +214,12 @@ public class VillagerService {
         }
 
         return Result.success(Component.literal(message.toString().trim()));
+    }
+
+    public static Result addExhaustion(Villager villager, float amount) {
+        villager.getFoodData().addExhaustion(amount);
+        return Result.success(Component.translatable(
+                String.format("%s.command.villager.exhaustion_added", VillageTale.MOD_ID), amount, 1));
     }
 
     public static Result addExhaustion(Collection<? extends Entity> entities, float amount) {
@@ -204,6 +269,29 @@ public class VillagerService {
         sender.accept(Component.literal(String.format("Saturation: %.1f", foodData.getSaturationLevel())));
         sender.accept(Component.literal(String.format("Exhaustion: %.1f", foodData.getExhaustionLevel())));
 
+        sender.accept(Component.literal(""));
+        sender.accept(Component.literal("--- Brain State ---"));
+        sender.accept(Component.literal(String.format("Current Activity: %s", 
+                villager.getBrain().getActiveNonCoreActivity().orElse(null))));
+        sender.accept(Component.literal(String.format("Schedule Activity: %s at time %d", 
+                villager.getBrain().getSchedule().getActivityAt((int)(level.getDayTime() % 24000)),
+                level.getDayTime() % 24000)));
+        
+        String runningBehaviors = villager.getBrain().getRunningBehaviors().stream()
+                .map(behavior -> {
+                    String name = behavior.getClass().getSimpleName();
+                    if (name.equals("RunOne")) {
+                        return name + "[check debugger]";
+                    }
+                    return name;
+                })
+                .collect(java.util.stream.Collectors.joining(", "));
+        if (!runningBehaviors.isEmpty()) {
+            sender.accept(Component.literal(String.format("Running Behaviors: %s", runningBehaviors)));
+        } else {
+            sender.accept(Component.literal("Running Behaviors: None"));
+        }
+        
         sender.accept(Component.literal(""));
         sender.accept(Component.literal("--- Core Memories ---"));
 

@@ -20,7 +20,7 @@ public class GoToAssignedBed extends Behavior<Villager> {
         super(ImmutableMap.of(
             MemoryModuleType.HOME, MemoryStatus.VALUE_PRESENT,
             MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT
-        ));
+        ), 200);
         this.speedModifier = speedModifier;
     }
 
@@ -49,5 +49,22 @@ public class GoToAssignedBed extends Behavior<Villager> {
         BlockPos bedPos = homePos.pos();
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(bedPos, speedModifier, WALK_PRECISION));
+    }
+
+    @Override
+    protected boolean canStillUse(ServerLevel level, Villager villager, long gameTime) {
+        GlobalPos homePos = villager.getBrain().getMemory(MemoryModuleType.HOME).orElse(null);
+        if (homePos == null) {
+            return false;
+        }
+        
+        BlockPos bedPos = homePos.pos();
+        return !bedPos.closerToCenterThan(villager.position(), ARRIVAL_DISTANCE);
+    }
+    
+    
+    @Override
+    protected void stop(ServerLevel level, Villager villager, long gameTime) {
+        villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
     }
 }

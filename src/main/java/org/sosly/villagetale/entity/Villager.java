@@ -29,7 +29,9 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -44,6 +46,7 @@ import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
+import org.sosly.villagetale.entity.Activities;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -167,15 +170,16 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         brain.setSchedule(this.getProfession().getSchedule());
 
         brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage());
-        brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(0.3F));
+        brain.addActivity(Activities.MORNING_IDLE.get(), VillagerGoalPackages.getMorningIdlePackage(0.3F));
+        brain.addActivity(Activities.EVENING_IDLE.get(), VillagerGoalPackages.getEveningIdlePackage(0.3F));
         brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(0.6F));
         brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(0.6F));
 
         brain.addActivity(Activity.WORK, getCombinedWorkPackage());
 
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
-        brain.setDefaultActivity(Activity.IDLE);
-        brain.setActiveActivityIfPossible(Activity.IDLE);
+        brain.setDefaultActivity(Activities.MORNING_IDLE.get());
+        brain.setActiveActivityIfPossible(Activities.MORNING_IDLE.get());
         brain.updateActivityFromSchedule(this.level().getDayTime(), this.level().getGameTime());
     }
 
@@ -332,10 +336,16 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
     @Override
     public void startSleeping(@NotNull BlockPos pos) {
+        VillageTale.LOGGER.info("Villager {} attempting to sleep at {}", this.getDisplayName().getString(), pos);
         super.startSleeping(pos);
         this.brain.setMemory(MemoryModuleType.LAST_SLEPT, this.level().getGameTime());
         this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
         this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+    }
+
+    @Override
+    protected float getStandingEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
+        return pose == Pose.SLEEPING ? 0.2F : super.getStandingEyeHeight(pose, dimensions);
     }
 
     public void setHome(BlockPos pos) {
@@ -545,6 +555,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
                 MemoryModuleType.NEAREST_HOSTILE,
                 MemoryModuleType.LAST_SLEPT,
                 MemoryModuleType.LAST_WOKEN,
+                MemoryModuleTypes.LAST_DAILY_EXHAUSTION.get(),
                 MemoryModuleTypes.CAN_EAT.get(),
                 MemoryModuleTypes.IS_HUNGRY.get(),
                 MemoryModuleTypes.IS_STARVING.get(),

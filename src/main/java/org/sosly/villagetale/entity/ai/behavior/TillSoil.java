@@ -29,6 +29,7 @@ import org.sosly.villagetale.network.NetworkHandler;
 public class TillSoil extends Behavior<Villager> {
     private static final int TILLING_DURATION = 40;
     private static final int BEHAVIOR_DURATION = 100;
+    private static final float WORK_EXHAUSTION = 0.8f;
 
     boolean claimed;
     BlockPos pos;
@@ -139,6 +140,7 @@ public class TillSoil extends Behavior<Villager> {
         if (tilledState != null) {
             level.setBlock(pos, tilledState, 3);
             level.playSound(null, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+            villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
         }
 
         tool.setDamageValue(tool.getDamageValue() + 1);

@@ -47,6 +47,10 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<Boolean>> IS_STARVING =
         MEMORY_MODULE_TYPES.register("is_starving",
                 () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+    
+    public static final RegistryObject<MemoryModuleType<Long>> LAST_DAILY_EXHAUSTION =
+        MEMORY_MODULE_TYPES.register("last_daily_exhaustion",
+                () -> new MemoryModuleType<>(Optional.of(Codec.LONG)));
 
     public static final RegistryObject<MemoryModuleType<Map<ResourceLocation, Integer>>> ITEMS_TO_DEPOSIT =
             MEMORY_MODULE_TYPES.register("items_to_deposit",
