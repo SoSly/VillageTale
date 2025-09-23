@@ -17,6 +17,7 @@ import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.recipeknowledge.RecipeKnowledgeProvider;
 import org.sosly.villagetale.capability.village.VillageProvider;
 import org.sosly.villagetale.capability.villages.VillagesProvider;
+import org.sosly.villagetale.entity.Villager;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Capabilities {
@@ -49,6 +50,10 @@ public class Capabilities {
 
     @SubscribeEvent
     public static void onAttachEntityCapabilities(AttachCapabilitiesEvent<Entity> event) {
+        if (!(event.getObject() instanceof Villager)) {
+            return;
+        }
+        
         RecipeKnowledgeProvider provider = new RecipeKnowledgeProvider();
         event.addCapability(RECIPE_KNOWLEDGE_KEY, provider);
     }

@@ -48,7 +48,7 @@ public class RecipeKnowledgeProvider implements ICapabilitySerializable<Compound
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        ListTag recipes = nbt.getList("recipes", 10);
+        ListTag recipes = nbt.getList("recipes", Tag.TAG_STRING);
         for (Tag tag : recipes) {
             capability.addRecipe(new ResourceLocation(tag.getAsString()));
         }
