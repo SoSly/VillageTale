@@ -13,6 +13,7 @@ import org.sosly.villagetale.zone.shape.Route;
 import org.sosly.villagetale.zone.shape.Sphere;
 import org.sosly.villagetale.zone.type.Farmland;
 import org.sosly.villagetale.zone.type.Home;
+import org.sosly.villagetale.zone.type.Kitchen;
 import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.zone.type.TownHall;
 
@@ -53,6 +54,7 @@ public class ZoneRegistry {
         // todo: this is a hack because the events are not working for some reason.
         TYPES.put(Farmland.ID, Farmland::new);
         TYPES.put(Home.ID, Home::new);
+        TYPES.put(Kitchen.ID, Kitchen::new);
         TYPES.put(Storage.ID, Storage::new);
         TYPES.put(TownHall.ID, TownHall::new);
         // end todo

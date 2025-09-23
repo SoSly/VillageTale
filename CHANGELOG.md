@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zone system for defining areas within villages
 - Four zone shapes available: rectangle, sphere, point, or route
 - Many zone types available:
-    farmland, home, storage, townhall
+    farmland, home, kitchen, storage, townhall
 - Zones can be filtered to only accept specific items (e.g., wheat-only farms)
 
 **Commands**

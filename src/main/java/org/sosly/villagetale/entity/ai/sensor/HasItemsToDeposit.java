@@ -52,7 +52,7 @@ public class HasItemsToDeposit extends Sensor<Villager> {
         boolean nearlyFull = usedSlots >= NEARLY_FULL_THRESHOLD;
 
         boolean hasLargeQuantityOfNonEssentials = hasLargeQuantityOfNonEssentials(villager);
-        
+
         boolean hasExcessResources = hasExcessResources(villager);
 
         boolean isEvening = villager.getBrain().isActive(Activity.IDLE);
@@ -89,28 +89,28 @@ public class HasItemsToDeposit extends Sensor<Villager> {
 
         return itemCounts.values().stream().anyMatch(count -> count >= LARGE_QUANTITY_THRESHOLD);
     }
-    
+
     private boolean hasExcessResources(Villager villager) {
         int wantedAmount = ItemMatcher.RESOURCES.getFor(villager).getAmount();
         if (wantedAmount <= 0) {
             return false;
         }
-        
+
         for (int i = 0; i < villager.getInventory().getContainerSize(); i++) {
             ItemStack stack = villager.getInventory().getItem(i);
             if (stack.isEmpty()) {
                 continue;
             }
-            
+
             if (!ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(stack)) {
                 continue;
             }
-            
+
             if (stack.getCount() > wantedAmount) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -142,7 +142,7 @@ public class HasItemsToDeposit extends Sensor<Villager> {
                 }
                 continue;
             }
-            
+
             if (isEssentialItem(testStack, villager)) {
                 continue;
             }
@@ -153,11 +153,11 @@ public class HasItemsToDeposit extends Sensor<Villager> {
                 }
                 continue;
             }
-            
+
             int toKeep = Math.min(totalCount, FOOD_TO_KEEP - foodKept);
             foodKept += toKeep;
             totalCount -= toKeep;
-            
+
             if (totalCount > 0) {
                 itemsToDeposit.put(itemId, totalCount);
             }

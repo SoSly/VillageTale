@@ -15,14 +15,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
@@ -55,7 +55,7 @@ public class GetFromContainer extends Behavior<Villager> {
             return false;
         }
 
-        WantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        IWantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
         if (wantedItem == null) {
             return false;
         }
@@ -161,7 +161,7 @@ public class GetFromContainer extends Behavior<Villager> {
     }
 
     private void extractItems(ServerLevel level, Villager villager) {
-        WantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        IWantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
         if (wantedItem == null) {
             return;
         }

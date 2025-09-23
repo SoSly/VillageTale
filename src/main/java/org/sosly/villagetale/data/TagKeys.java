@@ -1,5 +1,6 @@
 package org.sosly.villagetale.data;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -11,6 +12,6 @@ public class TagKeys {
     public static final TagKey<Block> TILLABLE = create("tillable");
 
     private static TagKey<Block> create(String name) {
-        return TagKey.create(net.minecraft.core.registries.Registries.BLOCK, new ResourceLocation(VillageTale.MOD_ID, name));
+        return TagKey.create(Registries.BLOCK, new ResourceLocation(VillageTale.MOD_ID, name));
     }
 }

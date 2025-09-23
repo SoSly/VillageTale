@@ -15,19 +15,19 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.config.CommonConfig;
-import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.capability.Capabilities;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.TimedWantedItem;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
+import org.sosly.villagetale.zone.type.Storage;
 
 public class IsItemInStorage extends Sensor<Villager> {
 
@@ -43,7 +43,7 @@ public class IsItemInStorage extends Sensor<Villager> {
             return;
         }
 
-        WantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        IWantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
         if (wantedItem == null) {
             return;
         }
@@ -99,7 +99,7 @@ public class IsItemInStorage extends Sensor<Villager> {
                 .orElse(null);
     }
 
-    private void scanStorageZone(ServerLevel level, Villager villager, IVillageZone zone, WantedItem wantedItem, List<UUID> alreadyScanned) {
+    private void scanStorageZone(ServerLevel level, Villager villager, IVillageZone zone, IWantedItem wantedItem, List<UUID> alreadyScanned) {
         Map<BlockPos, Optional<UUID>> claims = zone.getClaims(level.getGameTime());
         if (claims.isEmpty()) {
             addToScannedList(villager, zone.getUUID(), alreadyScanned);
@@ -134,7 +134,7 @@ public class IsItemInStorage extends Sensor<Villager> {
             zoneId, villager.getId());
     }
 
-    private void checkIfAllStoragesScanned(ServerLevel level, Villager villager, UUID villageId, WantedItem wantedItem) {
+    private void checkIfAllStoragesScanned(ServerLevel level, Villager villager, UUID villageId, IWantedItem wantedItem) {
         if (villager.getBrain().hasMemoryValue(MemoryModuleTypes.FOUND_ITEM.get())) {
             return;
         }
@@ -173,7 +173,7 @@ public class IsItemInStorage extends Sensor<Villager> {
         }
     }
 
-    private void addToCouldNotFindList(ServerLevel level, Villager villager, WantedItem wantedItem) {
+    private void addToCouldNotFindList(ServerLevel level, Villager villager, IWantedItem wantedItem) {
         List<TimedWantedItem> couldNotFind = villager.getBrain().getMemory(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get())
             .orElse(new ArrayList<>());
 

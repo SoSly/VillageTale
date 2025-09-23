@@ -110,9 +110,9 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // required dependencies
+    implementation fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
 
     // these mods are included only for the purpose of testing
-    runtimeOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
     runtimeOnly fg.deobf("curse.maven:betteradvancements-${advancements_projectId}:${advancements_fileId}")
 }
 
@@ -189,14 +189,13 @@ if (System.getenv("CURSEFORGE_TOKEN")) {
             }
 
             relations {
-                optionalDependency 'jei'
+                requiredDependency 'jei'
             }
         }
     }
 }
 
 // Modrinth deployment configuration
-import com.modrinth.minotaur.dependencies.ModDependency
 
 if (System.getenv("MODRINTH_TOKEN")) {
     modrinth {
@@ -212,7 +211,7 @@ if (System.getenv("MODRINTH_TOKEN")) {
         versionType = mod_version.contains('alpha') ? 'alpha' : mod_version.contains('beta') ? 'beta' : 'release'
 
         dependencies {
-            optional.project "jei"
+            required.project 'jei'
         }
     }
 }

@@ -379,6 +379,17 @@ public class VillagerService {
                             pos.getX(), pos.getY(), pos.getZ())));
                 });
             }
+
+            if (profession.getID().equals(new ResourceLocation("villagetale", "cook"))) {
+                villager.getBrain().getMemory(MemoryModuleTypes.CURRENT_RECIPE.get()).ifPresent(recipeId -> {
+                    sender.accept(Component.literal(String.format("Current Recipe: %s", recipeId)));
+                });
+
+                villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get()).ifPresent(pos -> {
+                    sender.accept(Component.literal(String.format("Nearest Workstation: %d, %d, %d",
+                            pos.getX(), pos.getY(), pos.getZ())));
+                });
+            }
         }
 
         sender.accept(Component.literal(""));

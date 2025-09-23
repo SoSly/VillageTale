@@ -2,10 +2,13 @@ package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -21,7 +24,7 @@ public class HasResources extends Sensor<Villager> {
 
     @Override
     protected void doTick(ServerLevel level, Villager villager) {
-        IWantedItem requiredResources = villager.getProfession().getAlwaysWantedItems().orElse(null);
+        IWantedItem requiredResources = ItemMatcher.RESOURCES.getFor(villager);
 
         if (requiredResources == null || requiredResources == IWantedItem.EMPTY) {
             return;
@@ -30,7 +33,7 @@ public class HasResources extends Sensor<Villager> {
         int resourceCount = countResources(villager, requiredResources);
         int minimumThreshold = requiredResources.getMinimum();
         int targetAmount = requiredResources.getAmount();
-        boolean needsMoreResources = resourceCount <= minimumThreshold;
+        boolean needsMoreResources = resourceCount < minimumThreshold;
         boolean hasTargetAmount = resourceCount >= targetAmount;
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 

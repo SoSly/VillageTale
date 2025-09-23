@@ -15,6 +15,8 @@ import org.sosly.villagetale.entity.ai.sensor.HasWorkZone;
 import org.sosly.villagetale.entity.ai.sensor.IsFarmland;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
 import org.sosly.villagetale.entity.ai.sensor.IsItemInStorage;
+import org.sosly.villagetale.entity.ai.sensor.WhatShouldBeCrafted;
+import org.sosly.villagetale.entity.ai.sensor.WhereShouldICraft;
 
 public class SensorTypes {
     public static final DeferredRegister<SensorType<?>> SENSOR_TYPES =
@@ -23,6 +25,8 @@ public class SensorTypes {
     public static final RegistryObject<SensorType<HasFood>> HAS_FOOD =
         SENSOR_TYPES.register("has_food", () -> new SensorType<>(HasFood::new));
 
+    public static final RegistryObject<SensorType<HasBedInHomeZone>> HAS_BED_IN_HOME_ZONE =
+            SENSOR_TYPES.register("has_bed_in_home_zone", () -> new SensorType<>(HasBedInHomeZone::new));
     public static final RegistryObject<SensorType<HasItemsToDeposit>> HAS_ITEMS_TO_DEPOSIT =
             SENSOR_TYPES.register("has_items_to_deposit", () -> new SensorType<>(HasItemsToDeposit::new));
 
@@ -43,9 +47,13 @@ public class SensorTypes {
 
     public static final RegistryObject<SensorType<IsItemInStorage>> IS_ITEM_IN_STORAGE =
             SENSOR_TYPES.register("is_item_in_storage", () -> new SensorType<>(IsItemInStorage::new));
-    
-    public static final RegistryObject<SensorType<HasBedInHomeZone>> HAS_BED_IN_HOME_ZONE =
-            SENSOR_TYPES.register("has_bed_in_home_zone", () -> new SensorType<>(HasBedInHomeZone::new));
+
+
+    public static final RegistryObject<SensorType<WhatShouldBeCrafted>> WHAT_SHOULD_BE_CRAFTED =
+            SENSOR_TYPES.register("what_should_be_crafted", () -> new SensorType<>(WhatShouldBeCrafted::new));
+
+    public static final RegistryObject<SensorType<WhereShouldICraft>> WHERE_SHOULD_I_CRAFT =
+            SENSOR_TYPES.register("where_should_i_craft", () -> new SensorType<>(WhereShouldICraft::new));
 
 
     public static void register(IEventBus eventBus) {

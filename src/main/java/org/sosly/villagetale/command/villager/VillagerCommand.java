@@ -51,7 +51,19 @@ public class VillagerCommand {
                                         .executes(VillagerCommand::addExhaustion)))
                         
                         .then(Commands.literal("info")
-                                .executes(VillagerCommand::displayInfo))));
+                                .executes(VillagerCommand::displayInfo))
+                        
+                        .then(Commands.literal("recipes")
+                                .then(Commands.literal("list")
+                                        .executes(VillagerCommand::listRecipes))
+                                .then(Commands.literal("add")
+                                        .then(Commands.argument("recipe", ResourceLocationArgument.id())
+                                                .suggests(RecipeCommand.RECIPE_SUGGESTIONS)
+                                                .executes(VillagerCommand::addRecipe)))
+                                .then(Commands.literal("remove")
+                                        .then(Commands.argument("recipe", ResourceLocationArgument.id())
+                                                .suggests(RecipeCommand.KNOWN_RECIPE_SUGGESTIONS)
+                                                .executes(VillagerCommand::removeRecipe))))));
     }
 
     private static int queryVillageAssignment(CommandContext<CommandSourceStack> ctx) {
@@ -150,6 +162,47 @@ public class VillagerCommand {
         } catch (Exception e) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.villager.info_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+
+    private static int listRecipes(CommandContext<CommandSourceStack> ctx) {
+        try {
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
+            ServerLevel level = ctx.getSource().getLevel();
+            Result result = RecipeCommand.listRecipes(level, villager);
+            return result.send(ctx.getSource());
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.list_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+
+    private static int addRecipe(CommandContext<CommandSourceStack> ctx) {
+        try {
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
+            ResourceLocation recipeId = ResourceLocationArgument.getId(ctx, "recipe");
+            ServerLevel level = ctx.getSource().getLevel();
+            Result result = RecipeCommand.addRecipe(level, villager, recipeId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.add_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+
+    private static int removeRecipe(CommandContext<CommandSourceStack> ctx) {
+        try {
+            Villager villager = VillagerUUIDArgument.getVillager(ctx, "target");
+            ResourceLocation recipeId = ResourceLocationArgument.getId(ctx, "recipe");
+            ServerLevel level = ctx.getSource().getLevel();
+            Result result = RecipeCommand.removeRecipe(level, villager, recipeId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.remove_error", VillageTale.MOD_ID), e.getMessage()))
                     .send(ctx.getSource());
         }
     }

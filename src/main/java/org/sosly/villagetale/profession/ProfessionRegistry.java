@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
 import org.sosly.villagetale.profession.professions.Commoner;
+import org.sosly.villagetale.profession.professions.Cook;
 import org.sosly.villagetale.profession.professions.Farmer;
 
 public class ProfessionRegistry {
@@ -39,6 +40,7 @@ public class ProfessionRegistry {
 
     {
         professions.put(Commoner.ID, new Commoner());
+        professions.put(Cook.ID, new Cook());
         professions.put(Farmer.ID, new Farmer());
     }
 }
