@@ -15,19 +15,14 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.capability.IVillageCapability;
-import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.config.CommonConfig;
-import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
+import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.zone.type.Storage;
 
 public class DepositItem extends Behavior<Villager> {
@@ -157,35 +152,7 @@ public class DepositItem extends Behavior<Villager> {
     }
 
     private boolean isAtStorageZone(ServerLevel level, Villager villager, UUID villageId) {
-        return getCurrentStorageZone(level, villager, villageId) != null;
-    }
-
-    private IVillageZone getCurrentStorageZone(ServerLevel level, Villager villager, UUID villageId) {
-        IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
-        if (villagesCapability == null) {
-            return null;
-        }
-
-        VillageInfo village = villagesCapability.getVillageById(villageId);
-        if (village == null) {
-            return null;
-        }
-
-        ChunkPos townHallChunk = new ChunkPos(village.getTownHallPos());
-        LevelChunk chunk = level.getChunk(townHallChunk.x, townHallChunk.z);
-
-        IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
-        if (villageCapability == null) {
-            return null;
-        }
-
-        BlockPos villagerPos = villager.blockPosition();
-        return villageCapability.getZones()
-                .stream()
-                .filter(z -> z.getType().getID().equals(Storage.ID))
-                .filter(z -> villagerPos.closerThan(z.getStartPosition().atY(villagerPos.getY()), CommonConfig.interactionDistance))
-                .findFirst()
-                .orElse(null);
+        return VillagesHelper.getZoneAtPosition(level, villageId, villager.blockPosition(), Storage.ID) != null;
     }
 
     private BlockPos findAvailableContainer(ServerLevel level, Villager villager, UUID villageId, Map<ResourceLocation, Integer> itemsToDeposit) {
@@ -193,7 +160,7 @@ public class DepositItem extends Behavior<Villager> {
             return null;
         }
 
-        IVillageZone zone = getCurrentStorageZone(level, villager, villageId);
+        IVillageZone zone = VillagesHelper.getZoneAtPosition(level, villageId, villager.blockPosition(), Storage.ID);
         if (zone == null) {
             return null;
         }
@@ -222,7 +189,7 @@ public class DepositItem extends Behavior<Villager> {
             return false;
         }
 
-        IVillageZone zone = getCurrentStorageZone(level, villager, villageId);
+        IVillageZone zone = VillagesHelper.getZoneAtPosition(level, villageId, villager.blockPosition(), Storage.ID);
         if (zone == null) {
             return false;
         }
