@@ -43,6 +43,10 @@ public class TreeHelper {
             BlockPos current = toCheck.poll();
             BlockState currentState = level.getBlockState(current);
 
+            if (isLog(currentState) && current.getY() < lowestLog.getY()) {
+                lowestLog = current;
+            }
+
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     for (int dz = -1; dz <= 1; dz++) {

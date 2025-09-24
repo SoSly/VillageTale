@@ -2,7 +2,7 @@ package org.sosly.villagetale.command.zone;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.UUID;
@@ -29,7 +29,7 @@ public class CreateCommand {
                     builder
             );
 
-    public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
+    public static void register(ArgumentBuilder<CommandSourceStack, ?> parentCommand) {
         parentCommand.then(Commands.literal("create")
                 .then(Commands.literal("box")
                         .then(Commands.argument("pos1", BlockPosArgument.blockPos())
@@ -48,8 +48,7 @@ public class CreateCommand {
                                                     .suggests(ZONE_TYPE_SUGGESTIONS)
                                                     .executes(CreateCommand::createCylinderZone)
                                                     .then(Commands.argument("name", StringArgumentType.string())
-                                                            .executes(CreateCommand::createCylinderZoneWithName))))))
-
+                                                            .executes(CreateCommand::createCylinderZoneWithName)))))))
                 .then(Commands.literal("point")
                         .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                 .then(Commands.argument("type", ResourceLocationArgument.id())
@@ -63,7 +62,7 @@ public class CreateCommand {
                                 .suggests(ZONE_TYPE_SUGGESTIONS)
                                 .executes(CreateCommand::createRouteZone)
                                 .then(Commands.argument("name", StringArgumentType.string())
-                                        .executes(CreateCommand::createRouteZoneWithName))))));
+                                        .executes(CreateCommand::createRouteZoneWithName)))));
     }
 
     private static int createBoxZone(CommandContext<CommandSourceStack> ctx) {

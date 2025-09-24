@@ -8,19 +8,18 @@ import org.sosly.villagetale.command.arguments.VillageUUIDArgument;
 public class ZoneCommand {
 
     public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
-        var zoneCommand = Commands.literal("zone")
-                .then(Commands.argument("villageUUID", VillageUUIDArgument.villageUUID())
-                        .suggests(VillageUUIDArgument::suggest));
+        var villageArgument = Commands.argument("villageUUID", VillageUUIDArgument.villageUUID())
+                .suggests(VillageUUIDArgument::suggest);
 
-        CreateCommand.register(zoneCommand);
-        DeleteCommand.register(zoneCommand);
-        ListCommand.register(zoneCommand);
-        InfoCommand.register(zoneCommand);
-        RouteCommand.register(zoneCommand);
-        AssignCommand.register(zoneCommand);
-        UnassignCommand.register(zoneCommand);
-        FilterCommand.register(zoneCommand);
+        CreateCommand.register(villageArgument);
+        DeleteCommand.register(villageArgument);
+        ListCommand.register(villageArgument);
+        InfoCommand.register(villageArgument);
+        RouteCommand.register(villageArgument);
+        AssignCommand.register(villageArgument);
+        UnassignCommand.register(villageArgument);
+        FilterCommand.register(villageArgument);
 
-        parentCommand.then(zoneCommand);
+        parentCommand.then(Commands.literal("zone").then(villageArgument));
     }
 }

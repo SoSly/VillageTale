@@ -50,7 +50,7 @@ public class Lumberjack extends AbstractProfession {
     @Override
     public ImmutableList<MemoryModuleType<?>> getMemoryModules() {
         return ImmutableList.of(
-            MemoryModuleTypes.NEAREST_TREE.get(),
+            MemoryModuleTypes.NEAREST_LOG.get(),
             MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get()
         );
     }
@@ -77,8 +77,8 @@ public class Lumberjack extends AbstractProfession {
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
             Pair.of(1, new PickUpItems()),
-            Pair.of(11, new ChopTreeBehavior()),
-            Pair.of(12, new PlantSapling())
+            Pair.of(10, new ChopTreeBehavior()),
+            Pair.of(11, new PlantSapling())
         );
     }
 

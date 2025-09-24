@@ -1,8 +1,6 @@
 package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -12,11 +10,12 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.data.Tree;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
@@ -24,19 +23,17 @@ import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.zone.type.Forest;
 
 public class IsForest extends Sensor<Villager> {
-    private static final Set<BlockPos> replantedPositions = new HashSet<>();
-    
     public IsForest() {
         super(100);
     }
 
     @Override
-    protected void doTick(ServerLevel level, Villager villager) {
-        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
-        if (workplaceId == null) {
+    protected void doTick(@NotNull ServerLevel level, Villager villager) {
+        if (villager.getVillage().isEmpty() || !villager.getBrain().hasMemoryValue(MemoryModuleTypes.WORK_ZONE.get())) {
             return;
         }
 
+        UUID workplaceId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).get();
         IVillageZone zone = VillagesHelper.getZoneById(level, villager.getVillage().get(), workplaceId);
         if (zone == null) {
             return;
@@ -46,63 +43,90 @@ public class IsForest extends Sensor<Villager> {
             return;
         }
 
-        if (!(zone.getType() instanceof Forest forest)) {
+        if (!(zone.getType() instanceof Forest)) {
             return;
         }
 
-        long gameTime = level.getGameTime();
-        
-        Set<Tree> trees = forest.getTrees();
-        if (!trees.isEmpty()) {
-            Optional<Tree> nearestTree = trees.stream()
-                .filter(tree -> zone.containsPosition(tree.getBase()))
-                .filter(tree -> level.getBlockState(tree.getBase()).is(BlockTags.LOGS))
-                .min((t1, t2) -> {
-                    double dist1 = villager.blockPosition().distSqr(t1.getBase());
-                    double dist2 = villager.blockPosition().distSqr(t2.getBase());
-                    return Double.compare(dist1, dist2);
-                });
-            
-            nearestTree.ifPresent(tree -> 
-                villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_TREE.get(), tree.getBase(), 600L)
-            );
-        }
-
-        ItemStack sapling = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.SAPLINGS), zone);
-        if (!sapling.isEmpty()) {
-            Optional<BlockPos> replantableSpot = findReplantableSpot(level, zone, villager.blockPosition());
-            replantableSpot.ifPresent(pos -> {
-                villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get(), pos, 600L);
-                replantedPositions.add(pos);
-            });
-        }
+        findNearestLog(level, villager, zone);
+        findNearestReplantableSpot(level, villager, zone);
     }
 
-    private Optional<BlockPos> findReplantableSpot(ServerLevel level, IVillageZone zone, BlockPos villagerPos) {
-        int searchRadius = 16;
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        
-        for (int x = -searchRadius; x <= searchRadius; x++) {
-            for (int z = -searchRadius; z <= searchRadius; z++) {
-                for (int y = -2; y <= 2; y++) {
-                    mutablePos.set(villagerPos.getX() + x, villagerPos.getY() + y, villagerPos.getZ() + z);
+    private void findNearestLog(ServerLevel level, Villager villager, IVillageZone zone) {
+        BlockPos villagerPos = villager.blockPosition();
+        int scanRadius = (int) CommonConfig.scanRadius;
+        BlockPos nearestLog = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int z = -scanRadius; z <= scanRadius; z++) {
+                for (int y = -scanRadius; y <= scanRadius; y++) {
+                    BlockPos pos = villagerPos.offset(x, y, z);
                     
-                    if (!zone.containsPosition(mutablePos)) {
+                    if (!zone.containsPosition(pos)) {
                         continue;
                     }
                     
-                    if (replantedPositions.contains(mutablePos)) {
+                    if (!level.getBlockState(pos).is(BlockTags.LOGS)) {
                         continue;
                     }
                     
-                    if (canPlantSapling(level, mutablePos)) {
-                        return Optional.of(mutablePos.immutable());
+                    double distance = villagerPos.distSqr(pos);
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestLog = pos;
                     }
                 }
             }
         }
-        
-        return Optional.empty();
+
+        if (nearestLog != null) {
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_LOG.get(), nearestLog, 600L);
+        }
+    }
+
+    private void findNearestReplantableSpot(ServerLevel level, Villager villager, IVillageZone zone) {
+        ItemStack sapling = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.SAPLINGS), zone);
+        if (sapling.isEmpty()) {
+            return;
+        }
+
+        boolean needs2x2 = needs2x2Configuration(sapling);
+        BlockPos villagerPos = villager.blockPosition();
+        int scanRadius = (int) CommonConfig.scanRadius;
+        BlockPos nearestSpot = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int z = -scanRadius; z <= scanRadius; z++) {
+                for (int y = -2; y <= 2; y++) {
+                    BlockPos pos = villagerPos.offset(x, y, z);
+                    
+                    if (!zone.containsPosition(pos)) {
+                        continue;
+                    }
+                    
+                    if (needs2x2) {
+                        if (!canPlace2x2Sapling(level, pos, zone) || !has2x2Spacing(level, pos)) {
+                            continue;
+                        }
+                    } else {
+                        if (!canPlantSapling(level, pos) || !hasProperSpacing(level, pos)) {
+                            continue;
+                        }
+                    }
+                    
+                    double distance = villagerPos.distSqr(pos);
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestSpot = pos;
+                    }
+                }
+            }
+        }
+
+        if (nearestSpot != null) {
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get(), nearestSpot, 600L);
+        }
     }
 
     private boolean canPlantSapling(ServerLevel level, BlockPos pos) {
@@ -110,25 +134,99 @@ public class IsForest extends Sensor<Villager> {
         if (!state.isAir()) {
             return false;
         }
-        
+
         BlockPos below = pos.below();
         BlockState belowState = level.getBlockState(below);
-        
-        return belowState.is(BlockTags.DIRT) || 
-               belowState.is(Blocks.GRASS_BLOCK) || 
-               belowState.is(Blocks.PODZOL) || 
+
+        return belowState.is(BlockTags.DIRT) ||
+               belowState.is(Blocks.GRASS_BLOCK) ||
+               belowState.is(Blocks.PODZOL) ||
                belowState.is(Blocks.MYCELIUM);
     }
 
-    public static void clearReplantedPosition(BlockPos pos) {
-        replantedPositions.remove(pos);
+    private boolean canPlace2x2Sapling(ServerLevel level, BlockPos pos, IVillageZone zone) {
+        BlockPos north = pos.north();
+        BlockPos east = pos.east();
+        BlockPos northeast = pos.north().east();
+
+        if (!zone.containsPosition(north) || !zone.containsPosition(east) || !zone.containsPosition(northeast)) {
+            return false;
+        }
+
+        return canPlantSapling(level, pos) &&
+               canPlantSapling(level, north) &&
+               canPlantSapling(level, east) &&
+               canPlantSapling(level, northeast);
+    }
+
+    private boolean hasProperSpacing(ServerLevel level, BlockPos pos) {
+        int minSpacing = 3;
+
+        for (int dx = -minSpacing; dx <= minSpacing; dx++) {
+            for (int dz = -minSpacing; dz <= minSpacing; dz++) {
+                if (dx == 0 && dz == 0) {
+                    continue;
+                }
+
+                BlockPos nearbyPos = pos.offset(dx, 0, dz);
+                BlockState nearbyState = level.getBlockState(nearbyPos);
+
+                if (!nearbyState.is(BlockTags.SAPLINGS) && !nearbyState.is(BlockTags.LOGS)) {
+                    continue;
+                }
+                
+                double distance = Math.sqrt(dx * dx + dz * dz);
+                if (distance < minSpacing) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private boolean has2x2Spacing(ServerLevel level, BlockPos pos) {
+        int checkRadius = 4;
+        
+        for (int dx = -checkRadius; dx <= checkRadius + 1; dx++) {
+            for (int dz = -checkRadius; dz <= checkRadius + 1; dz++) {
+                if (dx >= 0 && dx <= 1 && dz >= 0 && dz <= 1) {
+                    continue;
+                }
+                
+                BlockPos checkPos = pos.offset(dx, 0, dz);
+                BlockState state = level.getBlockState(checkPos);
+                
+                if (!state.is(BlockTags.SAPLINGS) && !state.is(BlockTags.LOGS)) {
+                    continue;
+                }
+                
+                int closestX = Math.max(0, Math.min(1, dx));
+                int closestZ = Math.max(0, Math.min(1, dz));
+                int distX = Math.abs(dx - closestX);
+                int distZ = Math.abs(dz - closestZ);
+                double distance = Math.sqrt(distX * distX + distZ * distZ);
+                
+                if (distance < 3) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+
+    private boolean needs2x2Configuration(ItemStack sapling) {
+        return sapling.is(Items.JUNGLE_SAPLING) ||
+               sapling.is(Items.SPRUCE_SAPLING) ||
+               sapling.is(Items.DARK_OAK_SAPLING);
     }
 
     @Override
     public @NotNull Set<MemoryModuleType<?>> requires() {
         return ImmutableSet.of(
             MemoryModuleTypes.WORK_ZONE.get(),
-            MemoryModuleTypes.NEAREST_TREE.get(),
+            MemoryModuleTypes.NEAREST_LOG.get(),
             MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get()
         );
     }

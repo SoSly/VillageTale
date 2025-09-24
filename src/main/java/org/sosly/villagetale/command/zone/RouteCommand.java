@@ -1,6 +1,6 @@
 package org.sosly.villagetale.command.zone;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,7 +16,7 @@ import org.sosly.villagetale.command.arguments.ZoneUUIDArgument;
 
 public class RouteCommand {
 
-    public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
+    public static void register(ArgumentBuilder<CommandSourceStack, ?> parentCommand) {
         parentCommand.then(Commands.literal("route")
                 .then(Commands.argument("zoneUUID", ZoneUUIDArgument.zoneUUID())
                         .suggests(ZoneUUIDArgument::suggest)

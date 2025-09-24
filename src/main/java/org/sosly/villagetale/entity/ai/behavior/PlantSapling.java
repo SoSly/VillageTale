@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,6 @@ import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
-import org.sosly.villagetale.entity.ai.sensor.IsForest;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.NetworkHandler;
@@ -83,7 +83,7 @@ public class PlantSapling extends Behavior<Villager> {
 
         if (!villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(pos, 0.5F, 1), 200L);
+                new WalkTarget(pos, 0.5F, 0), 200L);
         }
     }
 
@@ -93,10 +93,6 @@ public class PlantSapling extends Behavior<Villager> {
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get());
-
-        if (pos != null) {
-            IsForest.clearReplantedPosition(pos);
-        }
 
         this.pos = null;
         this.plantTicks = 0;
@@ -120,7 +116,7 @@ public class PlantSapling extends Behavior<Villager> {
         }
 
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
-        
+
         if (plantTicks++ < PLANTING_DURATION) {
             if (plantTicks % 10 == 0) {
                 villager.getLookControl().setLookAt(
@@ -140,14 +136,25 @@ public class PlantSapling extends Behavior<Villager> {
 
         BlockState saplingBlock = getSaplingBlock(sapling);
         if (saplingBlock != null) {
-            level.setBlock(pos, saplingBlock, 3);
-            level.playSound(null, pos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
-            villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
-            sapling.shrink(1);
+            if (needs2x2Configuration(sapling)) {
+                if (canPlace2x2(level, pos, saplingBlock) && sapling.getCount() >= 4) {
+                    level.setBlock(pos, saplingBlock, 3);
+                    level.setBlock(pos.north(), saplingBlock, 3);
+                    level.setBlock(pos.east(), saplingBlock, 3);
+                    level.setBlock(pos.north().east(), saplingBlock, 3);
+                    level.playSound(null, pos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    villager.getFoodData().addExhaustion(WORK_EXHAUSTION * 4);
+                    sapling.shrink(4);
+                }
+            } else {
+                level.setBlock(pos, saplingBlock, 3);
+                level.playSound(null, pos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
+                sapling.shrink(1);
+            }
         }
 
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get());
-        IsForest.clearReplantedPosition(pos);
         claimed = false;
     }
 
@@ -157,5 +164,18 @@ public class PlantSapling extends Behavior<Villager> {
             return block.defaultBlockState();
         }
         return null;
+    }
+    
+    private boolean needs2x2Configuration(ItemStack sapling) {
+        return sapling.is(Items.JUNGLE_SAPLING) || 
+               sapling.is(Items.SPRUCE_SAPLING) || 
+               sapling.is(Items.DARK_OAK_SAPLING);
+    }
+    
+    private boolean canPlace2x2(ServerLevel level, BlockPos pos, BlockState saplingBlock) {
+        return level.getBlockState(pos).isAir() &&
+               level.getBlockState(pos.north()).isAir() &&
+               level.getBlockState(pos.east()).isAir() &&
+               level.getBlockState(pos.north().east()).isAir();
     }
 }

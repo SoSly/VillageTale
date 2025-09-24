@@ -1,6 +1,6 @@
 package org.sosly.villagetale.command.zone;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,7 +15,7 @@ import org.sosly.villagetale.entity.Villager;
 
 public class UnassignCommand {
 
-    public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
+    public static void register(ArgumentBuilder<CommandSourceStack, ?> parentCommand) {
         parentCommand.then(Commands.literal("unassign")
                 .then(Commands.argument("villager", VillagerUUIDArgument.villagerUUID())
                         .suggests(VillagerUUIDArgument::suggest)

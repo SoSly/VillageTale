@@ -11,6 +11,7 @@ import org.sosly.villagetale.api.IProfession;
 import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.professions.Cook;
 import org.sosly.villagetale.profession.professions.Farmer;
+import org.sosly.villagetale.profession.professions.Lumberjack;
 
 public class ProfessionRegistry {
     public static final ProfessionRegistry INSTANCE = new ProfessionRegistry();
@@ -42,5 +43,6 @@ public class ProfessionRegistry {
         professions.put(Commoner.ID, new Commoner());
         professions.put(Cook.ID, new Cook());
         professions.put(Farmer.ID, new Farmer());
+        professions.put(Lumberjack.ID, new Lumberjack());
     }
 }

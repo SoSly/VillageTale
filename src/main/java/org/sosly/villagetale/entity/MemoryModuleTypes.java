@@ -103,8 +103,8 @@ public class MemoryModuleTypes {
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
     // Lumberjack Memories
-    public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_TREE =
-            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_tree",
+    public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_LOG =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_log",
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_REPLANTABLE_SPOT =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_replantable_spot",
