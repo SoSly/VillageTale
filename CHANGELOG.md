@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Town Hall block - establish your village (automatically named after you)
 - Villages must be at least 30 chunks apart
 - Zone system for defining areas within villages
-- Four zone shapes available: rectangle, sphere, point, or route
+- Four zone shapes available: box, cylinder, point, or route
 - Many zone types available:
     farmland, home, kitchen, storage, townhall
 - Zones can be filtered to only accept specific items (e.g., wheat-only farms)

@@ -31,23 +31,24 @@ public class CreateCommand {
 
     public static void register(LiteralArgumentBuilder<CommandSourceStack> parentCommand) {
         parentCommand.then(Commands.literal("create")
-                .then(Commands.literal("rectangle")
+                .then(Commands.literal("box")
                         .then(Commands.argument("pos1", BlockPosArgument.blockPos())
                                 .then(Commands.argument("pos2", BlockPosArgument.blockPos())
                                         .then(Commands.argument("type", ResourceLocationArgument.id())
                                                 .suggests(ZONE_TYPE_SUGGESTIONS)
-                                                .executes(CreateCommand::createRectangleZone)
+                                                .executes(CreateCommand::createBoxZone)
                                                 .then(Commands.argument("name", StringArgumentType.string())
-                                                        .executes(CreateCommand::createRectangleZoneWithName))))))
+                                                        .executes(CreateCommand::createBoxZoneWithName))))))
 
-                .then(Commands.literal("sphere")
+                .then(Commands.literal("cylinder")
                         .then(Commands.argument("center", BlockPosArgument.blockPos())
                                 .then(Commands.argument("radius", IntegerArgumentType.integer(1))
-                                        .then(Commands.argument("type", ResourceLocationArgument.id())
-                                                .suggests(ZONE_TYPE_SUGGESTIONS)
-                                                .executes(CreateCommand::createSphereZone)
-                                                .then(Commands.argument("name", StringArgumentType.string())
-                                                        .executes(CreateCommand::createSphereZoneWithName))))))
+                                        .then(Commands.argument("height", IntegerArgumentType.integer(1))
+                                            .then(Commands.argument("type", ResourceLocationArgument.id())
+                                                    .suggests(ZONE_TYPE_SUGGESTIONS)
+                                                    .executes(CreateCommand::createCylinderZone)
+                                                    .then(Commands.argument("name", StringArgumentType.string())
+                                                            .executes(CreateCommand::createCylinderZoneWithName))))))
 
                 .then(Commands.literal("point")
                         .then(Commands.argument("pos", BlockPosArgument.blockPos())
@@ -62,19 +63,19 @@ public class CreateCommand {
                                 .suggests(ZONE_TYPE_SUGGESTIONS)
                                 .executes(CreateCommand::createRouteZone)
                                 .then(Commands.argument("name", StringArgumentType.string())
-                                        .executes(CreateCommand::createRouteZoneWithName)))));
+                                        .executes(CreateCommand::createRouteZoneWithName))))));
     }
 
-    private static int createRectangleZone(CommandContext<CommandSourceStack> ctx) {
-        return createRectangleZoneInternal(ctx, null);
+    private static int createBoxZone(CommandContext<CommandSourceStack> ctx) {
+        return createBoxZoneInterval(ctx, null);
     }
 
-    private static int createRectangleZoneWithName(CommandContext<CommandSourceStack> ctx) {
+    private static int createBoxZoneWithName(CommandContext<CommandSourceStack> ctx) {
         String name = StringArgumentType.getString(ctx, "name");
-        return createRectangleZoneInternal(ctx, name);
+        return createBoxZoneInterval(ctx, name);
     }
 
-    private static int createRectangleZoneInternal(CommandContext<CommandSourceStack> ctx, String name) {
+    private static int createBoxZoneInterval(CommandContext<CommandSourceStack> ctx, String name) {
         try {
             ServerLevel level = ctx.getSource().getLevel();
             UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
@@ -82,37 +83,38 @@ public class CreateCommand {
             BlockPos pos1 = BlockPosArgument.getBlockPos(ctx, "pos1");
             BlockPos pos2 = BlockPosArgument.getBlockPos(ctx, "pos2");
 
-            Result result = ZoneService.createRectangleZone(level, villageId, pos1, pos2, zoneType, name);
+            Result result = ZoneService.createBoxZone(level, villageId, pos1, pos2, zoneType, name);
             return result.send(ctx.getSource(), true);
         } catch (Exception e) {
             return Result.failure(Component.translatable(
-                    String.format("%s.command.zone.create_rectangle_error", VillageTale.MOD_ID), e.getMessage()))
+                    String.format("%s.command.zone.create_box_error", VillageTale.MOD_ID), e.getMessage()))
                     .send(ctx.getSource());
         }
     }
 
-    private static int createSphereZone(CommandContext<CommandSourceStack> ctx) {
-        return createSphereZoneInternal(ctx, null);
+    private static int createCylinderZone(CommandContext<CommandSourceStack> ctx) {
+        return createCylinderZoneInterval(ctx, null);
     }
 
-    private static int createSphereZoneWithName(CommandContext<CommandSourceStack> ctx) {
+    private static int createCylinderZoneWithName(CommandContext<CommandSourceStack> ctx) {
         String name = StringArgumentType.getString(ctx, "name");
-        return createSphereZoneInternal(ctx, name);
+        return createCylinderZoneInterval(ctx, name);
     }
 
-    private static int createSphereZoneInternal(CommandContext<CommandSourceStack> ctx, String name) {
+    private static int createCylinderZoneInterval(CommandContext<CommandSourceStack> ctx, String name) {
         try {
             ServerLevel level = ctx.getSource().getLevel();
             UUID villageId = VillageUUIDArgument.getVillageUUID(ctx, "villageUUID");
             ResourceLocation zoneType = ResourceLocationArgument.getId(ctx, "type");
             BlockPos center = BlockPosArgument.getBlockPos(ctx, "center");
             int radius = IntegerArgumentType.getInteger(ctx, "radius");
+            int height = IntegerArgumentType.getInteger(ctx, "height");
 
-            Result result = ZoneService.createSphereZone(level, villageId, center, radius, zoneType, name);
+            Result result = ZoneService.createCylinderZone(level, villageId, center, radius, height, zoneType, name);
             return result.send(ctx.getSource(), true);
         } catch (Exception e) {
             return Result.failure(Component.translatable(
-                    String.format("%s.command.zone.create_sphere_error", VillageTale.MOD_ID), e.getMessage()))
+                    String.format("%s.command.zone.create_cylinder_error", VillageTale.MOD_ID), e.getMessage()))
                     .send(ctx.getSource());
         }
     }

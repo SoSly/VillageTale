@@ -15,44 +15,51 @@ import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
-public class Sphere implements IZoneShape {
-    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "sphere");
+public class Cylinder implements IZoneShape {
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "cylinder");
 
-    private BlockPos center;
+    private BlockPos baseCenter;
     private int radius;
+    private int height;
 
-    public Sphere() {}
+    public Cylinder() {}
 
-    public Sphere(BlockPos center, int radius) {
-        this.center = center;
+    public Cylinder(BlockPos baseCenter, int radius, int height) {
+        this.baseCenter = baseCenter;
         this.radius = radius;
+        this.height = height;
     }
 
-    public BlockPos getCenter() {
-        return center;
+    public BlockPos getBaseCenter() {
+        return baseCenter;
     }
 
     public int getRadius() {
         return radius;
     }
 
+    public int getHeight() {
+        return height;
+    }
+
     @Override
     public boolean containsPosition(BlockPos pos) {
-        if (center == null || pos == null) {
-            return false;
-        }
-
-        double distanceSquared = center.distSqr(pos);
-        return distanceSquared <= radius * radius;
+        return containsPosition(pos, 0);
     }
-    
+
     @Override
     public boolean containsPosition(BlockPos pos, int buffer) {
-        if (center == null || pos == null) {
+        if (baseCenter == null || pos == null) {
             return false;
         }
 
-        double distanceSquared = center.distSqr(pos);
+        if (pos.getY() < baseCenter.getY() - buffer || pos.getY() >= baseCenter.getY() + height + buffer) {
+            return false;
+        }
+
+        double dx = pos.getX() - baseCenter.getX();
+        double dz = pos.getZ() - baseCenter.getZ();
+        double distanceSquared = dx * dx + dz * dz;
         int expandedRadius = radius + buffer;
         return distanceSquared <= expandedRadius * expandedRadius;
     }
@@ -68,13 +75,17 @@ public class Sphere implements IZoneShape {
             return Collections.emptyList();
         }
 
-        double radiusSq = radius * radius;  // avoid sqrt in the loop
+        double radiusSq = radius * radius;
 
         return BlockPos.betweenClosedStream(
-                center.offset(-radius, -radius, -radius),
-                center.offset(radius, radius, radius)
+                baseCenter.offset(-radius, 0, -radius),
+                baseCenter.offset(radius, height - 1, radius)
             )
-            .filter(pos -> center.distSqr(pos) <= radiusSq)
+            .filter(pos -> {
+                double dx = pos.getX() - baseCenter.getX();
+                double dz = pos.getZ() - baseCenter.getZ();
+                return dx * dx + dz * dz <= radiusSq;
+            })
             .filter(pos -> isPOI.test(pos))
             .map(BlockPos::immutable)
             .toList();
@@ -82,21 +93,23 @@ public class Sphere implements IZoneShape {
 
     @Override
     public BlockPos getStartPosition() {
-        return this.center;
+        return this.baseCenter;
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("radius", this.radius);
-        tag.putLong("center", this.center.asLong());
+        tag.putInt("height", this.height);
+        tag.putLong("baseCenter", this.baseCenter.asLong());
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         this.radius = nbt.getInt("radius");
-        this.center = BlockPos.of(nbt.getLong("center"));
+        this.height = nbt.getInt("height");
+        this.baseCenter = BlockPos.of(nbt.getLong("baseCenter"));
     }
 
     public static Builder builder(Level level, IVillageCapability village, int ordinal) {
@@ -107,8 +120,9 @@ public class Sphere implements IZoneShape {
         private final Level level;
         private final IVillageCapability village;
         private final int ordinal;
-        private BlockPos center;
+        private BlockPos baseCenter;
         private int radius;
+        private int height = 4;
 
         private IZoneType type;
 
@@ -118,13 +132,18 @@ public class Sphere implements IZoneShape {
             this.ordinal = ordinal;
         }
 
-        public Builder setCenter(BlockPos pos) {
-            this.center = pos;
+        public Builder setBaseCenter(BlockPos pos) {
+            this.baseCenter = pos;
             return this;
         }
 
         public Builder setRadius(int radius) {
             this.radius = radius;
+            return this;
+        }
+
+        public Builder setHeight(int height) {
+            this.height = height;
             return this;
         }
 
@@ -138,15 +157,19 @@ public class Sphere implements IZoneShape {
                 throw new IllegalStateException("Zone has no type");
             }
 
-            if (center == null) {
-                throw new IllegalStateException("Sphere Zone has no center");
+            if (baseCenter == null) {
+                throw new IllegalStateException("Cylinder Zone has no base center");
             }
 
             if (radius <= 0) {
-                throw new IllegalStateException("Sphere Zone has no radius");
+                throw new IllegalStateException("Cylinder Zone has no radius");
             }
 
-            return new Zone(level, UUID.randomUUID(), village, ordinal, new Sphere(center, radius), type);
+            if (height <= 0) {
+                throw new IllegalStateException("Cylinder Zone has no height");
+            }
+
+            return new Zone(level, UUID.randomUUID(), village, ordinal, new Cylinder(baseCenter, radius, height), type);
         }
     }
 }

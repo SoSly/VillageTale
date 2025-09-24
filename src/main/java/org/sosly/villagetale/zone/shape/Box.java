@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.IZoneShape;
@@ -16,16 +17,16 @@ import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
-public class Rectangle implements IZoneShape {
-    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "rectangle");
+public class Box implements IZoneShape {
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "box");
 
 
     private AABB bounds;
 
-    public Rectangle() {
+    public Box() {
     }
 
-    public Rectangle(AABB bounds) {
+    public Box(AABB bounds) {
         this.bounds = bounds;
     }
 
@@ -37,7 +38,7 @@ public class Rectangle implements IZoneShape {
     public boolean containsPosition(BlockPos pos) {
         return bounds.contains(pos.getX(), pos.getY(), pos.getZ());
     }
-    
+
     @Override
     public boolean containsPosition(BlockPos pos, int buffer) {
         return bounds.inflate(buffer, 0, buffer).contains(pos.getX(), pos.getY(), pos.getZ());
@@ -62,7 +63,9 @@ public class Rectangle implements IZoneShape {
 
     @Override
     public BlockPos getStartPosition() {
-        return BlockPos.containing(bounds.getCenter());
+        Vec3 center = bounds.getCenter();
+        BlockPos centerPos = BlockPos.containing(center);
+        return new BlockPos(centerPos.getX(), (int)bounds.minY, centerPos.getZ());
     }
 
     @Override
@@ -116,10 +119,10 @@ public class Rectangle implements IZoneShape {
             }
 
             if (bounds == null) {
-                throw new IllegalStateException("Rectangle Zone has no bounds");
+                throw new IllegalStateException("Box Zone has no bounds");
             }
 
-            return new Zone(level, UUID.randomUUID(), village, ordinal, new Rectangle(bounds), type);
+            return new Zone(level, UUID.randomUUID(), village, ordinal, new Box(bounds), type);
         }
     }
 }

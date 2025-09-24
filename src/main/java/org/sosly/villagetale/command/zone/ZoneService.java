@@ -25,10 +25,10 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.zone.Zone;
+import org.sosly.villagetale.zone.shape.Box;
+import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
-import org.sosly.villagetale.zone.shape.Rectangle;
 import org.sosly.villagetale.zone.shape.Route;
-import org.sosly.villagetale.zone.shape.Sphere;
 import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.TownHall;
 
@@ -50,8 +50,8 @@ public class ZoneService {
         return chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
     }
 
-    public static Result createRectangleZone(ServerLevel level, UUID villageId, BlockPos pos1, BlockPos pos2,
-                                            ResourceLocation zoneType, String name) {
+    public static Result createBoxZone(ServerLevel level, UUID villageId, BlockPos pos1, BlockPos pos2,
+                                       ResourceLocation zoneType, String name) {
         if (zoneType.equals(TownHall.ID)) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.zone.townhall_auto_managed", VillageTale.MOD_ID)));
@@ -68,7 +68,7 @@ public class ZoneService {
                 Math.max(pos1.getX(), pos2.getX()) + 1, Math.max(pos1.getY(), pos2.getY()) + 1, Math.max(pos1.getZ(), pos2.getZ()) + 1
         );
 
-        Zone zone = Rectangle.builder(level, capability, capability.getZones().size())
+        Zone zone = Box.builder(level, capability, capability.getZones().size())
                 .setBounds(bounds)
                 .setType(zoneType)
                 .build();
@@ -79,11 +79,11 @@ public class ZoneService {
 
         capability.addZone(zone);
         return Result.success(Component.translatable(
-                String.format("%s.command.zone.rectangle_created", VillageTale.MOD_ID), zone.getName()));
+                String.format("%s.command.zone.box_created", VillageTale.MOD_ID), zone.getName()));
     }
 
-    public static Result createSphereZone(ServerLevel level, UUID villageId, BlockPos center, int radius,
-                                         ResourceLocation zoneType, String name) {
+    public static Result createCylinderZone(ServerLevel level, UUID villageId, BlockPos center, int radius, int height,
+                                            ResourceLocation zoneType, String name) {
         if (zoneType.equals(TownHall.ID)) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.zone.townhall_auto_managed", VillageTale.MOD_ID)));
@@ -95,9 +95,10 @@ public class ZoneService {
                     String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
         }
 
-        Zone zone = Sphere.builder(level, capability, capability.getZones().size())
-                .setCenter(center)
+        Zone zone = Cylinder.builder(level, capability, capability.getZones().size())
+                .setBaseCenter(center)
                 .setRadius(radius)
+                .setHeight(height)
                 .setType(zoneType)
                 .build();
 
@@ -107,7 +108,7 @@ public class ZoneService {
 
         capability.addZone(zone);
         return Result.success(Component.translatable(
-                String.format("%s.command.zone.sphere_created", VillageTale.MOD_ID), zone.getName()));
+                String.format("%s.command.zone.cylinder_created", VillageTale.MOD_ID), zone.getName()));
     }
 
     public static Result createPointZone(ServerLevel level, UUID villageId, BlockPos pos,
@@ -230,14 +231,14 @@ public class ZoneService {
 
         if (zone instanceof Zone zImpl) {
             IZoneShape shape = zImpl.getShape();
-            if (shape instanceof Rectangle rect) {
+            if (shape instanceof Box rect) {
                 AABB bounds = rect.getBounds();
-                sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_rectangle", VillageTale.MOD_ID),
+                sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_box", VillageTale.MOD_ID),
                         (int)bounds.minX, (int)bounds.minY, (int)bounds.minZ,
                         (int)(bounds.maxX-1), (int)(bounds.maxY-1), (int)(bounds.maxZ-1)));
-            } else if (shape instanceof Sphere sphere) {
-                sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_sphere", VillageTale.MOD_ID),
-                        sphere.getCenter().toShortString(), sphere.getRadius()));
+            } else if (shape instanceof Cylinder cylinder) {
+                sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_cylinder", VillageTale.MOD_ID),
+                        cylinder.getStartPosition().toShortString(), cylinder.getRadius(), cylinder.getHeight()));
             } else if (shape instanceof Point point) {
                 sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_point", VillageTale.MOD_ID),
                         point.getPos().toShortString()));
@@ -250,7 +251,7 @@ public class ZoneService {
 
         List<UUID> assigned = zone.getAssignedVillagers();
         sender.accept(Component.translatable(String.format("%s.command.zone.info_assigned", VillageTale.MOD_ID), assigned.size()));
-        
+
         List<ItemStack> filters = zone.getFilter();
         if (!filters.isEmpty()) {
             sender.accept(Component.translatable(String.format("%s.command.zone.info_filter_header", VillageTale.MOD_ID)));

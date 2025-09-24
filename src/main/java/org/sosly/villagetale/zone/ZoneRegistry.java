@@ -7,10 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
+import org.sosly.villagetale.zone.shape.Box;
+import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
-import org.sosly.villagetale.zone.shape.Rectangle;
 import org.sosly.villagetale.zone.shape.Route;
-import org.sosly.villagetale.zone.shape.Sphere;
 import org.sosly.villagetale.zone.type.Farmland;
 import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.Kitchen;
@@ -60,8 +60,8 @@ public class ZoneRegistry {
         // end todo
 
         SHAPES.put(Point.ID, Point::new);
-        SHAPES.put(Rectangle.ID, Rectangle::new);
+        SHAPES.put(Box.ID, Box::new);
         SHAPES.put(Route.ID, Route::new);
-        SHAPES.put(Sphere.ID, Sphere::new);
+        SHAPES.put(Cylinder.ID, Cylinder::new);
     }
 }
