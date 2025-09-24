@@ -1,6 +1,7 @@
 package org.sosly.villagetale.command.villager;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -8,7 +9,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +25,61 @@ import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
 import org.sosly.villagetale.entity.Villager;
 
 public class RecipeCommand {
+    
+    public static LiteralArgumentBuilder<CommandSourceStack> register() {
+        return Commands.literal("recipes")
+                .then(Commands.literal("list")
+                        .executes(RecipeCommand::listRecipesCommand))
+                .then(Commands.literal("add")
+                        .then(Commands.argument("recipe", ResourceLocationArgument.id())
+                                .suggests(RECIPE_SUGGESTIONS)
+                                .executes(RecipeCommand::addRecipeCommand)))
+                .then(Commands.literal("remove")
+                        .then(Commands.argument("recipe", ResourceLocationArgument.id())
+                                .suggests(KNOWN_RECIPE_SUGGESTIONS)
+                                .executes(RecipeCommand::removeRecipeCommand)));
+    }
+    
+    private static int listRecipesCommand(CommandContext<CommandSourceStack> ctx) {
+        try {
+            Villager villager = VillagerCommand.getTargetVillager(ctx);
+            ServerLevel level = ctx.getSource().getLevel();
+            Result result = listRecipes(level, villager);
+            return result.send(ctx.getSource());
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.list_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+    
+    private static int addRecipeCommand(CommandContext<CommandSourceStack> ctx) {
+        try {
+            Villager villager = VillagerCommand.getTargetVillager(ctx);
+            ResourceLocation recipeId = ResourceLocationArgument.getId(ctx, "recipe");
+            ServerLevel level = ctx.getSource().getLevel();
+            Result result = addRecipe(level, villager, recipeId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.add_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
+    
+    private static int removeRecipeCommand(CommandContext<CommandSourceStack> ctx) {
+        try {
+            Villager villager = VillagerCommand.getTargetVillager(ctx);
+            ResourceLocation recipeId = ResourceLocationArgument.getId(ctx, "recipe");
+            ServerLevel level = ctx.getSource().getLevel();
+            Result result = removeRecipe(level, villager, recipeId);
+            return result.send(ctx.getSource(), true);
+        } catch (Exception e) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.remove_error", VillageTale.MOD_ID), e.getMessage()))
+                    .send(ctx.getSource());
+        }
+    }
     
     public static final SuggestionProvider<CommandSourceStack> RECIPE_SUGGESTIONS = 
             (context, builder) -> {

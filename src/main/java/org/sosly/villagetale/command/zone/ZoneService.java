@@ -250,6 +250,14 @@ public class ZoneService {
 
         List<UUID> assigned = zone.getAssignedVillagers();
         sender.accept(Component.translatable(String.format("%s.command.zone.info_assigned", VillageTale.MOD_ID), assigned.size()));
+        
+        List<ItemStack> filters = zone.getFilter();
+        if (!filters.isEmpty()) {
+            sender.accept(Component.translatable(String.format("%s.command.zone.info_filter_header", VillageTale.MOD_ID)));
+            for (ItemStack filter : filters) {
+                sender.accept(Component.literal("  - " + filter.getHoverName().getString() + " x" + filter.getCount()));
+            }
+        }
     }
 
     public static Result addRoutePoint(ServerLevel level, UUID villageId, UUID zoneId, BlockPos pos) {

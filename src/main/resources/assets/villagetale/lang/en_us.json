@@ -59,6 +59,7 @@
   "villagetale.command.zone.info_shape_point": "Shape: Point (%s)",
   "villagetale.command.zone.info_shape_route": "Shape: Route (%d points)",
   "villagetale.command.zone.info_assigned": "Assigned Villagers: %d",
+  "villagetale.command.zone.info_filter_header": "Zone Filters:",
   "villagetale.command.zone.not_route_type": "Zone is not a route type",
   "villagetale.command.zone.route_point_added": "Added point to route: %s",
   "villagetale.command.zone.route_cleared": "Cleared route points",
