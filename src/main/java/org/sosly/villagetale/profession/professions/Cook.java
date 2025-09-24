@@ -24,6 +24,7 @@ import org.sosly.villagetale.zone.type.Kitchen;
 
 public class Cook extends AbstractProfession {
     public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "cook");
+    private final static ResourceLocation OVERLAY_TEXTURE = new ResourceLocation(VillageTale.MOD_ID, "textures/entity/villager/profession/cook.png");
 
     public Cook() {
         super(ID);
@@ -76,5 +77,10 @@ public class Cook extends AbstractProfession {
     @Override
     public boolean isValidWorkZone(IVillageZone zone) {
         return zone.getType().getID().equals(Kitchen.ID);
+    }
+
+    @Override
+    public Optional<ResourceLocation> getOverlayTexture() {
+        return Optional.of(OVERLAY_TEXTURE);
     }
 }

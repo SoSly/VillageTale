@@ -11,9 +11,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IProfession;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.network.ClientPacketHandler;
-import org.sosly.villagetale.profession.professions.Farmer;
+import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.renderer.model.VillagerModel;
 
 @OnlyIn(Dist.CLIENT)
@@ -36,9 +37,6 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 
     @OnlyIn(Dist.CLIENT)
     public static class VillagerProfessionLayer extends RenderLayer<Villager, VillagerModel<Villager>> {
-        private static final ResourceLocation FARMER_OVERLAY =
-            new ResourceLocation("minecraft", "textures/entity/villager/profession/farmer.png");
-
         public VillagerProfessionLayer(VillagerRenderer renderer, EntityRendererProvider.Context context) {
             super(renderer);
         }
@@ -52,12 +50,11 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
                 return;
             }
 
-            if (!professionId.equals(Farmer.ID)) {
-                return;
-            }
-
-            renderColoredCutoutModel(this.getParentModel(), FARMER_OVERLAY, poseStack, buffer,
-                                    packedLight, villager, 1.0F, 1.0F, 1.0F);
+            ProfessionRegistry.INSTANCE.getProfession(professionId)
+                .flatMap(IProfession::getOverlayTexture)
+                .ifPresent(texture -> renderColoredCutoutModel(
+                    this.getParentModel(), texture, poseStack, buffer,
+                    packedLight, villager, 1.0F, 1.0F, 1.0F));
         }
     }
 }

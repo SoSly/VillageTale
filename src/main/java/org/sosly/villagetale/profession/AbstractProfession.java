@@ -1,5 +1,6 @@
 package org.sosly.villagetale.profession;
 
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.schedule.Activity;
@@ -38,5 +39,10 @@ public abstract class AbstractProfession implements IProfession {
 
     @Override
     public void registerAdditionalGoals(Brain<Villager> brain) {
+    }
+
+    @Override
+    public Optional<ResourceLocation> getOverlayTexture() {
+        return Optional.empty();
     }
 }
