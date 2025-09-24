@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +48,7 @@ public class IsFarmland extends Sensor<Villager> {
             .findAny();
         harvestable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), blockPos, 600L));
 
-        ItemStack seeds = InventoryHelper.getSeeds(villager, zone);
+        ItemStack seeds = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS), zone);
         if (!seeds.isEmpty()) {
             Optional<BlockPos> plantable = claims
                 .stream()

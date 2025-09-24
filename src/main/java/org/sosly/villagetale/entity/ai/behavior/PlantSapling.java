@@ -20,26 +20,26 @@ import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.entity.ai.sensor.IsForest;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.NetworkHandler;
 
-public class PlantCrops extends Behavior<Villager> {
+public class PlantSapling extends Behavior<Villager> {
     private static final int PLANTING_DURATION = 30;
     private static final int BEHAVIOR_DURATION = 60;
-    private static final float WORK_EXHAUSTION = 0.4f;
+    private static final float WORK_EXHAUSTION = 0.3f;
 
-    boolean claimed;
-    BlockPos pos;
-    int plantTicks;
+    private boolean claimed;
+    private BlockPos pos;
+    private int plantTicks;
+    private ItemStack sapling = ItemStack.EMPTY;
+    private IVillageZone workplace;
 
-    ItemStack seeds = ItemStack.EMPTY;
-    IVillageZone workplace;
-
-    public PlantCrops() {
+    public PlantSapling() {
         super(ImmutableMap.of(
                 MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
-                MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), MemoryStatus.VALUE_PRESENT,
+                MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get(), MemoryStatus.VALUE_PRESENT,
                 MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), BEHAVIOR_DURATION);
     }
@@ -51,8 +51,8 @@ public class PlantCrops extends Behavior<Villager> {
             return false;
         }
 
-        ItemStack seeds = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS), zone);
-        if (seeds.isEmpty()) {
+        ItemStack sapling = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.SAPLINGS), zone);
+        if (sapling.isEmpty()) {
             return false;
         }
 
@@ -60,14 +60,14 @@ public class PlantCrops extends Behavior<Villager> {
             return false;
         }
 
-        this.seeds = seeds;
+        this.sapling = sapling;
         this.workplace = zone;
         return true;
     }
 
     @Override
     protected void start(@NotNull ServerLevel level, Villager villager, long gameTime) {
-        pos = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get()).orElse(null);
+        pos = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get()).orElse(null);
         if (pos == null) {
             return;
         }
@@ -78,15 +78,13 @@ public class PlantCrops extends Behavior<Villager> {
         }
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
-        villager.setItemInHand(InteractionHand.MAIN_HAND, seeds);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, seeds);
+        villager.setItemInHand(InteractionHand.MAIN_HAND, sapling);
+        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, sapling);
 
-        if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
-            return;
+        if (!villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                new WalkTarget(pos, 0.5F, 1), 200L);
         }
-
-        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(pos, 0.5F, 1), 200L);
     }
 
     @Override
@@ -94,11 +92,15 @@ public class PlantCrops extends Behavior<Villager> {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get());
+        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get());
+
+        if (pos != null) {
+            IsForest.clearReplantedPosition(pos);
+        }
 
         this.pos = null;
         this.plantTicks = 0;
-        this.seeds = ItemStack.EMPTY;
+        this.sapling = ItemStack.EMPTY;
         this.workplace = null;
     }
 
@@ -118,6 +120,7 @@ public class PlantCrops extends Behavior<Villager> {
         }
 
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+        
         if (plantTicks++ < PLANTING_DURATION) {
             if (plantTicks % 10 == 0) {
                 villager.getLookControl().setLookAt(
@@ -130,20 +133,26 @@ public class PlantCrops extends Behavior<Villager> {
             return;
         }
 
-        BlockState cropBlock = getCropBlock(seeds);
-        if (cropBlock != null) {
-            level.setBlock(pos, cropBlock, 3);
-            level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
-            villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
-            seeds.shrink(1);
+        if (!level.getBlockState(pos).isAir()) {
+            claimed = false;
+            return;
         }
 
-        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get());
+        BlockState saplingBlock = getSaplingBlock(sapling);
+        if (saplingBlock != null) {
+            level.setBlock(pos, saplingBlock, 3);
+            level.playSound(null, pos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
+            villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
+            sapling.shrink(1);
+        }
+
+        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get());
+        IsForest.clearReplantedPosition(pos);
         claimed = false;
     }
 
-    private BlockState getCropBlock(ItemStack crop) {
-        if (crop.getItem() instanceof BlockItem blockItem) {
+    private BlockState getSaplingBlock(ItemStack sapling) {
+        if (sapling.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             return block.defaultBlockState();
         }

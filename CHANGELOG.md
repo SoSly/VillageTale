@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New custom Villager entity
 - Villager profession system with many professions available:
     - Commoner (unemployed)
+    - Cook (creates foods from recipes)
     - Farmer (tills soil, plants seeds, harvests crops)
+    - Lumberjack (cuts trees, plants trees)
 
 **Villages & Zones**
 - Town Hall block - establish your village (automatically named after you)

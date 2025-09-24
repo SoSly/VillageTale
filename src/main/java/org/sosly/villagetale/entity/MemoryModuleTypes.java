@@ -102,6 +102,14 @@ public class MemoryModuleTypes {
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_harvestable_crop",
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
+    // Lumberjack Memories
+    public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_TREE =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_tree",
+                    () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
+    public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_REPLANTABLE_SPOT =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_replantable_spot",
+                    () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
+
 
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);

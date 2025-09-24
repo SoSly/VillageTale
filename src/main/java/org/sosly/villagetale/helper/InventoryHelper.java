@@ -1,12 +1,12 @@
 package org.sosly.villagetale.helper;
 
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.entity.Villager;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class InventoryHelper {
 
@@ -54,41 +54,31 @@ public class InventoryHelper {
         return false;
     }
 
-    public static ItemStack getTool(Villager villager) {
-        Container inventory = villager.getInventory();
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            if (inventory.getItem(i).is(ItemTags.HOES)) {
-                return inventory.getItem(i);
-            }
-        }
-        return ItemStack.EMPTY;
-    }
-
-    public static ItemStack getSeeds(Villager villager) {
+    public static ItemStack getItem(Villager villager, Predicate<ItemStack> matcher) {
         Container inventory = villager.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
-            if (stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
+            if (matcher.test(stack)) {
                 return stack;
             }
         }
         return ItemStack.EMPTY;
     }
 
-    public static ItemStack getSeeds(Villager villager, IVillageZone zone) {
+    public static ItemStack getItem(Villager villager, Predicate<ItemStack> matcher, IVillageZone zone) {
         if (zone == null) {
-            return getSeeds(villager);
+            return getItem(villager, matcher);
         }
 
         List<ItemStack> wantedItems = zone.getFilter();
         if (wantedItems.isEmpty()) {
-            return getSeeds(villager);
+            return getItem(villager, matcher);
         }
 
         Container inventory = villager.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
-            if (!stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
+            if (!matcher.test(stack)) {
                 continue;
             }
 

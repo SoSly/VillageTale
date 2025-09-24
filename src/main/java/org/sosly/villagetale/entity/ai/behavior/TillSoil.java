@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -48,7 +49,7 @@ public class TillSoil extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(@NotNull ServerLevel level, @NotNull Villager villager) {
-        ItemStack tool = InventoryHelper.getTool(villager);
+        ItemStack tool = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.HOES));
         if (tool.isEmpty()) {
             return false;
         }
