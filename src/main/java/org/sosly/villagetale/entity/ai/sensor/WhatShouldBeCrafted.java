@@ -27,7 +27,7 @@ public class WhatShouldBeCrafted extends Sensor<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(MemoryModuleTypes.CURRENT_RECIPE.get(), recipe.get());
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.CURRENT_RECIPE.get(), recipe.get(), 2400L);
     }
 
     @Override

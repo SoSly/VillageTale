@@ -62,7 +62,7 @@ public class HasBedInHomeZone extends Sensor<Villager> {
         }
 
         BlockPos bedHead = getBedHeadPosition(level, nearest);
-        villager.getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), bedHead));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), bedHead), 24000L);
         VillageTale.LOGGER.info("Villager {} claimed bed at {} in home zone {}",
                 villager.getUUID(), bedHead, zone.getName());
     }

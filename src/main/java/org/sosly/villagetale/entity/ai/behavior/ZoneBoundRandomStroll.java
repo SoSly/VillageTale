@@ -73,13 +73,13 @@ public class ZoneBoundRandomStroll extends Behavior<Villager> {
         Optional<BlockPos> targetPos = findValidStrollPosition(villager, zone);
         
         if (targetPos.isPresent()) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(targetPos.get(), this.speedModifier, 0));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                new WalkTarget(targetPos.get(), this.speedModifier, 0), 200L);
         } else {
             BlockPos startPos = zone.getStartPosition();
             if (!villager.blockPosition().equals(startPos)) {
-                villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                    new WalkTarget(startPos, this.speedModifier, 2));
+                villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                    new WalkTarget(startPos, this.speedModifier, 2), 200L);
             }
         }
     }

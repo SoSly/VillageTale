@@ -74,8 +74,8 @@ public class DepositItem extends Behavior<Villager> {
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
 
         if (this.targetContainer != null) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(this.targetContainer, 0.5F, 1));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                new WalkTarget(this.targetContainer, 0.5F, 1), 200L);
 
             VillageTale.LOGGER.debug("DepositItem started walking to {} for villager {}",
                 this.targetContainer, villager.getId());
@@ -255,7 +255,7 @@ public class DepositItem extends Behavior<Villager> {
         if (updatedItems.isEmpty()) {
             villager.getBrain().eraseMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get());
         } else {
-            villager.getBrain().setMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), updatedItems);
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), updatedItems, 1200L);
         }
     }
 
@@ -288,8 +288,8 @@ public class DepositItem extends Behavior<Villager> {
         this.searchTicks = 0;
         this.claimedZone = null;
 
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(this.targetContainer, 0.5F, 1));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(this.targetContainer, 0.5F, 1), 200L);
     }
 
     private void stopBehavior(Villager villager) {

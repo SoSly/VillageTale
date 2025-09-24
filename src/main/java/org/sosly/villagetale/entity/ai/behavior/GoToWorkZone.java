@@ -41,8 +41,8 @@ public class GoToWorkZone extends Behavior<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(zone.getStartPosition(), 0.5F, 2));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(zone.getStartPosition(), 0.5F, 2), 200L);
     }
 
     @Override

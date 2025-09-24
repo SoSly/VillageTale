@@ -47,8 +47,8 @@ public class GoToAssignedBed extends Behavior<Villager> {
         }
 
         BlockPos bedPos = homePos.pos();
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(bedPos, speedModifier, WALK_PRECISION));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(bedPos, speedModifier, WALK_PRECISION), 200L);
     }
 
     @Override

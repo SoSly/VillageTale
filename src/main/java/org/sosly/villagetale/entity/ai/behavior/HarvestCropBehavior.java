@@ -83,8 +83,8 @@ public class HarvestCropBehavior extends Behavior<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(pos, 0.5F, 1));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(pos, 0.5F, 1), 200L);
     }
 
     @Override

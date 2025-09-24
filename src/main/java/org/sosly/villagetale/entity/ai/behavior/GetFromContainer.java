@@ -72,8 +72,8 @@ public class GetFromContainer extends Behavior<Villager> {
         this.claimedZone = null;
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(this.targetContainer, 0.5F, 1));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(this.targetContainer, 0.5F, 1), 200L);
 
         VillageTale.LOGGER.debug("GetFromContainer started walking to {} for villager {}",
             this.targetContainer, villager.getId());

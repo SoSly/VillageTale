@@ -273,23 +273,23 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
         if (tag.contains("VillageId")) {
             UUID villageId = UUID.fromString(tag.getString("VillageId"));
-            this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
+            this.brain.setMemoryWithExpiry(MemoryModuleTypes.VILLAGE.get(), villageId, 24000L);
         }
 
         ResourceLocation profession = Commoner.ID;
         if (tag.contains("Profession") && ResourceLocation.tryParse(tag.getString("Profession")) != null) {
             profession = ResourceLocation.tryParse(tag.getString("Profession"));
         }
-        this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), profession);
+        this.brain.setMemoryWithExpiry(MemoryModuleTypes.PROFESSION.get(), profession, 24000L);
 
         if (tag.contains("WorkZoneId")) {
             UUID workZoneId = UUID.fromString(tag.getString("WorkZoneId"));
-            this.brain.setMemory(MemoryModuleTypes.WORK_ZONE.get(), workZoneId);
+            this.brain.setMemoryWithExpiry(MemoryModuleTypes.WORK_ZONE.get(), workZoneId, 24000L);
         }
 
         if (tag.contains("HomeZoneId")) {
             UUID homeZoneId = UUID.fromString(tag.getString("HomeZoneId"));
-            this.brain.setMemory(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId);
+            this.brain.setMemoryWithExpiry(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId, 24000L);
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {
@@ -337,7 +337,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     public void startSleeping(@NotNull BlockPos pos) {
         VillageTale.LOGGER.info("Villager {} attempting to sleep at {}", this.getDisplayName().getString(), pos);
         super.startSleeping(pos);
-        this.brain.setMemory(MemoryModuleType.LAST_SLEPT, this.level().getGameTime());
+        this.brain.setMemoryWithExpiry(MemoryModuleType.LAST_SLEPT, this.level().getGameTime(), 24000L);
         this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
         this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
     }
@@ -350,7 +350,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     public void setHome(BlockPos pos) {
         if (pos != null) {
             BlockPos bedHeadPos = getBedHeadPosition(pos);
-            this.brain.setMemory(MemoryModuleType.HOME, GlobalPos.of(this.level().dimension(), bedHeadPos));
+            this.brain.setMemoryWithExpiry(MemoryModuleType.HOME, GlobalPos.of(this.level().dimension(), bedHeadPos), 24000L);
             VillageTale.LOGGER.info("Villager {} assigned home at {} (bed head: {})", this, pos, bedHeadPos);
         } else {
             this.brain.eraseMemory(MemoryModuleType.HOME);
@@ -375,7 +375,19 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
             return;
         }
 
-        this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), professionId);
+        // Clear all profession and work-related memories when changing profession
+        this.brain.eraseMemory(MemoryModuleTypes.WORK_ZONE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
+        this.brain.eraseMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get());
+        this.brain.eraseMemory(MemoryModuleTypes.CURRENT_RECIPE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
+        this.brain.eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
+        this.brain.eraseMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get());
+        this.brain.eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());
+        this.brain.eraseMemory(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get());
+        this.brain.eraseMemory(MemoryModuleTypes.BUSY.get());
+        
+        this.brain.setMemoryWithExpiry(MemoryModuleTypes.PROFESSION.get(), professionId, 24000L);
 
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
@@ -438,7 +450,14 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         newVillageCapability.addVillagerByUUID(this.getUUID());
-        this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
+        
+        // Clear all zone-related memories when changing villages
+        this.brain.eraseMemory(MemoryModuleTypes.HOME_ZONE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.WORK_ZONE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
+        this.brain.eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+        
+        this.brain.setMemoryWithExpiry(MemoryModuleTypes.VILLAGE.get(), villageId, 24000L);
         VillageTale.LOGGER.info("Villager {} assigned to village {}", this.getUUID(), villageId);
     }
 
@@ -448,14 +467,19 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
             return;
         }
 
+        // Clear all village and zone-related memories
+        this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.HOME_ZONE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.WORK_ZONE.get());
+        this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
+        this.brain.eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+
         if (!(this.level() instanceof ServerLevel serverLevel)) {
-            this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
             return;
         }
 
         IVillagesCapability villages = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
         if (villages == null) {
-            this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
             return;
         }
 

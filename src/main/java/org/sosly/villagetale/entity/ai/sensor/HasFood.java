@@ -29,7 +29,7 @@ public class HasFood extends Sensor<Villager> {
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 
         if (needsFood && (!hasExistingWant || isStarving)) {
-            villager.getBrain().setMemory(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.FOOD.getFor(villager));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.FOOD.getFor(villager), 2400L);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 

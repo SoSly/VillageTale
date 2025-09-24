@@ -31,7 +31,7 @@ public class HasTool extends Sensor<Villager> {
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 
         if (!hasTool && !hasExistingWant) {
-            villager.getBrain().setMemory(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.PROFESSION_TOOL.getFor(villager));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.PROFESSION_TOOL.getFor(villager), 2400L);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 

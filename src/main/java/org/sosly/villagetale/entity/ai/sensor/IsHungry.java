@@ -42,7 +42,7 @@ public class IsHungry extends Sensor<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(memoryType, newValue);
+        villager.getBrain().setMemoryWithExpiry(memoryType, newValue, 1200L);
     }
 
     @Override

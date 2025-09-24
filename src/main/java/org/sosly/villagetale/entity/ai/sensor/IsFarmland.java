@@ -45,7 +45,7 @@ public class IsFarmland extends Sensor<Villager> {
             .stream()
             .filter(pos -> Farmland.isHarvestableBlock(level, pos))
             .findAny();
-        harvestable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), blockPos));
+        harvestable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), blockPos, 600L));
 
         ItemStack seeds = InventoryHelper.getSeeds(villager, zone);
         if (!seeds.isEmpty()) {
@@ -53,14 +53,14 @@ public class IsFarmland extends Sensor<Villager> {
                 .stream()
                 .filter(pos -> Farmland.isPlantableBlock(level, pos, seeds))
                 .findAny();
-            plantable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), blockPos));
+            plantable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), blockPos, 600L));
         }
 
         Optional<BlockPos> tillable = claims
             .stream()
             .filter(pos -> Farmland.isTillableBlock(level, pos))
             .findAny();
-        tillable.ifPresent(blockPos -> villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get(), blockPos));
+        tillable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get(), blockPos, 600L));
     }
 
     @Override

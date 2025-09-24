@@ -75,8 +75,8 @@ public class PickUpItems extends Behavior<Villager> {
         }
 
         Vec3 targetPos = targetItem.position();
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(targetPos, 0.5F, 1));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(targetPos, 0.5F, 1), 200L);
     }
 
     @Override
@@ -104,8 +104,8 @@ public class PickUpItems extends Behavior<Villager> {
         double distance = targetItem.position().distanceTo(villager.blockPosition().getCenter());
 
         if (distance > CommonConfig.collectionDistance) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(targetItem.position(), 0.5F, 1));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                new WalkTarget(targetItem.position(), 0.5F, 1), 200L);
             return;
         }
 

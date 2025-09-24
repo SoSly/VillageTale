@@ -41,7 +41,7 @@ public class HasItemsToDeposit extends Sensor<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), itemsToDeposit);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), itemsToDeposit, 1200L);
 
         VillageTale.LOGGER.debug("HasItemsToDeposit set ITEMS_TO_DEPOSIT for villager {} with {} items",
             villager.getId(), itemsToDeposit.size());

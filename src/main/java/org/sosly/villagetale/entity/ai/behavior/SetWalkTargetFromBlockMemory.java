@@ -96,18 +96,20 @@ public class SetWalkTargetFromBlockMemory extends Behavior<Villager> {
         if (distance > tooFarDistance) {
             Vec3 walkPos = findValidWalkPosition(villager, targetPos);
             if (walkPos != null) {
-                villager.getBrain().setMemory(
+                villager.getBrain().setMemoryWithExpiry(
                     MemoryModuleType.WALK_TARGET,
-                    new WalkTarget(walkPos, speedModifier, closeEnoughDistance)
+                    new WalkTarget(walkPos, speedModifier, closeEnoughDistance),
+                    200L
                 );
             } else {
                 villager.getBrain().eraseMemory(targetMemoryType);
-                villager.getBrain().setMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, gameTime);
+                villager.getBrain().setMemoryWithExpiry(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, gameTime, 600L);
             }
         } else if (distance > closeEnoughDistance) {
-            villager.getBrain().setMemory(
+            villager.getBrain().setMemoryWithExpiry(
                 MemoryModuleType.WALK_TARGET,
-                new WalkTarget(targetPos.pos(), speedModifier, closeEnoughDistance)
+                new WalkTarget(targetPos.pos(), speedModifier, closeEnoughDistance),
+                200L
             );
         }
     }

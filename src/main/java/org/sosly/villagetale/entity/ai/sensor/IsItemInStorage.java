@@ -115,7 +115,7 @@ public class IsItemInStorage extends Sensor<Villager> {
             }
 
             FoundItem foundItem = new FoundItem(containerPos, itemId);
-            villager.getBrain().setMemory(MemoryModuleTypes.FOUND_ITEM.get(), foundItem);
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.FOUND_ITEM.get(), foundItem, 2400L);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
 
             VillageTale.LOGGER.debug("IsItemInStorage found item {} at {} for villager {}",
@@ -128,7 +128,7 @@ public class IsItemInStorage extends Sensor<Villager> {
     private void addToScannedList(Villager villager, UUID zoneId, List<UUID> alreadyScanned) {
         List<UUID> updatedList = new ArrayList<>(alreadyScanned);
         updatedList.add(zoneId);
-        villager.getBrain().setMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get(), updatedList);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get(), updatedList, 1200L);
 
         VillageTale.LOGGER.debug("IsItemInStorage added zone {} to scanned list for villager {}",
             zoneId, villager.getId());
@@ -181,7 +181,7 @@ public class IsItemInStorage extends Sensor<Villager> {
         TimedWantedItem timedItem = new TimedWantedItem(wantedItem, level.getGameTime() + 18000L);
         updatedList.add(timedItem);
 
-        villager.getBrain().setMemory(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get(), updatedList);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get(), updatedList, 18000L);
     }
 
     private void cleanupExpiredCouldNotFind(ServerLevel level, Villager villager) {
@@ -204,7 +204,7 @@ public class IsItemInStorage extends Sensor<Villager> {
         if (filtered.isEmpty()) {
             villager.getBrain().eraseMemory(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get());
         } else {
-            villager.getBrain().setMemory(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get(), filtered);
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.COULD_NOT_FIND_ITEM.get(), filtered, 18000L);
         }
     }
 

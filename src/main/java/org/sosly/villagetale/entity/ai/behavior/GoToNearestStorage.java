@@ -84,8 +84,8 @@ public class GoToNearestStorage extends Behavior<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(this.targetStoragePos, 0.5F, 2));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+            new WalkTarget(this.targetStoragePos, 0.5F, 2), 200L);
 
         VillageTale.LOGGER.debug("GoToNearestStorage set walk target to {} for villager {}",
             this.targetStoragePos, villager.getId());

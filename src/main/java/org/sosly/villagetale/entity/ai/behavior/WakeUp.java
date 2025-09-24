@@ -35,7 +35,7 @@ public class WakeUp extends Behavior<Villager> {
     @Override
     protected void start(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         villager.getFoodData().addExhaustion(DAILY_EXHAUSTION);
-        villager.getBrain().setMemory(MemoryModuleTypes.LAST_DAILY_EXHAUSTION.get(), gameTime);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.LAST_DAILY_EXHAUSTION.get(), gameTime, 24000L);
         villager.stopSleeping();
     }
 }

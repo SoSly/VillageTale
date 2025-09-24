@@ -79,8 +79,8 @@ public class CraftRecipeItem extends Behavior<Villager> {
             return;
         }
 
-        villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
-                new WalkTarget(workstation, 0.5f, 1));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                new WalkTarget(workstation, 0.5f, 1), 200L);
     }
 
     @Override

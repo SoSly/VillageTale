@@ -47,8 +47,8 @@ public class WhereShouldICraft extends Sensor<Villager> {
         }
 
         int stationPicker = level.getRandom().nextInt(stations.size());
-        villager.getBrain().setMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get(),
-                stations.get(stationPicker));
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_WORKSTATION.get(),
+                stations.get(stationPicker), 600L);
     }
 
     @Override

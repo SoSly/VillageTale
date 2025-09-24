@@ -38,7 +38,7 @@ public class HasResources extends Sensor<Villager> {
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 
         if (needsMoreResources && !hasExistingWant) {
-            villager.getBrain().setMemory(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.RESOURCES.getFor(villager));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.RESOURCES.getFor(villager), 2400L);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 
