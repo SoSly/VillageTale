@@ -21,7 +21,7 @@ import org.sosly.villagetale.entity.Villager;
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID)
 public class VillageMaintenanceHandler {
     
-    private static final int MAINTENANCE_INTERVAL = 6000; // 5 minutes in ticks (20 ticks/sec * 60 sec * 5 min)
+    private static final int MAINTENANCE_INTERVAL = 6000;
     private static long lastMaintenanceTick = 0;
     
     @SubscribeEvent
@@ -30,7 +30,11 @@ public class VillageMaintenanceHandler {
             return;
         }
         
-        if (event.getServer() == null || event.getServer().getTickCount() - lastMaintenanceTick < MAINTENANCE_INTERVAL) {
+        if (event.getServer() == null) {
+            return;
+        }
+        
+        if (event.getServer().getTickCount() - lastMaintenanceTick < MAINTENANCE_INTERVAL) {
             return;
         }
         
@@ -57,7 +61,6 @@ public class VillageMaintenanceHandler {
     private static void maintainVillage(ServerLevel level, VillageInfo villageInfo) {
         ChunkPos villageChunk = villageInfo.getVillageStartingChunk();
         
-        // Only maintain villages with loaded chunks
         if (!level.hasChunk(villageChunk.x, villageChunk.z)) {
             return;
         }
@@ -68,55 +71,73 @@ public class VillageMaintenanceHandler {
             return;
         }
         
-        // Check villager integrity
+        Set<UUID> missingVillagers = findMissingVillagers(level, villageInfo, villageCapability);
+        cleanupMissingVillagers(villageInfo, villageCapability, missingVillagers);
+        cleanupExpiredZoneClaims(level, villageCapability);
+    }
+    
+    private static Set<UUID> findMissingVillagers(ServerLevel level, VillageInfo villageInfo, IVillageCapability villageCapability) {
         Set<UUID> missingVillagers = new HashSet<>();
+        
         for (UUID villagerId : villageCapability.getVillagerUUIDs()) {
-            Entity entity = level.getEntity(villagerId);
-            
-            if (entity == null || !(entity instanceof Villager)) {
+            if (shouldRemoveVillager(level, villageInfo, villagerId)) {
                 missingVillagers.add(villagerId);
-                VillageTale.LOGGER.warn("Village {} has reference to missing villager {}", 
-                    villageInfo.getVillageName(), villagerId);
-            } else {
-                Villager villager = (Villager) entity;
-                
-                // Check if villager is dead
-                if (!villager.isAlive() || villager.isRemoved()) {
-                    missingVillagers.add(villagerId);
-                    VillageTale.LOGGER.warn("Village {} has reference to dead/removed villager {}", 
-                        villageInfo.getVillageName(), villagerId);
-                }
-                // Verify the villager still belongs to this village
-                else if (villager.getVillage().isEmpty() || !villager.getVillage().get().equals(villageInfo.getVillageId())) {
-                    missingVillagers.add(villagerId);
-                    VillageTale.LOGGER.warn("Villager {} no longer belongs to village {}", 
-                        villagerId, villageInfo.getVillageName());
-                }
             }
         }
         
-        // Clean up missing villagers
+        return missingVillagers;
+    }
+    
+    private static boolean shouldRemoveVillager(ServerLevel level, VillageInfo villageInfo, UUID villagerId) {
+        Entity entity = level.getEntity(villagerId);
+        
+        if (!(entity instanceof Villager villager)) {
+            VillageTale.LOGGER.warn("Village {} has reference to missing villager {}", 
+                villageInfo.getVillageName(), villagerId);
+            return true;
+        }
+        
+        if (!villager.isAlive() || villager.isRemoved()) {
+            VillageTale.LOGGER.warn("Village {} has reference to dead/removed villager {}", 
+                villageInfo.getVillageName(), villagerId);
+            return true;
+        }
+        
+        if (villager.getVillage().isEmpty() || !villager.getVillage().get().equals(villageInfo.getVillageId())) {
+            VillageTale.LOGGER.warn("Villager {} no longer belongs to village {}", 
+                villagerId, villageInfo.getVillageName());
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private static void cleanupMissingVillagers(VillageInfo villageInfo, IVillageCapability villageCapability, Set<UUID> missingVillagers) {
+        if (missingVillagers.isEmpty()) {
+            return;
+        }
+        
         for (UUID missingVillager : missingVillagers) {
             villageCapability.removeVillagerByUUID(missingVillager);
-            
-            // Also remove from any zone assignments
-            for (IVillageZone zone : villageCapability.getZones()) {
-                if (zone.removeAssignedVillager(missingVillager)) {
-                    VillageTale.LOGGER.info("Removed missing villager {} from zone {}", 
-                        missingVillager, zone.getName());
-                }
+            removeVillagerFromZones(villageCapability, missingVillager);
+        }
+        
+        VillageTale.LOGGER.info("Cleaned up {} missing villager references from village {}", 
+            missingVillagers.size(), villageInfo.getVillageName());
+    }
+    
+    private static void removeVillagerFromZones(IVillageCapability villageCapability, UUID villagerId) {
+        for (IVillageZone zone : villageCapability.getZones()) {
+            if (zone.removeAssignedVillager(villagerId)) {
+                VillageTale.LOGGER.info("Removed missing villager {} from zone {}", 
+                    villagerId, zone.getName());
             }
         }
-        
-        if (!missingVillagers.isEmpty()) {
-            VillageTale.LOGGER.info("Cleaned up {} missing villager references from village {}", 
-                missingVillagers.size(), villageInfo.getVillageName());
-        }
-        
-        // Clean up expired zone claims (though they should auto-expire when accessed)
+    }
+    
+    private static void cleanupExpiredZoneClaims(ServerLevel level, IVillageCapability villageCapability) {
         long currentTime = level.getGameTime();
         for (IVillageZone zone : villageCapability.getZones()) {
-            // This will trigger cleanup of expired claims
             zone.getClaims(currentTime);
         }
     }
