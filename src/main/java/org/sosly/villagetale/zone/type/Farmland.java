@@ -18,9 +18,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolActions;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IZoneType;
 
-public class Farmland implements IZoneType {
+public class Farmland extends AbstractZoneType {
     public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "farmland");
 
     @Override
@@ -33,14 +32,6 @@ public class Farmland implements IZoneType {
         return (isHarvestableBlock(level, pos) || isPlantableBlock(level, pos) || isTillableBlock(level, pos));
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        return null;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-    }
 
     public static boolean isHarvestableBlock(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);

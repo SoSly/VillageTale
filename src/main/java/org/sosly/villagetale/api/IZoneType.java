@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 public interface IZoneType {
     ResourceLocation getID();
     boolean isPOI(Level level, BlockPos pos);
+    void initialize(Level level, IZoneShape shape);
     CompoundTag serializeNBT();
     void deserializeNBT(CompoundTag nbt);
 }

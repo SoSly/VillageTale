@@ -6,10 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.data.TagKeys;
 
-public class Storage implements IZoneType {
+public class Storage extends AbstractZoneType {
     public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "storage");
 
     @Override
@@ -23,12 +22,4 @@ public class Storage implements IZoneType {
         return state.is(TagKeys.STORAGE_CONTAINERS);
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        return null;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-    }
 }

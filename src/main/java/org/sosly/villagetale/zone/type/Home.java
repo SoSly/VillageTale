@@ -7,9 +7,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IZoneType;
 
-public class Home implements IZoneType {
+public class Home extends AbstractZoneType {
     public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "home");
 
     @Override
@@ -23,12 +22,4 @@ public class Home implements IZoneType {
         return state.is(BlockTags.BEDS);
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        return null;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-    }
 }

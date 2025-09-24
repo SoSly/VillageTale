@@ -6,10 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.block.BlockTypes;
 
-public class TownHall implements IZoneType {
+public class TownHall extends AbstractZoneType {
     public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "townhall");
 
     @Override
@@ -23,12 +22,4 @@ public class TownHall implements IZoneType {
         return state.is(BlockTypes.TOWNHALL.get());
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        return null;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-    }
 }

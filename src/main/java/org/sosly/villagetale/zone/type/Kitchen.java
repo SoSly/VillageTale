@@ -10,9 +10,8 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IZoneType;
 
-public class Kitchen implements IZoneType {
+public class Kitchen extends AbstractZoneType {
     public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "kitchen");
 
 
@@ -26,14 +25,6 @@ public class Kitchen implements IZoneType {
         return isCraftingBlock(level, pos) || isCookingBlock(level, pos);
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        return null;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-    }
 
     public static boolean isCraftingBlock(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);

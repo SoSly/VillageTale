@@ -52,6 +52,10 @@ public class Zone implements IVillageZone {
         this.type = type;
         this.ordinal = ordinal;
         this.village = village;
+        
+        if (type != null && level != null) {
+            type.initialize(level, shape);
+        }
     }
 
     @Override
