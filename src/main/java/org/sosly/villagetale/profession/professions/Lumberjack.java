@@ -21,7 +21,7 @@ import org.sosly.villagetale.entity.Activities;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
-import org.sosly.villagetale.entity.ai.behavior.ChopTreeBehavior;
+import org.sosly.villagetale.entity.ai.behavior.ChopTree;
 import org.sosly.villagetale.entity.ai.behavior.PickUpItems;
 import org.sosly.villagetale.entity.ai.behavior.PlantSapling;
 import org.sosly.villagetale.profession.AbstractProfession;
@@ -77,7 +77,7 @@ public class Lumberjack extends AbstractProfession {
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
             Pair.of(1, new PickUpItems()),
-            Pair.of(10, new ChopTreeBehavior()),
+            Pair.of(10, new ChopTree()),
             Pair.of(11, new PlantSapling())
         );
     }

@@ -47,11 +47,15 @@ public class PickUpItems extends Behavior<Villager> {
             return false;
         }
 
+        int baseY = zone.getStartPosition().getY();
+        int maxYDifference = 2;
+        
         AABB searchBox = new AABB(villager.blockPosition()).inflate(CommonConfig.scanRadius);
         List<ItemEntity> allItems = level.getEntitiesOfClass(ItemEntity.class, searchBox);
         
         List<ItemEntity> items = allItems.stream()
             .filter(item -> !item.isRemoved() && item.isAlive()
+                && Math.abs(item.blockPosition().getY() - baseY) <= maxYDifference
                 && (zone.containsPosition(item.blockPosition()) || 
                     zone.containsPosition(item.blockPosition(), 1))  // Check with 1 block buffer
                 && InventoryHelper.canAddToInventory(villager.getInventory(), item.getItem()))

@@ -390,6 +390,18 @@ public class VillagerService {
                             pos.getX(), pos.getY(), pos.getZ())));
                 });
             }
+
+            if (profession.getID().equals(new ResourceLocation("villagetale", "lumberjack"))) {
+                villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_LOG.get()).ifPresent(pos -> {
+                    sender.accept(Component.literal(String.format("Nearest Log: %d, %d, %d",
+                            pos.getX(), pos.getY(), pos.getZ())));
+                });
+
+                villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get()).ifPresent(pos -> {
+                    sender.accept(Component.literal(String.format("Nearest Replantable Spot: %d, %d, %d",
+                            pos.getX(), pos.getY(), pos.getZ())));
+                });
+            }
         }
 
         sender.accept(Component.literal(""));

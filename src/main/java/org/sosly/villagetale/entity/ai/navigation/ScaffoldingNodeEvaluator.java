@@ -37,13 +37,12 @@ public class ScaffoldingNodeEvaluator extends WalkNodeEvaluator {
         int neighborCount = super.getNeighbors(outputArray, node);
         BlockPos nodePos = node.asBlockPos();
         BlockState currentState = this.level.getBlockState(nodePos);
-        BlockState belowState = this.level.getBlockState(nodePos.below());
-        
-        if (!currentState.is(Blocks.SCAFFOLDING) && belowState.is(Blocks.SCAFFOLDING)) {
-            neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.below(), 0.5F);
-        }
         
         if (!currentState.is(Blocks.SCAFFOLDING)) {
+            BlockState belowState = this.level.getBlockState(nodePos.below());
+            if (belowState.is(Blocks.SCAFFOLDING)) {
+                neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.below(), 0.5F);
+            }
             return neighborCount;
         }
         
@@ -52,8 +51,28 @@ public class ScaffoldingNodeEvaluator extends WalkNodeEvaluator {
             neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.above(), 1.5F);
         }
         
+        BlockState belowState = this.level.getBlockState(nodePos.below());
+        neighborCount = tryAddDownwardPath(outputArray, neighborCount, nodePos, belowState);
+        
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos adjacentPos = nodePos.relative(direction);
+            BlockState adjacentState = this.level.getBlockState(adjacentPos);
+            BlockState adjacentBelow = this.level.getBlockState(adjacentPos.below());
+            
+            if (adjacentState.isAir() && !adjacentBelow.isAir()) {
+                BlockPathTypes adjacentBelowType = this.getBlockPathType(this.level, adjacentPos.below().getX(), adjacentPos.below().getY(), adjacentPos.below().getZ());
+                if (adjacentBelowType == BlockPathTypes.WALKABLE) {
+                    neighborCount = addNodeIfValid(outputArray, neighborCount, adjacentPos.below(), 1.0F);
+                }
+            }
+        }
+        
+        return neighborCount;
+    }
+    
+    private int tryAddDownwardPath(Node[] outputArray, int neighborCount, BlockPos nodePos, BlockState belowState) {
         if (belowState.is(Blocks.SCAFFOLDING)) {
-            neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.below(), 0.5F);
+            return addNodeIfValid(outputArray, neighborCount, nodePos.below(), 0.5F);
         }
         
         return neighborCount;

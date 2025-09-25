@@ -22,8 +22,8 @@ import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.NetworkHandler;
 
-public class ChopTreeBehavior extends Behavior<Villager> {
-    private static final int CHOP_DURATION = 40;
+public class ChopTree extends Behavior<Villager> {
+    private static final int CHOP_DURATION = 20;
     private static final int BEHAVIOR_DURATION = 100;
     private static final float WORK_EXHAUSTION = 0.5f;
 
@@ -33,7 +33,7 @@ public class ChopTreeBehavior extends Behavior<Villager> {
     private ItemStack axe = ItemStack.EMPTY;
     private IVillageZone workplace;
 
-    public ChopTreeBehavior() {
+    public ChopTree() {
         super(ImmutableMap.of(
                 MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
                 MemoryModuleTypes.NEAREST_LOG.get(), MemoryStatus.VALUE_PRESENT,
@@ -69,7 +69,7 @@ public class ChopTreeBehavior extends Behavior<Villager> {
             return;
         }
 
-        if (!level.getBlockState(targetLog).is(BlockTags.LOGS)) {
+        if (!level.getBlockState(targetLog).is(BlockTags.LOGS) && !level.getBlockState(targetLog).is(BlockTags.LEAVES)) {
             villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_LOG.get());
             return;
         }
@@ -113,7 +113,7 @@ public class ChopTreeBehavior extends Behavior<Villager> {
 
     @Override
     protected boolean canStillUse(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
-        return claimed && targetLog != null && level.getBlockState(targetLog).is(BlockTags.LOGS);
+        return claimed;
     }
 
     @Override
@@ -139,15 +139,23 @@ public class ChopTreeBehavior extends Behavior<Villager> {
                 );
                 villager.swing(InteractionHand.MAIN_HAND);
             }
-            
+
             int progress = (int)((chopTicks / (float)CHOP_DURATION) * 10);
             level.destroyBlockProgress(villager.getId(), targetLog, progress);
             return;
         }
 
         level.destroyBlockProgress(villager.getId(), targetLog, -1);
+
+        boolean isLeaf = level.getBlockState(targetLog).is(BlockTags.LEAVES);
         level.destroyBlock(targetLog, true);
-        level.playSound(null, targetLog, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+
+        if (isLeaf) {
+            level.playSound(null, targetLog, SoundEvents.GRASS_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+        } else {
+            level.playSound(null, targetLog, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+
         villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
 
         axe.setDamageValue(axe.getDamageValue() + 1);

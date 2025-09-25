@@ -1,12 +1,16 @@
 package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
@@ -54,34 +58,110 @@ public class IsForest extends Sensor<Villager> {
     private void findNearestLog(ServerLevel level, Villager villager, IVillageZone zone) {
         BlockPos villagerPos = villager.blockPosition();
         int scanRadius = (int) CommonConfig.scanRadius;
-        BlockPos nearestLog = null;
-        double nearestDistance = Double.MAX_VALUE;
-
-        for (int y = -scanRadius; y <= scanRadius; y++) {
-            for (int x = -scanRadius; x <= scanRadius; x++) {
-                for (int z = -scanRadius; z <= scanRadius; z++) {
-                    BlockPos pos = villagerPos.offset(x, y, z);
+        
+        Set<BlockPos> validTreeBlocks = collectValidTreeBlocks(level, villagerPos, zone, scanRadius);
+        BlockPos nearestTreeBlock = findClosestPosition(villagerPos, validTreeBlocks);
+        
+        if (nearestTreeBlock != null) {
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_LOG.get(), nearestTreeBlock, 600L);
+        }
+    }
+    
+    private Set<BlockPos> collectValidTreeBlocks(ServerLevel level, BlockPos center, IVillageZone zone, int radius) {
+        Set<BlockPos> validTreeBlocks = new HashSet<>();
+        Set<BlockPos> connectedLogs = new HashSet<>();
+        
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos pos = center.offset(x, y, z);
                     
                     if (!zone.containsPosition(pos)) {
                         continue;
                     }
                     
-                    if (!level.getBlockState(pos).is(BlockTags.LOGS)) {
-                        continue;
-                    }
-                    
-                    double distance = villagerPos.distSqr(pos);
-                    if (distance < nearestDistance) {
-                        nearestDistance = distance;
-                        nearestLog = pos;
+                    if (level.getBlockState(pos).is(BlockTags.LOGS)) {
+                        validTreeBlocks.add(pos);
+                        connectedLogs.add(pos);
+                    } else if (level.getBlockState(pos).is(BlockTags.LEAVES)) {
+                        Set<BlockPos> logs = findLogsConnectedToLeaves(level, pos, radius);
+                        if (!logs.isEmpty()) {
+                            connectedLogs.addAll(logs);
+                        }
                     }
                 }
             }
         }
-
-        if (nearestLog != null) {
-            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_LOG.get(), nearestLog, 600L);
+        
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos pos = center.offset(x, y, z);
+                    
+                    if (!zone.containsPosition(pos)) {
+                        continue;
+                    }
+                    
+                    if (level.getBlockState(pos).is(BlockTags.LEAVES) && isConnectedToLogs(level, pos, connectedLogs, 6)) {
+                        validTreeBlocks.add(pos);
+                    }
+                }
+            }
         }
+        
+        return validTreeBlocks;
+    }
+    
+    private boolean isConnectedToLogs(ServerLevel level, BlockPos leafPos, Set<BlockPos> knownLogs, int maxDistance) {
+        Set<BlockPos> visited = new HashSet<>();
+        Queue<BlockPos> toCheck = new LinkedList<>();
+        
+        toCheck.add(leafPos);
+        visited.add(leafPos);
+        
+        while (!toCheck.isEmpty()) {
+            BlockPos current = toCheck.poll();
+            
+            if (current.distManhattan(leafPos) > maxDistance) {
+                continue;
+            }
+            
+            for (BlockPos neighbor : new BlockPos[]{
+                current.above(), current.below(),
+                current.north(), current.south(),
+                current.east(), current.west()
+            }) {
+                if (visited.contains(neighbor)) {
+                    continue;
+                }
+                visited.add(neighbor);
+                
+                if (knownLogs.contains(neighbor)) {
+                    return true;
+                }
+                
+                if (level.getBlockState(neighbor).is(BlockTags.LEAVES)) {
+                    toCheck.add(neighbor);
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private BlockPos findClosestPosition(BlockPos origin, Set<BlockPos> positions) {
+        BlockPos closest = null;
+        double minDistance = Double.MAX_VALUE;
+        
+        for (BlockPos pos : positions) {
+            double distance = origin.distSqr(pos);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = pos;
+            }
+        }
+        
+        return closest;
     }
 
     private void findNearestReplantableSpot(ServerLevel level, Villager villager, IVillageZone zone) {
@@ -214,6 +294,43 @@ public class IsForest extends Sensor<Villager> {
         }
         
         return true;
+    }
+
+    private Set<BlockPos> findLogsConnectedToLeaves(ServerLevel level, BlockPos leafPos, int maxDistance) {
+        Set<BlockPos> connectedLogs = new HashSet<>();
+        Set<BlockPos> visited = new HashSet<>();
+        Queue<BlockPos> toCheck = new LinkedList<>();
+        
+        toCheck.add(leafPos);
+        visited.add(leafPos);
+        
+        while (!toCheck.isEmpty()) {
+            BlockPos current = toCheck.poll();
+            
+            if (current.distManhattan(leafPos) > maxDistance) {
+                continue;
+            }
+            
+            for (BlockPos neighbor : new BlockPos[]{
+                current.above(), current.below(),
+                current.north(), current.south(),
+                current.east(), current.west()
+            }) {
+                if (visited.contains(neighbor)) {
+                    continue;
+                }
+                visited.add(neighbor);
+                
+                if (level.getBlockState(neighbor).is(BlockTags.LOGS)) {
+                    connectedLogs.add(neighbor);
+                    toCheck.add(neighbor);
+                } else if (level.getBlockState(neighbor).is(BlockTags.LEAVES)) {
+                    toCheck.add(neighbor);
+                }
+            }
+        }
+        
+        return connectedLogs;
     }
 
     private boolean needs2x2Configuration(ItemStack sapling) {
