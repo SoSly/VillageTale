@@ -8,6 +8,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.entity.Mob;
 
 public class ScaffoldingNodeEvaluator extends WalkNodeEvaluator {
     @Override
@@ -34,35 +36,38 @@ public class ScaffoldingNodeEvaluator extends WalkNodeEvaluator {
     public int getNeighbors(Node[] outputArray, Node node) {
         int neighborCount = super.getNeighbors(outputArray, node);
         BlockPos nodePos = node.asBlockPos();
+        BlockState currentState = this.level.getBlockState(nodePos);
+        BlockState belowState = this.level.getBlockState(nodePos.below());
         
-        neighborCount = tryAddScaffoldingNeighbor(outputArray, neighborCount, nodePos.above(), Direction.UP);
-        neighborCount = tryAddScaffoldingNeighbor(outputArray, neighborCount, nodePos.below(), Direction.DOWN);
+        if (!currentState.is(Blocks.SCAFFOLDING) && belowState.is(Blocks.SCAFFOLDING)) {
+            neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.below(), 0.5F);
+        }
         
-        return neighborCount;
-    }
-    
-    private int tryAddScaffoldingNeighbor(Node[] outputArray, int neighborCount, BlockPos targetPos, Direction direction) {
-        BlockState targetState = this.level.getBlockState(targetPos);
-        if (!targetState.is(Blocks.SCAFFOLDING)) {
+        if (!currentState.is(Blocks.SCAFFOLDING)) {
             return neighborCount;
         }
         
-        Node targetNode = this.getNode(targetPos);
-        if (targetNode == null || targetNode.closed) {
-            return neighborCount;
+        BlockState aboveState = this.level.getBlockState(nodePos.above());
+        if (aboveState.is(Blocks.SCAFFOLDING) || aboveState.isAir()) {
+            neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.above(), 1.5F);
         }
         
-        if (direction == Direction.DOWN || canMoveToScaffolding(targetPos)) {
-            targetNode.type = BlockPathTypes.WALKABLE;
-            targetNode.costMalus = Math.max(targetNode.costMalus, 0.0F);
-            outputArray[neighborCount++] = targetNode;
+        if (belowState.is(Blocks.SCAFFOLDING)) {
+            neighborCount = addNodeIfValid(outputArray, neighborCount, nodePos.below(), 0.5F);
         }
         
         return neighborCount;
     }
     
-    private boolean canMoveToScaffolding(BlockPos pos) {
-        BlockState state = this.level.getBlockState(pos);
-        return state.is(Blocks.SCAFFOLDING) || state.isAir();
+    private int addNodeIfValid(Node[] outputArray, int neighborCount, BlockPos pos, float cost) {
+        Node node = this.getNode(pos);
+        if (node == null || node.closed) {
+            return neighborCount;
+        }
+        
+        node.type = BlockPathTypes.WALKABLE;
+        node.costMalus = cost;
+        outputArray[neighborCount++] = node;
+        return neighborCount;
     }
 }
