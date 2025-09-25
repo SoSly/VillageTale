@@ -20,7 +20,7 @@ import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
-import org.sosly.villagetale.entity.ai.behavior.DepositItem;
+import org.sosly.villagetale.entity.ai.behavior.PutInContainer;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
 import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
@@ -44,7 +44,7 @@ public class VillagerGoalPackages {
             Pair.of(1, new WakeUp()),
             Pair.of(2, new EatFood()),
             Pair.of(3, new GetFromContainer()),
-            Pair.of(3, new DepositItem()),
+            Pair.of(3, new PutInContainer()),
             Pair.of(99, UpdateActivityFromSchedule.create())
         );
     }

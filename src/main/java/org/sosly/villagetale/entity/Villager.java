@@ -39,7 +39,6 @@ import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -66,7 +65,6 @@ import org.sosly.villagetale.data.LivingEntityFoodData;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
-import org.sosly.villagetale.entity.ai.navigation.VillagerNavigation;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.profession.ProfessionRegistry;
@@ -117,10 +115,6 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
             .add(Attributes.MAX_HEALTH, 20.0D);
     }
 
-    @Override
-    protected PathNavigation createNavigation(Level level) {
-        return new VillagerNavigation(this, level);
-    }
 
     @Override
     protected Brain.@NotNull Provider<Villager> brainProvider() {

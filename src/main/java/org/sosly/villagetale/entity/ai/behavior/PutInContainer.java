@@ -25,7 +25,7 @@ import org.sosly.villagetale.helper.ContainerHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.zone.type.Storage;
 
-public class DepositItem extends Behavior<Villager> {
+public class PutInContainer extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
     private static final int CLAIM_DURATION = 60;
     private static final int SEARCH_DURATION = 20;
@@ -35,7 +35,7 @@ public class DepositItem extends Behavior<Villager> {
     private int searchTicks;
     private IVillageZone claimedZone;
 
-    public DepositItem() {
+    public PutInContainer() {
         super(ImmutableMap.of(
             MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), MemoryStatus.VALUE_PRESENT,
             MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT,
@@ -77,7 +77,7 @@ public class DepositItem extends Behavior<Villager> {
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(this.targetContainer, 0.5F, 1), 200L);
 
-            VillageTale.LOGGER.debug("DepositItem started walking to {} for villager {}",
+            VillageTale.LOGGER.debug("PutInContainer started walking to {} for villager {}",
                 this.targetContainer, villager.getId());
         }
     }
@@ -196,7 +196,7 @@ public class DepositItem extends Behavior<Villager> {
 
         boolean claimed = zone.claim(this.targetContainer, villager.getUUID(), CLAIM_DURATION, gameTime);
         if (!claimed) {
-            VillageTale.LOGGER.debug("DepositItem failed to claim container at {} for villager {}",
+            VillageTale.LOGGER.debug("PutInContainer failed to claim container at {} for villager {}",
                 this.targetContainer, villager.getId());
             return false;
         }
@@ -204,7 +204,7 @@ public class DepositItem extends Behavior<Villager> {
         this.containerClaimed = true;
         this.claimedZone = zone;
 
-        VillageTale.LOGGER.debug("DepositItem claimed container at {} for villager {}",
+        VillageTale.LOGGER.debug("PutInContainer claimed container at {} for villager {}",
             this.targetContainer, villager.getId());
 
         return true;
@@ -248,7 +248,7 @@ public class DepositItem extends Behavior<Villager> {
                 updatedItems.put(itemId, remaining);
             }
 
-            VillageTale.LOGGER.debug("DepositItem deposited {} x{} for villager {}",
+            VillageTale.LOGGER.debug("PutInContainer deposited {} x{} for villager {}",
                 itemId, deposited, villager.getId());
         }
 
@@ -267,7 +267,7 @@ public class DepositItem extends Behavior<Villager> {
 
         boolean released = this.claimedZone.release(this.targetContainer);
 
-        VillageTale.LOGGER.debug("DepositItem {} container at {}",
+        VillageTale.LOGGER.debug("PutInContainer {} container at {}",
             released ? "released" : "failed to release", this.targetContainer);
     }
 

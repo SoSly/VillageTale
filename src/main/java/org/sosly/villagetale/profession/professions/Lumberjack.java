@@ -50,7 +50,7 @@ public class Lumberjack extends AbstractProfession {
     @Override
     public ImmutableList<MemoryModuleType<?>> getMemoryModules() {
         return ImmutableList.of(
-            MemoryModuleTypes.NEAREST_LOG.get(),
+            MemoryModuleTypes.NEAREST_TREE.get(),
             MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get()
         );
     }

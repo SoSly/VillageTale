@@ -23,7 +23,8 @@ public class EatFood extends Behavior<Villager> {
 
     public EatFood() {
         super(ImmutableMap.of(
-            MemoryModuleTypes.CAN_EAT.get(), MemoryStatus.VALUE_PRESENT
+            MemoryModuleTypes.CAN_EAT.get(), MemoryStatus.VALUE_PRESENT,
+            MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), EATING_DURATION);
     }
 

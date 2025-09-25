@@ -18,6 +18,7 @@ import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.api.serialization.Codecs;
 import org.sosly.villagetale.data.FoundItem;
 import org.sosly.villagetale.data.TimedWantedItem;
+import org.sosly.villagetale.data.Tree;
 
 public class MemoryModuleTypes {
     public static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES =
@@ -103,9 +104,9 @@ public class MemoryModuleTypes {
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
     // Lumberjack Memories
-    public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_LOG =
+    public static final RegistryObject<MemoryModuleType<Optional<Tree>>> NEAREST_TREE =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_log",
-                    () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
+                    () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_REPLANTABLE_SPOT =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_replantable_spot",
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));

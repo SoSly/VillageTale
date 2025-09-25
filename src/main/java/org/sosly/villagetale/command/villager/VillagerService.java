@@ -271,12 +271,12 @@ public class VillagerService {
 
         sender.accept(Component.literal(""));
         sender.accept(Component.literal("--- Brain State ---"));
-        sender.accept(Component.literal(String.format("Current Activity: %s", 
+        sender.accept(Component.literal(String.format("Current Activity: %s",
                 villager.getBrain().getActiveNonCoreActivity().orElse(null))));
-        sender.accept(Component.literal(String.format("Schedule Activity: %s at time %d", 
+        sender.accept(Component.literal(String.format("Schedule Activity: %s at time %d",
                 villager.getBrain().getSchedule().getActivityAt((int)(level.getDayTime() % 24000)),
                 level.getDayTime() % 24000)));
-        
+
         String runningBehaviors = villager.getBrain().getRunningBehaviors().stream()
                 .map(behavior -> {
                     String name = behavior.getClass().getSimpleName();
@@ -291,7 +291,7 @@ public class VillagerService {
         } else {
             sender.accept(Component.literal("Running Behaviors: None"));
         }
-        
+
         sender.accept(Component.literal(""));
         sender.accept(Component.literal("--- Core Memories ---"));
 
@@ -392,9 +392,10 @@ public class VillagerService {
             }
 
             if (profession.getID().equals(new ResourceLocation("villagetale", "lumberjack"))) {
-                villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_LOG.get()).ifPresent(pos -> {
-                    sender.accept(Component.literal(String.format("Nearest Log: %d, %d, %d",
-                            pos.getX(), pos.getY(), pos.getZ())));
+                villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_TREE.get()).ifPresent(tree -> {
+                    BlockPos base = tree.get().getBase();
+                    sender.accept(Component.literal(String.format("Nearest Tree: %d, %d, %d",
+                            base.getX(), base.getY(), base.getZ())));
                 });
 
                 villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get()).ifPresent(pos -> {
