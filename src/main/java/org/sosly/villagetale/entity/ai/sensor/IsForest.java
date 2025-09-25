@@ -57,9 +57,9 @@ public class IsForest extends Sensor<Villager> {
         BlockPos nearestLog = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (int x = -scanRadius; x <= scanRadius; x++) {
-            for (int z = -scanRadius; z <= scanRadius; z++) {
-                for (int y = -scanRadius; y <= scanRadius; y++) {
+        for (int y = -scanRadius; y <= scanRadius; y++) {
+            for (int x = -scanRadius; x <= scanRadius; x++) {
+                for (int z = -scanRadius; z <= scanRadius; z++) {
                     BlockPos pos = villagerPos.offset(x, y, z);
                     
                     if (!zone.containsPosition(pos)) {
@@ -96,9 +96,9 @@ public class IsForest extends Sensor<Villager> {
         BlockPos nearestSpot = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (int x = -scanRadius; x <= scanRadius; x++) {
-            for (int z = -scanRadius; z <= scanRadius; z++) {
-                for (int y = -2; y <= 2; y++) {
+        for (int y = -scanRadius; y <= scanRadius; y++) {
+            for (int x = -scanRadius; x <= scanRadius; x++) {
+                for (int z = -scanRadius; z <= scanRadius; z++) {
                     BlockPos pos = villagerPos.offset(x, y, z);
                     
                     if (!zone.containsPosition(pos)) {
