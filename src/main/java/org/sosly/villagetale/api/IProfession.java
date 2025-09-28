@@ -78,9 +78,4 @@ public interface IProfession {
      */
     public Schedule getSchedule();
 
-    /**
-     * Gets the overlay texture for this profession's clothing/appearance.
-     * @return Optional containing the ResourceLocation of the overlay texture, or empty if no overlay
-     */
-    public Optional<ResourceLocation> getOverlayTexture();
 }

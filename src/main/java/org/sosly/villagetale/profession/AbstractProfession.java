@@ -40,9 +40,4 @@ public abstract class AbstractProfession implements IProfession {
     @Override
     public void registerAdditionalGoals(Brain<Villager> brain) {
     }
-
-    @Override
-    public Optional<ResourceLocation> getOverlayTexture() {
-        return Optional.empty();
-    }
 }

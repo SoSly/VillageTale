@@ -88,8 +88,8 @@ A happy village is a productive village:
 ### Currently Planned
 - **Guards:** Patrol the village and defend against threats
 - **Miners:** Dig shafts and extract underground resources
-- **Lumberjacks:** Manage tree farms and provide wood
-- **Herdsmen:** Tend to and breed livestock
+- **Foresters:** Manage tree farms and provide wood
+- **Herders:** Tend to and breed livestock
 - **Farmers:** Grow crops and manage fields (enhancing vanilla farmers)
 - **Blacksmiths:** Craft tools, weapons, and armor (enhancing vanilla toolsmiths/weaponsmiths/armorers)
 - **Children:** Not a profession, but a life stage focused on play and learning

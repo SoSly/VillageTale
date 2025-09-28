@@ -103,7 +103,7 @@ public class MemoryModuleTypes {
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_harvestable_crop",
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
-    // Lumberjack Memories
+    // Forester Memories
     public static final RegistryObject<MemoryModuleType<Optional<Tree>>> NEAREST_TREE =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_log",
                     () -> new MemoryModuleType<>(Optional.empty()));

@@ -32,11 +32,11 @@ A living document exploring which professions belong in VillageTale and why.
 - **What they do:** Tills soil, plants seeds, harvests crops, maintains farmland
 - **Where they work:** Farmland zone
 
-### Fisherman
+### Fisher
 - **What they do:** Fishes at water sources, provides fish as alternative food source
 - **Where they work:** Fishing zone
 
-### Florist
+### Gardener
 - **What they do:** Cultivates and breeds flowers, maintains flower gardens, provides dyes
 - **Where they work:** Garden zone
 
@@ -44,7 +44,7 @@ A living document exploring which professions belong in VillageTale and why.
 - **What they do:** Patrols village, engages threats in melee combat, equips swords/shields
 - **Where they work:** Guard Post zone, Patrol Route zone
 
-### Herdsman
+### Herder
 - **What they do:** Breeds animals, shears sheep, milks cows, collects eggs, captures wandering animals
 - **Where they work:** Pen zone
 
@@ -52,7 +52,7 @@ A living document exploring which professions belong in VillageTale and why.
 - **What they do:** Crafts leather armor, books, item frames, leads, and modded leather items (backpacks, satchels)
 - **Where they work:** Tannery zone
 
-### Lumberjack
+### Forester
 - **What they do:** Cuts trees, plants trees
 - **Where they work:** Forest zone
 
@@ -68,7 +68,7 @@ A living document exploring which professions belong in VillageTale and why.
 - **What they do:** Processes raw materials in furnaces - ores to ingots, logs to charcoal, sand to glass, clay to bricks
 - **Where they work:** Foundry zone
 
-### Woodworker
+### Carpenter
 - **What they do:** Processes wood into construction materials (planks, stairs, slabs, fences, ladders, scaffolding), crafts bows/arrows
 - **Where they work:** Woodshop zone
 
@@ -111,7 +111,7 @@ A living document exploring which professions belong in VillageTale and why.
 - **What they do:** Creates clay pots, decorative terracotta, ceramic items
 - **Where they work:** Kiln zone
 
-### Rat Catcher
+### Warden
 - **What they do:** Patrols chunks to suppress hostile mob spawning temporarily
 - **Where they work:** Throughout village bounds
 
@@ -119,16 +119,16 @@ A living document exploring which professions belong in VillageTale and why.
 - **What they do:** Copies maps and books, creates new books, potentially other document-related tasks
 - **Where they work:** TBD
 
-### Storage Manager
+### Steward
 - **What they do:** Organizes storage, delivers resources to crafters, tracks inventory for player requests
 - **Where they work:** Storage zone
 
-### Traveling Merchant
+### Peddler
 - **What they do:** Visits periodically with trades from distant lands (improving on vanilla's wandering trader)
 - **Where they work:** Town square/market when visiting
 
-### Vendor
-- **What they do:** Sells village surplus goods for emeralds (includes specialized types like fishmonger, produce vendor, etc.)
+### Merchant
+- **What they do:** Sells village surplus goods for emeralds (includes specialized types like fishmonger, produce merchant, etc.)
 - **Where they work:** Market Stall zone
 
 ### Weaver

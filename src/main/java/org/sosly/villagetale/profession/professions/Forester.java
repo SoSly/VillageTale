@@ -27,11 +27,10 @@ import org.sosly.villagetale.entity.ai.behavior.PlantSapling;
 import org.sosly.villagetale.profession.AbstractProfession;
 import org.sosly.villagetale.zone.type.Forest;
 
-public class Lumberjack extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "lumberjack");
-    private final static ResourceLocation OVERLAY_TEXTURE = new ResourceLocation(VillageTale.MOD_ID, "textures/entity/villager/profession/lumberjack.png");
+public class Forester extends AbstractProfession {
+    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "forester");
 
-    public Lumberjack() {
+    public Forester() {
         super(ID);
     }
 
@@ -85,10 +84,5 @@ public class Lumberjack extends AbstractProfession {
     @Override
     public boolean isValidWorkZone(IVillageZone zone) {
         return zone.getType().getID().equals(Forest.ID);
-    }
-
-    @Override
-    public Optional<ResourceLocation> getOverlayTexture() {
-        return Optional.of(OVERLAY_TEXTURE);
     }
 }

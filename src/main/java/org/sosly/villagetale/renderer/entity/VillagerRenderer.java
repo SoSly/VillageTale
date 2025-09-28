@@ -20,41 +20,23 @@ import org.sosly.villagetale.renderer.model.VillagerModel;
 @OnlyIn(Dist.CLIENT)
 public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villager>> {
     private static final ResourceLocation VILLAGER_BASE_SKIN =
-        new ResourceLocation("minecraft", "textures/entity/villager/villager.png");
-    public static final ModelLayerLocation VILLAGER_ARMS = new ModelLayerLocation(
-        new ResourceLocation(VillageTale.MOD_ID, "villager_arms"), "main");
+        new ResourceLocation(VillageTale.MOD_ID, "textures/entity/villager/profession/commoner.png");
 
     public VillagerRenderer(EntityRendererProvider.Context context) {
-        super(context, new VillagerModel<>(context.bakeLayer(VILLAGER_ARMS)), 0.5F);
+        super(context, new VillagerModel<>(context.bakeLayer(VillagerModel.LAYER_LOCATION)), 0.5F);
         this.addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
-        this.addLayer(new VillagerProfessionLayer(this, context));
     }
 
     @Override
     public ResourceLocation getTextureLocation(Villager villager) {
+        ResourceLocation professionId = ClientPacketHandler.getCachedProfession(villager.getId());
+        if (professionId != null) {
+            return ProfessionRegistry.INSTANCE.getProfession(professionId)
+                .map(profession -> new ResourceLocation(profession.getID().getNamespace(), 
+                    "textures/entity/villager/profession/" + profession.getID().getPath() + ".png"))
+                .orElse(VILLAGER_BASE_SKIN);
+        }
         return VILLAGER_BASE_SKIN;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static class VillagerProfessionLayer extends RenderLayer<Villager, VillagerModel<Villager>> {
-        public VillagerProfessionLayer(VillagerRenderer renderer, EntityRendererProvider.Context context) {
-            super(renderer);
-        }
-
-        @Override
-        public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight,
-                          Villager villager, float limbSwing, float limbSwingAmount,
-                          float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-            ResourceLocation professionId = ClientPacketHandler.getCachedProfession(villager.getId());
-            if (professionId == null) {
-                return;
-            }
-
-            ProfessionRegistry.INSTANCE.getProfession(professionId)
-                .flatMap(IProfession::getOverlayTexture)
-                .ifPresent(texture -> renderColoredCutoutModel(
-                    this.getParentModel(), texture, poseStack, buffer,
-                    packedLight, villager, 1.0F, 1.0F, 1.0F));
-        }
-    }
 }

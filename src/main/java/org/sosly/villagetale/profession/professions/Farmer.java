@@ -30,7 +30,6 @@ import org.sosly.villagetale.zone.type.Farmland;
 
 public class Farmer extends AbstractProfession {
     public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "farmer");
-    private final static ResourceLocation OVERLAY_TEXTURE = new ResourceLocation("minecraft", "textures/entity/villager/profession/farmer.png");
 
     public Farmer() {
         super(ID);
@@ -88,10 +87,5 @@ public class Farmer extends AbstractProfession {
     @Override
     public boolean isValidWorkZone(IVillageZone zone) {
         return zone.getType().getID().equals(Farmland.ID);
-    }
-
-    @Override
-    public Optional<ResourceLocation> getOverlayTexture() {
-        return Optional.of(OVERLAY_TEXTURE);
     }
 }

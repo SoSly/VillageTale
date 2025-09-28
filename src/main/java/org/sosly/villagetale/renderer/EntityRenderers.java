@@ -19,6 +19,6 @@ public class EntityRenderers {
 
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(VillagerRenderer.VILLAGER_ARMS, VillagerModel::createBodyLayer);
+        event.registerLayerDefinition(VillagerModel.LAYER_LOCATION, VillagerModel::createBodyLayer);
     }
 }
