@@ -23,7 +23,7 @@ import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.NetworkHandler;
 
-public class HarvestCropBehavior extends Behavior<Villager> {
+public class HarvestCrop extends Behavior<Villager> {
     private static final int HARVEST_DURATION = 40;
     private static final int BEHAVIOR_DURATION = 100;
     private static final float WORK_EXHAUSTION = 0.6f;
@@ -35,7 +35,7 @@ public class HarvestCropBehavior extends Behavior<Villager> {
     ItemStack tool = ItemStack.EMPTY;
     IVillageZone workplace;
 
-    public HarvestCropBehavior() {
+    public HarvestCrop() {
         super(ImmutableMap.of(
                 MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
                 MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), MemoryStatus.VALUE_PRESENT,
@@ -129,7 +129,8 @@ public class HarvestCropBehavior extends Behavior<Villager> {
             return;
         }
 
-        BlockState cropState = level.getBlockState(pos);
+        BlockPos cropPos = pos.above();
+        BlockState cropState = level.getBlockState(cropPos);
         if (!(cropState.getBlock() instanceof CropBlock cropBlock)) {
             claimed = false;
             return;
@@ -140,14 +141,14 @@ public class HarvestCropBehavior extends Behavior<Villager> {
             return;
         }
 
-        level.destroyBlock(pos, true);
-        level.playSound(null, pos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+        level.destroyBlock(cropPos, true);
+        level.playSound(null, cropPos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
         villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
 
         tool.setDamageValue(tool.getDamageValue() + 1);
         if (tool.getDamageValue() >= tool.getMaxDamage()) {
             tool.shrink(1);
-            level.playSound(null, pos, SoundEvents.ITEM_BREAK, SoundSource.NEUTRAL, 1.0F, 1.0F);
+            level.playSound(null, cropPos, SoundEvents.ITEM_BREAK, SoundSource.NEUTRAL, 1.0F, 1.0F);
         }
 
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());

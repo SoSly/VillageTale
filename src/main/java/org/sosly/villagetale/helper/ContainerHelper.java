@@ -1,16 +1,18 @@
 package org.sosly.villagetale.helper;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import org.sosly.villagetale.entity.FakePlayer;
-
-import java.util.function.Predicate;
 
 public class ContainerHelper {
 
@@ -200,6 +202,48 @@ public class ContainerHelper {
         }
 
         return false;
+    }
+
+    public static Map<ResourceLocation, Integer> tryDepositFromInventory(
+            ServerLevel level,
+            BlockPos containerPos,
+            SimpleContainer inventory,
+            Map<ResourceLocation, Integer> itemsToDeposit) {
+        
+        if (itemsToDeposit == null || itemsToDeposit.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        Map<ResourceLocation, Integer> remaining = new HashMap<>(itemsToDeposit);
+
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            Integer wantedAmount = itemsToDeposit.get(itemId);
+            if (wantedAmount == null || wantedAmount <= 0) {
+                continue;
+            }
+
+            int deposited = depositItemToContainer(level, containerPos, stack, wantedAmount);
+            if (deposited <= 0) {
+                continue;
+            }
+
+            stack.shrink(deposited);
+            int leftover = wantedAmount - deposited;
+
+            if (leftover <= 0) {
+                remaining.remove(itemId);
+            } else {
+                remaining.put(itemId, leftover);
+            }
+        }
+
+        return remaining;
     }
 
 }

@@ -15,11 +15,11 @@ import org.sosly.villagetale.zone.type.TownHall;
 public class Types {
     @SubscribeEvent
     public static void onRegisterZoneTypes(RegisterZoneTypesEvent event) {
-        event.register(Farmland.ID, Farmland::new);
-        event.register(Forest.ID, Forest::new);
-        event.register(Home.ID, Home::new);
-        event.register(Kitchen.ID, Kitchen::new);
-        event.register(Storage.ID, Storage::new);
-        event.register(TownHall.ID, TownHall::new);
+        event.register(Farmland.ID, new Farmland());
+        event.register(Forest.ID, new Forest());
+        event.register(Home.ID, new Home());
+        event.register(Kitchen.ID, new Kitchen());
+        event.register(Storage.ID, new Storage());
+        event.register(TownHall.ID, new TownHall());
     }
 }

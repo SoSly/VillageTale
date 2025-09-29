@@ -1,11 +1,14 @@
 package org.sosly.villagetale.zone;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
@@ -23,16 +26,16 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 
 public class Zone implements IVillageZone {
     private final Level level;
-
-    private UUID id;
-    private int ordinal;
-    private IZoneShape shape;
-    private IZoneType type;
-    private IVillageCapability village;
-    private List<UUID> villagers = new ArrayList<>();
-    private Map<BlockPos, Claim> claims = new HashMap<>();
-    private String name;
-    private List<ItemStack> filter = new ArrayList<>();
+    private final CopyOnWriteArrayList<UUID> villagers = new CopyOnWriteArrayList<>();
+    private final ConcurrentHashMap<BlockPos, Claim> claims = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Claim> entityClaims = new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<ItemStack> filter = new CopyOnWriteArrayList<>();
+    private volatile UUID id;
+    private volatile int ordinal;
+    private volatile IZoneShape shape;
+    private volatile IZoneType type;
+    private volatile IVillageCapability village;
+    private volatile String name;
 
     public Zone(Level level) {
         this.level = level;
@@ -52,7 +55,7 @@ public class Zone implements IVillageZone {
         this.type = type;
         this.ordinal = ordinal;
         this.village = village;
-        
+
         if (type != null && level != null) {
             type.initialize(level, shape);
         }
@@ -65,30 +68,25 @@ public class Zone implements IVillageZone {
 
     @Override
     public String getName() {
-        if (name != null) {
-            return name;
+        String currentName = name;
+        if (currentName != null) {
+            return currentName;
         }
 
-        String translationKey = this.type.getID().getNamespace()
+        IZoneType currentType = type;
+        if (currentType == null) {
+            return "";
+        }
+
+        String translationKey = currentType.getID().getNamespace()
                 .concat(".zone.")
-                .concat(this.type.getID().getPath());
-        String zoneName = Component.translatable(translationKey).toString();
+                .concat(currentType.getID().getPath());
         return Component.translatable("villagetale.zone.numbered", translationKey, ordinal).getString();
     }
 
     @Override
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         this.name = name;
-        markDirty();
-    }
-
-    public void setShape(IZoneShape shape) {
-        this.shape = shape;
-        markDirty();
-    }
-
-    public void setType(IZoneType type) {
-        this.type = type;
         markDirty();
     }
 
@@ -97,41 +95,53 @@ public class Zone implements IVillageZone {
         return shape;
     }
 
+    public synchronized void setShape(IZoneShape shape) {
+        this.shape = shape;
+        markDirty();
+    }
+
     @Override
     public IZoneType getType() {
         return type;
     }
 
+    public synchronized void setType(IZoneType type) {
+        this.type = type;
+        markDirty();
+    }
+
     @Override
     public List<UUID> getAssignedVillagers() {
-        return villagers;
+        return Collections.unmodifiableList(new ArrayList<>(villagers));
     }
 
     @Override
     public void addAssignedVillager(UUID villagerUUID) {
-        if (villagers.contains(villagerUUID)) {
+        if (villagerUUID == null || villagers.contains(villagerUUID)) {
             return;
         }
 
-        villagers.add(villagerUUID);
+        villagers.addIfAbsent(villagerUUID);
         markDirty();
     }
 
     @Override
     public boolean removeAssignedVillager(UUID villagerUUID) {
-        if (!villagers.contains(villagerUUID)) {
+        if (villagerUUID == null) {
             return false;
         }
 
-        villagers.remove(villagerUUID);
-        markDirty();
-        return true;
+        boolean removed = villagers.remove(villagerUUID);
+        if (removed) {
+            markDirty();
+        }
+        return removed;
     }
 
     @Override
     public Map<BlockPos, Optional<UUID>> getClaims(long currentTime) {
-        this.claims.entrySet()
-                .removeIf(entry -> entry.getValue().isExpired(currentTime));
+        // Clean expired claims atomically
+        claims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
 
         Optional<List<BlockPos>> pois = getPOIs();
         if (pois.isEmpty()) {
@@ -140,8 +150,12 @@ public class Zone implements IVillageZone {
 
         Map<BlockPos, Optional<UUID>> result = new HashMap<>();
         for (BlockPos pos : pois.get()) {
-            Claim claim = this.claims.get(pos);
-            result.put(pos, claim != null ? Optional.of(claim.getVillagerUUID()) : Optional.empty());
+            Claim claim = claims.get(pos);
+            if (claim != null && !claim.isExpired(currentTime)) {
+                result.put(pos, Optional.of(claim.getVillagerUUID()));
+            } else {
+                result.put(pos, Optional.empty());
+            }
         }
         return result;
     }
@@ -151,8 +165,8 @@ public class Zone implements IVillageZone {
         return getClaims(currentTime).entrySet().stream()
                 .filter(entry -> entry.getValue().isPresent())
                 .filter(claim -> blockFilter
-                    .map(filter -> filter.test(this.village.getChunk().getLevel().getBlockState(claim.getKey())))
-                    .orElse(true))
+                        .map(filter -> filter.test(this.village.getChunk().getLevel().getBlockState(claim.getKey())))
+                        .orElse(true))
                 .flatMap(entry -> entry.getValue().map(uuid -> Map.entry(entry.getKey(), uuid)).stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -160,12 +174,12 @@ public class Zone implements IVillageZone {
     @Override
     public List<BlockPos> getAvailableClaims(long currentTime, Optional<Predicate<BlockState>> blockFilter) {
         return getClaims(currentTime).entrySet().stream()
-            .filter(claim -> claim.getValue().isEmpty())
-            .filter(claim -> blockFilter
-                .map(filter -> filter.test(this.village.getChunk().getLevel().getBlockState(claim.getKey())))
-                .orElse(true))
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+                .filter(claim -> claim.getValue().isEmpty())
+                .filter(claim -> blockFilter
+                        .map(filter -> filter.test(this.village.getChunk().getLevel().getBlockState(claim.getKey())))
+                        .orElse(true))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -174,17 +188,27 @@ public class Zone implements IVillageZone {
             return false;
         }
 
-        List<BlockPos> available = getAvailableClaims(currentTime, Optional.empty());
-        if (!available.contains(pos)) {
+        if (!containsPosition(pos)) {
             return false;
         }
 
         long expirationTime = currentTime + durationTicks;
-        claims.put(pos, new Claim(villager, expirationTime));
-        if (durationTicks > 6000) {
+        Claim newClaim = new Claim(villager, expirationTime);
+
+        boolean[] claimed = {false};
+        claims.compute(pos, (key, existingClaim) -> {
+            if (existingClaim == null || existingClaim.isExpired(currentTime)) {
+                claimed[0] = true;
+                return newClaim;
+            }
+            return existingClaim;
+        });
+
+        if (claimed[0] && durationTicks > 6000) {
             markDirty();
         }
-        return true;
+
+        return claimed[0];
     }
 
     @Override
@@ -194,47 +218,120 @@ public class Zone implements IVillageZone {
 
     @Override
     public boolean containsPosition(BlockPos pos) {
-        return this.shape.containsPosition(pos);
+        IZoneShape currentShape = shape;
+        return currentShape != null && currentShape.containsPosition(pos);
     }
 
     @Override
     public boolean containsPosition(BlockPos pos, int buffer) {
-        return this.shape.containsPosition(pos, buffer);
+        IZoneShape currentShape = shape;
+        return currentShape != null && currentShape.containsPosition(pos, buffer);
     }
 
     @Override
     public BlockPos getStartPosition() {
-        return this.shape.getStartPosition();
+        IZoneShape currentShape = shape;
+        return currentShape != null ? currentShape.getStartPosition() : null;
+    }
+
+    @Override
+    public boolean claim(UUID entityId, UUID villagerUUID, int durationTicks, long currentTime) {
+        if (entityId == null || villagerUUID == null) {
+            return false;
+        }
+
+        long expirationTime = currentTime + durationTicks;
+        Claim newClaim = new Claim(villagerUUID, expirationTime);
+
+        boolean[] claimed = {false};
+        entityClaims.compute(entityId, (key, existingClaim) -> {
+            if (existingClaim == null || existingClaim.isExpired(currentTime)) {
+                claimed[0] = true;
+                return newClaim;
+            }
+            return existingClaim;
+        });
+
+        if (claimed[0] && durationTicks > 6000) {
+            markDirty();
+        }
+
+        return claimed[0];
+    }
+
+    @Override
+    public boolean release(UUID entityId) {
+        return entityClaims.remove(entityId) != null;
+    }
+
+    @Override
+    public Map<UUID, Optional<UUID>> getEntityClaims(long currentTime) {
+        entityClaims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
+
+        Map<UUID, Optional<UUID>> result = new HashMap<>();
+        for (Map.Entry<UUID, Claim> entry : entityClaims.entrySet()) {
+            if (!entry.getValue().isExpired(currentTime)) {
+                result.put(entry.getKey(), Optional.of(entry.getValue().getVillagerUUID()));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<UUID, UUID> getActiveEntityClaims(long currentTime) {
+        entityClaims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
+
+        Map<UUID, UUID> result = new HashMap<>();
+        for (Map.Entry<UUID, Claim> entry : entityClaims.entrySet()) {
+            if (!entry.getValue().isExpired(currentTime)) {
+                result.put(entry.getKey(), entry.getValue().getVillagerUUID());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<UUID> getAvailableEntityClaims(long currentTime) {
+        entityClaims.entrySet().removeIf(entry -> entry.getValue().isExpired(currentTime));
+        return new ArrayList<>();
     }
 
     @Override
     public List<ItemStack> getFilter() {
-        return filter;
+        return Collections.unmodifiableList(new ArrayList<>(filter));
     }
 
     @Override
     public void setFilter(List<ItemStack> filter) {
-        this.filter = filter;
+        this.filter.clear();
+        if (filter != null) {
+            this.filter.addAll(filter);
+        }
         markDirty();
     }
 
-    public CompoundTag serializeNBT() {
+    public synchronized CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putUUID("id", this.id);
         tag.putInt("sequence", this.ordinal);
         tag.putString("name", this.getName());
-        tag.putString("type", this.type.getID().toString());
 
-        CompoundTag typeData = this.type.serializeNBT();
-        if (typeData != null) {
-            tag.put("type_data", typeData);
+        IZoneType currentType = this.type;
+        if (currentType != null) {
+            tag.putString("type", currentType.getID().toString());
+            CompoundTag typeData = currentType.serializeNBT();
+            if (typeData != null) {
+                tag.put("type_data", typeData);
+            }
         }
 
-        tag.putString("shape", this.shape.getID().toString());
-
-        CompoundTag shapeData = this.shape.serializeNBT();
-        if (shapeData != null) {
-            tag.put("shape_data", shapeData);
+        IZoneShape currentShape = this.shape;
+        if (currentShape != null) {
+            tag.putString("shape", currentShape.getID().toString());
+            CompoundTag shapeData = currentShape.serializeNBT();
+            if (shapeData != null) {
+                tag.put("shape_data", shapeData);
+            }
         }
 
         if (!villagers.isEmpty()) {
@@ -248,63 +345,145 @@ public class Zone implements IVillageZone {
         }
 
         if (!filter.isEmpty()) {
-            ListTag filter = new ListTag();
-            for (ItemStack stack : this.filter) {
+            ListTag filterList = new ListTag();
+            for (ItemStack stack : filter) {
                 CompoundTag itemTag = stack.save(new CompoundTag());
-                filter.add(itemTag);
+                filterList.add(itemTag);
             }
-            tag.put("filter", filter);
+            tag.put("filter", filterList);
+        }
+
+        // Only persist long-duration claims
+        long currentTime = System.currentTimeMillis();
+        Map<BlockPos, Claim> persistableClaims = new HashMap<>();
+        claims.forEach((pos, claim) -> {
+            if (claim.getExpirationTime() - currentTime > 6000) {
+                persistableClaims.put(pos, claim);
+            }
+        });
+
+        if (!persistableClaims.isEmpty()) {
+            ListTag claimsList = new ListTag();
+            for (Map.Entry<BlockPos, Claim> entry : persistableClaims.entrySet()) {
+                CompoundTag claimTag = new CompoundTag();
+                claimTag.putLong("X", entry.getKey().getX());
+                claimTag.putLong("Y", entry.getKey().getY());
+                claimTag.putLong("Z", entry.getKey().getZ());
+                claimTag.put("Claim", entry.getValue().serializeNBT());
+                claimsList.add(claimTag);
+            }
+            tag.put("claims", claimsList);
+        }
+
+        Map<UUID, Claim> persistableEntityClaims = new HashMap<>();
+        entityClaims.forEach((entityId, claim) -> {
+            if (claim.getExpirationTime() - currentTime > 6000) {
+                persistableEntityClaims.put(entityId, claim);
+            }
+        });
+
+        if (!persistableEntityClaims.isEmpty()) {
+            ListTag entityClaimsList = new ListTag();
+            for (Map.Entry<UUID, Claim> entry : persistableEntityClaims.entrySet()) {
+                CompoundTag claimTag = new CompoundTag();
+                claimTag.putUUID("EntityId", entry.getKey());
+                claimTag.put("Claim", entry.getValue().serializeNBT());
+                entityClaimsList.add(claimTag);
+            }
+            tag.put("entity_claims", entityClaimsList);
         }
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(IVillageCapability village, CompoundTag tag) {
+    public synchronized void deserializeNBT(IVillageCapability village, CompoundTag tag) {
         this.id = tag.getUUID("id");
         this.village = village;
         this.ordinal = tag.getInt("sequence");
         this.name = tag.getString("name");
 
-        IZoneType type = ZoneRegistry.INSTANCE.type(new ResourceLocation(tag.getString("type")));
-        if (tag.contains("type_data")) {
-            type.deserializeNBT(tag.getCompound("type_data"));
+        if (tag.contains("type")) {
+            IZoneType type = ZoneRegistry.INSTANCE.type(new ResourceLocation(tag.getString("type")));
+            if (tag.contains("type_data")) {
+                type.deserializeNBT(tag.getCompound("type_data"));
+            }
+            this.type = type;
         }
-        this.type = type;
 
-        IZoneShape shape = ZoneRegistry.INSTANCE.shape(new ResourceLocation(tag.getString("shape")));
-        if (tag.contains("shape_data")) {
-            shape.deserializeNBT(tag.getCompound("shape_data"));
+        if (tag.contains("shape")) {
+            IZoneShape shape = ZoneRegistry.INSTANCE.shape(new ResourceLocation(tag.getString("shape")));
+            if (tag.contains("shape_data")) {
+                shape.deserializeNBT(tag.getCompound("shape_data"));
+            }
+            this.shape = shape;
         }
-        this.shape = shape;
 
+        villagers.clear();
         if (tag.contains("villagers")) {
             ListTag villagersList = tag.getList("villagers", 10);
             for (int i = 0; i < villagersList.size(); i++) {
                 UUID villagerUUID = villagersList.getCompound(i).getUUID("villager");
-                this.villagers.add(villagerUUID);
+                villagers.add(villagerUUID);
             }
         }
 
+        filter.clear();
         if (tag.contains("filter")) {
-            ListTag filter = tag.getList("filter", 10);
-            this.filter = new ArrayList<>();
-            for (int i = 0; i < filter.size(); i++) {
-                CompoundTag itemTag = filter.getCompound(i);
+            ListTag filterList = tag.getList("filter", 10);
+            for (int i = 0; i < filterList.size(); i++) {
+                CompoundTag itemTag = filterList.getCompound(i);
                 ItemStack stack = ItemStack.of(itemTag);
                 if (!stack.isEmpty()) {
-                    this.filter.add(stack);
+                    filter.add(stack);
                 }
+            }
+        }
+
+        claims.clear();
+        if (tag.contains("claims")) {
+            ListTag claimsList = tag.getList("claims", 10);
+            for (int i = 0; i < claimsList.size(); i++) {
+                CompoundTag claimTag = claimsList.getCompound(i);
+                BlockPos pos = new BlockPos(
+                        claimTag.getInt("X"),
+                        claimTag.getInt("Y"),
+                        claimTag.getInt("Z")
+                );
+                Optional<Claim> claim = Claim.deserializeNBT(claimTag.getCompound("Claim"));
+                claim.ifPresent(c -> claims.put(pos, c));
+            }
+        }
+
+        entityClaims.clear();
+        if (tag.contains("entity_claims")) {
+            ListTag entityClaimsList = tag.getList("entity_claims", 10);
+            for (int i = 0; i < entityClaimsList.size(); i++) {
+                CompoundTag claimTag = entityClaimsList.getCompound(i);
+                UUID entityId = claimTag.getUUID("EntityId");
+                Optional<Claim> claim = Claim.deserializeNBT(claimTag.getCompound("Claim"));
+                claim.ifPresent(c -> entityClaims.put(entityId, c));
             }
         }
     }
 
     private Optional<List<BlockPos>> getPOIs() {
-        return Optional.ofNullable(this.shape.getPOIs(this.village.getChunk().getLevel(),
-                (pos) -> this.type.isPOI(this.village.getChunk().getLevel(), pos)));
+        IVillageCapability currentVillage = village;
+        IZoneShape currentShape = shape;
+        IZoneType currentType = type;
+
+        if (currentVillage == null || currentShape == null || currentType == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(currentShape.getPOIs(currentVillage.getChunk().getLevel(),
+                (pos) -> currentType.isPOI(currentVillage.getChunk().getLevel(), pos)));
     }
 
     private void markDirty() {
-        this.village.getChunk().setUnsaved(true);
+        IVillageCapability currentVillage = village;
+        if (currentVillage != null && currentVillage.getChunk() != null) {
+            currentVillage.getChunk().setUnsaved(true);
+        }
     }
 }

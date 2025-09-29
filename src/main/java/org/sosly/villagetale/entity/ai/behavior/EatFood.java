@@ -14,6 +14,8 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.helper.ItemMatcher;
 import org.sosly.villagetale.network.NetworkHandler;
 
+import java.util.List;
+
 public class EatFood extends Behavior<Villager> {
     private static final int EATING_DURATION = 32;
     private static final int EATING_THRESHOLD = 18;
@@ -110,7 +112,7 @@ public class EatFood extends Behavior<Villager> {
 
     private ItemStack findBestFood(Villager villager) {
         SimpleContainer inventory = villager.getInventory();
-        IWantedItem foodMatcher = ItemMatcher.FOOD.getFor(villager);
+        List<IWantedItem> foodMatchers = ItemMatcher.FOOD.getFor(villager);
 
         ItemStack bestFood = ItemStack.EMPTY;
         float bestSaturation = 0.0f;
@@ -121,7 +123,10 @@ public class EatFood extends Behavior<Villager> {
                 continue;
             }
 
-            if (!foodMatcher.getMatcher().test(item)) {
+            boolean isFood = foodMatchers.stream()
+                .anyMatch(food -> food.getMatcher().test(item));
+
+            if (!isFood) {
                 continue;
             }
 

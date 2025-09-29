@@ -22,6 +22,7 @@ import org.sosly.villagetale.api.capability.IRecipeKnowledgeCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.command.Result;
 import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
+import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.entity.Villager;
 
 public class RecipeCommand {
@@ -161,6 +162,16 @@ public class RecipeCommand {
             return Result.failure(Component.translatable(
                     String.format("%s.command.villager.recipes.already_knows", VillageTale.MOD_ID), 
                     villager.getDisplayName().getString(), recipeId));
+        }
+        
+        Recipe<?> recipe = recipeManager.byKey(recipeId).orElse(null);
+        if (recipe != null && villager.getProfession() != null) {
+            ItemOrTagMatcher learnableItems = villager.getProfession().getLearnableItems();
+            if (!learnableItems.isEmpty() && !learnableItems.matches(recipe.getResultItem(level.registryAccess()))) {
+                return Result.failure(Component.translatable(
+                    String.format("%s.command.villager.recipes.not_learnable", VillageTale.MOD_ID),
+                    villager.getDisplayName().getString(), recipeId));
+            }
         }
         
         if (!knowledge.learn(level, recipeId)) {

@@ -21,6 +21,7 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.command.Result;
+import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -28,6 +29,7 @@ import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
+import org.sosly.villagetale.zone.type.AbstractZoneType;
 import org.sosly.villagetale.zone.shape.Route;
 import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.TownHall;
@@ -404,17 +406,41 @@ public class ZoneService {
                     String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
         }
 
-        // Check if valid item and create ItemStack
         Item item = BuiltInRegistries.ITEM.get(itemId);
         if (item == null || item == Items.AIR) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.zone.invalid_item", VillageTale.MOD_ID), itemId));
         }
 
+        if (!(zone.getType() instanceof AbstractZoneType abstractZoneType)) {
+            ItemStack newStack = new ItemStack(item);
+            List<ItemStack> currentItems = zone.getFilter();
+            
+            for (ItemStack existing : currentItems) {
+                if (ItemStack.isSameItem(existing, newStack)) {
+                    return Result.failure(Component.translatable(
+                            String.format("%s.command.zone.filter_item_already_exists", VillageTale.MOD_ID), itemId));
+                }
+            }
+            
+            List<ItemStack> updatedItems = new ArrayList<>(currentItems);
+            updatedItems.add(newStack);
+            zone.setFilter(updatedItems);
+            
+            return Result.success(Component.translatable(
+                    String.format("%s.command.zone.filter_item_added", VillageTale.MOD_ID), itemId, zone.getName()));
+        }
+        
+        ItemOrTagMatcher validFilter = abstractZoneType.getItemFilter();
+        if (!validFilter.isEmpty() && !validFilter.matches(item)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.invalid_filter_for_zone_type", VillageTale.MOD_ID), 
+                    itemId, zone.getType().getID()));
+        }
+
         ItemStack newStack = new ItemStack(item);
         List<ItemStack> currentItems = zone.getFilter();
 
-        // Check if already exists
         for (ItemStack existing : currentItems) {
             if (ItemStack.isSameItem(existing, newStack)) {
                 return Result.failure(Component.translatable(

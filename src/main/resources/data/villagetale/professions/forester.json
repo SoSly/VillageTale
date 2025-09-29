@@ -1,0 +1,15 @@
+{
+  "tools": [
+    "#minecraft:axes"
+  ],
+  "work": [
+    "villagetale:forest"
+  ],
+  "wanted": [
+    {
+      "items": ["#minecraft:saplings"],
+      "min": 0,
+      "amount": 16
+    }
+  ]
+}

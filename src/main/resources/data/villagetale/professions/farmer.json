@@ -1,0 +1,15 @@
+{
+  "tools": [
+    "#minecraft:hoes"
+  ],
+  "work": [
+    "villagetale:farmland"
+  ],
+  "wanted": [
+    {
+      "items": ["#minecraft:villager_plantable_seeds"],
+      "min": 0,
+      "amount": 16
+    }
+  ]
+}

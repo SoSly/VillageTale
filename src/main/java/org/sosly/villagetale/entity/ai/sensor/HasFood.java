@@ -11,6 +11,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ItemMatcher;
 
+import java.util.List;
 import java.util.Set;
 
 public class HasFood extends Sensor<Villager> {
@@ -29,7 +30,10 @@ public class HasFood extends Sensor<Villager> {
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 
         if (needsFood && (!hasExistingWant || isStarving)) {
-            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.FOOD.getFor(villager), 2400L);
+            List<IWantedItem> foodWants = ItemMatcher.FOOD.getFor(villager);
+            if (!foodWants.isEmpty()) {
+                villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), foodWants.get(0), 2400L);
+            }
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 
@@ -42,7 +46,12 @@ public class HasFood extends Sensor<Villager> {
         }
 
         IWantedItem currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
-        if (currentWant == null || !currentWant.equals(ItemMatcher.FOOD.getFor(villager))) {
+        if (currentWant == null) {
+            return;
+        }
+        
+        List<IWantedItem> foodWants = ItemMatcher.FOOD.getFor(villager);
+        if (foodWants.isEmpty() || !currentWant.equals(foodWants.get(0))) {
             return;
         }
 

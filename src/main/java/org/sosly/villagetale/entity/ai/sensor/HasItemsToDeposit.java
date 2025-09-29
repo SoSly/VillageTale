@@ -2,6 +2,7 @@ package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ItemMatcher;
@@ -91,10 +93,12 @@ public class HasItemsToDeposit extends Sensor<Villager> {
     }
 
     private boolean hasExcessResources(Villager villager) {
-        int wantedAmount = ItemMatcher.RESOURCES.getFor(villager).getAmount();
-        if (wantedAmount <= 0) {
+        List<IWantedItem> wantedResources = ItemMatcher.RESOURCES.getFor(villager);
+        if (wantedResources.isEmpty()) {
             return false;
         }
+
+        Map<IWantedItem, Integer> resourceCounts = new HashMap<>();
 
         for (int i = 0; i < villager.getInventory().getContainerSize(); i++) {
             ItemStack stack = villager.getInventory().getItem(i);
@@ -102,16 +106,14 @@ public class HasItemsToDeposit extends Sensor<Villager> {
                 continue;
             }
 
-            if (!ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(stack)) {
-                continue;
-            }
-
-            if (stack.getCount() > wantedAmount) {
-                return true;
-            }
+            wantedResources.stream()
+                    .filter(wanted -> wanted.getMatcher().test(stack))
+                    .findFirst()
+                    .ifPresent(wanted -> resourceCounts.merge(wanted, stack.getCount(), Integer::sum));
         }
 
-        return false;
+        return resourceCounts.entrySet().stream()
+                .anyMatch(entry -> entry.getValue() > entry.getKey().getAmount());
     }
 
     private Map<ResourceLocation, Integer> calculateItemsToDeposit(Villager villager) {
@@ -135,8 +137,14 @@ public class HasItemsToDeposit extends Sensor<Villager> {
             int totalCount = entry.getValue();
             ItemStack testStack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
 
-            if (ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(testStack)) {
-                int wantedAmount = ItemMatcher.RESOURCES.getFor(villager).getAmount();
+            List<IWantedItem> wantedResources = ItemMatcher.RESOURCES.getFor(villager);
+            IWantedItem matchingResource = wantedResources.stream()
+                    .filter(wanted -> wanted.getMatcher().test(testStack))
+                    .findFirst()
+                    .orElse(null);
+
+            if (matchingResource != null) {
+                int wantedAmount = matchingResource.getAmount();
                 if (totalCount > wantedAmount) {
                     itemsToDeposit.put(itemId, totalCount - wantedAmount);
                 }
@@ -167,15 +175,13 @@ public class HasItemsToDeposit extends Sensor<Villager> {
     }
 
     private boolean isEssentialItem(ItemStack stack, Villager villager) {
-        if (ItemMatcher.PROFESSION_TOOL.getFor(villager).getMatcher().test(stack)) {
+        List<IWantedItem> tools = ItemMatcher.PROFESSION_TOOL.getFor(villager);
+        if (tools.stream().anyMatch(tool -> tool.getMatcher().test(stack))) {
             return true;
         }
 
-        if (ItemMatcher.RESOURCES.getFor(villager).getMatcher().test(stack)) {
-            return true;
-        }
-
-        return false;
+        List<IWantedItem> resources = ItemMatcher.RESOURCES.getFor(villager);
+        return resources.stream().anyMatch(resource -> resource.getMatcher().test(stack));
     }
 
     @Override

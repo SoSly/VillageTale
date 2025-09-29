@@ -39,6 +39,11 @@ public class GoToNearestStorage extends Behavior<Villager> {
             return false;
         }
 
+        UUID villageId = villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null);
+        if (villageId == null) {
+            return false;
+        }
+
         boolean hasWantedItem = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
         boolean hasItemsToDeposit = villager.getBrain().hasMemoryValue(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get());
 
@@ -46,24 +51,14 @@ public class GoToNearestStorage extends Behavior<Villager> {
             return false;
         }
 
+        BlockPos targetStorage = null;
+
         if (hasWantedItem) {
-            IWantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
-            if (wantedItem != null && isInCouldNotFindList(level, villager, wantedItem)) {
-                return false;
-            }
+            targetStorage = findStorageForWantedItem(level, villager, villageId);
         }
 
-        UUID villageId = villager.getBrain().getMemory(MemoryModuleTypes.VILLAGE.get()).orElse(null);
-        if (villageId == null) {
-            return false;
-        }
-
-        boolean excludeScanned = hasWantedItem;
-        BlockPos targetStorage = findNearestStorage(level, villager, villageId, excludeScanned);
-
-        if (targetStorage == null && excludeScanned) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
-            targetStorage = findNearestStorage(level, villager, villageId, false);
+        if (targetStorage == null && hasItemsToDeposit) {
+            targetStorage = findStorageForDeposit(level, villager, villageId);
         }
 
         if (targetStorage == null) {
@@ -154,5 +149,29 @@ public class GoToNearestStorage extends Behavior<Villager> {
         return couldNotFind.stream()
             .filter(item -> !item.isExpired(currentTime))
             .anyMatch(item -> item.matches(wantedItem));
+    }
+
+    private BlockPos findStorageForWantedItem(ServerLevel level, Villager villager, UUID villageId) {
+        IWantedItem wantedItem = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
+        if (wantedItem == null) {
+            return null;
+        }
+
+        if (isInCouldNotFindList(level, villager, wantedItem)) {
+            return null;
+        }
+
+        BlockPos targetStorage = findNearestStorage(level, villager, villageId, true);
+
+        if (targetStorage == null) {
+            villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
+            targetStorage = findNearestStorage(level, villager, villageId, false);
+        }
+
+        return targetStorage;
+    }
+
+    private BlockPos findStorageForDeposit(ServerLevel level, Villager villager, UUID villageId) {
+        return findNearestStorage(level, villager, villageId, false);
     }
 }

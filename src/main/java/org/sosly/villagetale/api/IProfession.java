@@ -1,9 +1,12 @@
 package org.sosly.villagetale.api;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
+import org.sosly.villagetale.data.ItemOrTagMatcher;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -24,15 +27,22 @@ public interface IProfession {
 
     /**
      * Gets the items this profession always wants to keep in inventory.
-     * @return Optional containing the wanted items specification, or empty if no specific items required
+     * @param villager The villager with this profession
+     * @return List of wanted items specifications, or empty list if no specific items required
      */
-    public Optional<IWantedItem> getAlwaysWantedItems();
+    public List<IWantedItem> getAlwaysWantedItems(Villager villager);
 
     /**
      * Gets the tool requirement for this profession.
      * @return Optional containing the wanted tool specification, or empty if no tools required
      */
     public Optional<IWantedItem> getTool();
+
+    /**
+     * Gets the items this profession can learn recipes for.
+     * @return ItemOrTagMatcher for learnable recipe outputs
+     */
+    public ItemOrTagMatcher getLearnableItems();
 
     /**
      * Gets the translation key for displaying this profession's name.
@@ -78,4 +88,9 @@ public interface IProfession {
      */
     public Schedule getSchedule();
 
+    /**
+     * Reloads this profession's data from datapacks.
+     * @param data The JSON object containing profession configuration
+     */
+    public void onDatapackReload(JsonObject data);
 }

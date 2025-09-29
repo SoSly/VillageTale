@@ -22,21 +22,21 @@ public class ZoneRegistry {
     public static final ZoneRegistry INSTANCE = new ZoneRegistry();
 
     private final Map<ResourceLocation, Supplier<IZoneShape>> SHAPES = new HashMap<>();
-    private final Map<ResourceLocation, Supplier<IZoneType>> TYPES = new HashMap<>();
+    private final Map<ResourceLocation, IZoneType> TYPES = new HashMap<>();
     private ZoneRegistry() {}
 
-    public void register(ResourceLocation id, Supplier<IZoneType> supplier) {
-        TYPES.put(id, supplier);
+    public void register(ResourceLocation id, IZoneType type) {
+        TYPES.put(id, type);
         VillageTale.LOGGER.info("Registered zone type: {} (total: {})", id, TYPES.size());
     }
 
     public IZoneType type(ResourceLocation id) {
-        Supplier<IZoneType> supplier = TYPES.get(id);
-        if (supplier == null) {
+        IZoneType type = TYPES.get(id);
+        if (type == null) {
             VillageTale.LOGGER.warn("Failed to find zone type: {} (available: {})", id, TYPES.keySet());
             return null;
         }
-        return supplier.get();
+        return type;
     }
 
     public Iterable<ResourceLocation> getZoneTypeIDs() {
@@ -53,12 +53,12 @@ public class ZoneRegistry {
 
     {
         // todo: this is a hack because the events are not working for some reason.
-        TYPES.put(Farmland.ID, Farmland::new);
-        TYPES.put(Forest.ID, Forest::new);
-        TYPES.put(Home.ID, Home::new);
-        TYPES.put(Kitchen.ID, Kitchen::new);
-        TYPES.put(Storage.ID, Storage::new);
-        TYPES.put(TownHall.ID, TownHall::new);
+        TYPES.put(Farmland.ID, new Farmland());
+        TYPES.put(Forest.ID, new Forest());
+        TYPES.put(Home.ID, new Home());
+        TYPES.put(Kitchen.ID, new Kitchen());
+        TYPES.put(Storage.ID, new Storage());
+        TYPES.put(TownHall.ID, new TownHall());
         // end todo
 
         SHAPES.put(Point.ID, Point::new);

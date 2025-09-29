@@ -1,5 +1,6 @@
 package org.sosly.villagetale.api;
 
+import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -11,4 +12,5 @@ public interface IZoneType {
     void initialize(Level level, IZoneShape shape);
     CompoundTag serializeNBT();
     void deserializeNBT(CompoundTag nbt);
+    void onDatapackReload(JsonObject data);
 }

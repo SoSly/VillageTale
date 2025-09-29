@@ -11,6 +11,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ItemMatcher;
 
+import java.util.List;
 import java.util.Set;
 
 public class HasTool extends Sensor<Villager> {
@@ -31,7 +32,10 @@ public class HasTool extends Sensor<Villager> {
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 
         if (!hasTool && !hasExistingWant) {
-            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.PROFESSION_TOOL.getFor(villager), 2400L);
+            List<IWantedItem> toolWants = ItemMatcher.PROFESSION_TOOL.getFor(villager);
+            if (!toolWants.isEmpty()) {
+                villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), toolWants.get(0), 2400L);
+            }
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 
@@ -44,7 +48,12 @@ public class HasTool extends Sensor<Villager> {
         }
 
         IWantedItem currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
-        if (currentWant == null || !currentWant.equals(ItemMatcher.PROFESSION_TOOL.getFor(villager))) {
+        if (currentWant == null) {
+            return;
+        }
+        
+        List<IWantedItem> toolWants = ItemMatcher.PROFESSION_TOOL.getFor(villager);
+        if (toolWants.isEmpty() || !currentWant.equals(toolWants.get(0))) {
             return;
         }
 

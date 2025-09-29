@@ -1,7 +1,6 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,12 +8,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
@@ -31,6 +28,7 @@ public class PutInContainer extends Behavior<Villager> {
     private static final int SEARCH_DURATION = 20;
 
     private BlockPos targetContainer;
+    private boolean atContainer;
     private boolean containerClaimed;
     private int searchTicks;
     private IVillageZone claimedZone;
@@ -67,6 +65,7 @@ public class PutInContainer extends Behavior<Villager> {
 
     @Override
     protected void start(@NotNull ServerLevel level, Villager villager, long gameTime) {
+        this.atContainer = false;
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;
@@ -98,7 +97,7 @@ public class PutInContainer extends Behavior<Villager> {
             return;
         }
 
-        if (!this.containerClaimed) {
+        if (!this.atContainer) {
             handleArrival(level, villager, gameTime);
             return;
         }
@@ -133,6 +132,7 @@ public class PutInContainer extends Behavior<Villager> {
     }
 
     private void handleArrival(ServerLevel level, Villager villager, long gameTime) {
+        this.atContainer = true;
         this.searchTicks = 0;
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 
@@ -148,6 +148,7 @@ public class PutInContainer extends Behavior<Villager> {
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         releaseContainer();
+        clearMemories(villager);
         resetState();
     }
 
@@ -211,7 +212,6 @@ public class PutInContainer extends Behavior<Villager> {
     }
 
     private void depositItems(ServerLevel level, Villager villager) {
-        @SuppressWarnings("unchecked")
         Map<ResourceLocation, Integer> itemsToDeposit = villager.getBrain()
             .getMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get()).orElse(null);
 
@@ -219,43 +219,16 @@ public class PutInContainer extends Behavior<Villager> {
             return;
         }
 
-        SimpleContainer inventory = villager.getInventory();
-        Map<ResourceLocation, Integer> updatedItems = new HashMap<>(itemsToDeposit);
+        Map<ResourceLocation, Integer> remaining = ContainerHelper.tryDepositFromInventory(
+            level, this.targetContainer, villager.getInventory(), itemsToDeposit);
 
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (stack.isEmpty()) {
-                continue;
-            }
-
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-            Integer wantedAmount = itemsToDeposit.get(itemId);
-            if (wantedAmount == null || wantedAmount <= 0) {
-                continue;
-            }
-
-            int deposited = ContainerHelper.depositItemToContainer(level, this.targetContainer, stack, wantedAmount);
-            if (deposited <= 0) {
-                continue;
-            }
-
-            stack.shrink(deposited);
-            int remaining = wantedAmount - deposited;
-
-            if (remaining <= 0) {
-                updatedItems.remove(itemId);
-            } else {
-                updatedItems.put(itemId, remaining);
-            }
-
-            VillageTale.LOGGER.debug("PutInContainer deposited {} x{} for villager {}",
-                itemId, deposited, villager.getId());
-        }
-
-        if (updatedItems.isEmpty()) {
+        if (remaining.isEmpty()) {
             villager.getBrain().eraseMemory(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get());
+            VillageTale.LOGGER.debug("PutInContainer finished depositing all items for villager {}", villager.getId());
         } else {
-            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), updatedItems, 1200L);
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ITEMS_TO_DEPOSIT.get(), remaining, 1200L);
+            VillageTale.LOGGER.debug("PutInContainer has {} item types remaining for villager {}",
+                remaining.size(), villager.getId());
         }
     }
 
@@ -277,6 +250,7 @@ public class PutInContainer extends Behavior<Villager> {
 
     private void resetState() {
         this.targetContainer = null;
+        this.atContainer = false;
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;
@@ -284,6 +258,7 @@ public class PutInContainer extends Behavior<Villager> {
 
     private void resetForNewContainer(Villager villager) {
         releaseContainer();
+        this.atContainer = false;
         this.containerClaimed = false;
         this.searchTicks = 0;
         this.claimedZone = null;

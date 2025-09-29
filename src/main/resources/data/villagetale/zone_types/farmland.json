@@ -1,0 +1,16 @@
+{
+  "claims": {
+    "type": "block",
+    "values": [
+      "#villagetale:farmable"
+    ]
+  },
+  "filters": [
+    {
+      "type": "item",
+      "values": [
+        "#minecraft:villager_plantable_seeds"
+      ]
+    }
+  ]
+}

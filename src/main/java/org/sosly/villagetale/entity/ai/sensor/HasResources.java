@@ -1,14 +1,12 @@
 package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -24,42 +22,50 @@ public class HasResources extends Sensor<Villager> {
 
     @Override
     protected void doTick(ServerLevel level, Villager villager) {
-        IWantedItem requiredResources = ItemMatcher.RESOURCES.getFor(villager);
+        List<IWantedItem> requiredResources = ItemMatcher.RESOURCES.getFor(villager);
 
-        if (requiredResources == null || requiredResources == IWantedItem.EMPTY) {
+        if (requiredResources.isEmpty()) {
             return;
         }
 
-        int resourceCount = countResources(villager, requiredResources);
-        int minimumThreshold = requiredResources.getMinimum();
-        int targetAmount = requiredResources.getAmount();
-        boolean needsMoreResources = resourceCount < minimumThreshold;
-        boolean hasTargetAmount = resourceCount >= targetAmount;
+        IWantedItem neededItem = null;
+        for (IWantedItem wanted : requiredResources) {
+            int count = countResources(villager, wanted);
+            if (count <= wanted.getMinimum()) {
+                neededItem = wanted;
+                break;
+            }
+        }
+
         boolean hasExistingWant = villager.getBrain().hasMemoryValue(MemoryModuleTypes.WANTED_ITEM.get());
 
-        if (needsMoreResources && !hasExistingWant) {
-            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), ItemMatcher.RESOURCES.getFor(villager), 2400L);
+        if (neededItem != null && !hasExistingWant) {
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), neededItem, 2400L);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
 
-            VillageTale.LOGGER.debug("HasResources set WANTED_ITEM to RESOURCES for villager {} (has {}, need >= {})",
-                villager.getId(), resourceCount, minimumThreshold);
+            VillageTale.LOGGER.debug("HasResources set WANTED_ITEM for villager {} (needs more of an item type)",
+                villager.getId());
             return;
         }
 
-        if (!hasTargetAmount || !hasExistingWant) {
+        // Check if we have target amounts and can clear the want
+        if (!hasExistingWant) {
             return;
         }
 
         IWantedItem currentWant = villager.getBrain().getMemory(MemoryModuleTypes.WANTED_ITEM.get()).orElse(null);
-        if (currentWant == null || !currentWant.equals(ItemMatcher.RESOURCES.getFor(villager))) {
+        if (currentWant == null) {
             return;
         }
 
-        villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
-
-        VillageTale.LOGGER.debug("HasResources cleared WANTED_ITEM for villager {} (has {}, reached target {})",
-            villager.getId(), resourceCount, targetAmount);
+        // Check if current want is satisfied
+        int currentCount = countResources(villager, currentWant);
+        if (currentCount >= currentWant.getAmount()) {
+            villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
+            VillageTale.LOGGER.debug("HasResources cleared WANTED_ITEM for villager {} (reached target amount)",
+                villager.getId());
+        }
     }
 
     private int countResources(Villager villager, IWantedItem requiredResources) {

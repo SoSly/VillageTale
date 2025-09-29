@@ -16,34 +16,34 @@ import java.util.List;
 public enum ItemMatcher {
     PROFESSION_TOOL {
         @Override
-        public IWantedItem getFor(Villager villager) {
-            IWantedItem tool = villager.getProfession().getTool().orElse(IWantedItem.EMPTY);
-            if (tool instanceof WantedItem) {
-                return tool;
+        public List<IWantedItem> getFor(Villager villager) {
+            IWantedItem tool = villager.getProfession().getTool().orElse(null);
+            if (tool != null) {
+                return List.of(tool);
             }
-            return  IWantedItem.EMPTY;
+            return List.of();
         }
     },
     FOOD {
         @Override
-        public IWantedItem getFor(Villager villager) {
-            return new WantedItem(ItemStack::isEdible, 3, 0);
+        public List<IWantedItem> getFor(Villager villager) {
+            return List.of(new WantedItem(ItemStack::isEdible, 3, 0));
         }
     },
     RESOURCES {
         @Override
-        public IWantedItem getFor(Villager villager) {
+        public List<IWantedItem> getFor(Villager villager) {
             if (!villager.getBrain().hasMemoryValue(MemoryModuleTypes.VILLAGE.get())) {
-                return IWantedItem.EMPTY;
+                return List.of();
             }
 
             if (!(villager.level() instanceof ServerLevel serverLevel)) {
-                return IWantedItem.EMPTY;
+                return List.of();
             }
 
             IVillageZone workplace = VillagesHelper.getWorkplaceZone(serverLevel, villager);
             if (workplace == null) {
-                return IWantedItem.EMPTY;
+                return List.of();
             }
 
             List<ItemStack> filter = workplace.getFilter();
@@ -51,35 +51,34 @@ public enum ItemMatcher {
                 return getProfessionDefault(villager);
             }
 
-            return new WantedItem(stack -> {
+            return List.of(new WantedItem(stack -> {
                 for (ItemStack wanted : filter) {
                     if (ItemStack.isSameItem(wanted, stack)) {
                         return true;
                     }
                 }
                 return false;
-            }, 16, 0);
+            }, 16, 0));
         }
 
-        private IWantedItem getProfessionDefault(Villager villager) {
-            IWantedItem resources = villager.getProfession()
-                    .getAlwaysWantedItems()
-                    .orElse(null);
+        private List<IWantedItem> getProfessionDefault(Villager villager) {
+            List<IWantedItem> resources = villager.getProfession()
+                    .getAlwaysWantedItems(villager);
 
-            if (resources != null) {
+            if (!resources.isEmpty()) {
                 return resources;
             }
 
             Brain<Villager> brain = villager.getBrain();
             if (!brain.hasMemoryValue(MemoryModuleTypes.CURRENT_RECIPE.get())) {
-                return IWantedItem.EMPTY;
+                return List.of();
             }
 
             ResourceLocation recipeId = villager.getBrain()
                     .getMemory(MemoryModuleTypes.CURRENT_RECIPE.get())
                     .orElse(null);
             if (recipeId == null) {
-                return IWantedItem.EMPTY;
+                return List.of();
             }
 
             Recipe<?> recipe = villager.level()
@@ -88,14 +87,14 @@ public enum ItemMatcher {
                     .orElse(null);
 
             if (recipe == null) {
-                return IWantedItem.EMPTY;
+                return List.of();
             }
 
-            return new WantedItem((item) -> recipe.getIngredients()
+            return List.of(new WantedItem((item) -> recipe.getIngredients()
                     .stream()
-                    .anyMatch(ingredient -> ingredient.test(item)), 9, 9);
+                    .anyMatch(ingredient -> ingredient.test(item)), 9, 9));
         }
     };
 
-    public abstract IWantedItem getFor(Villager villager);
+    public abstract List<IWantedItem> getFor(Villager villager);
 }

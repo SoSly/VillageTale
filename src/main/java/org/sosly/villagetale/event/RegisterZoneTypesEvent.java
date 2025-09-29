@@ -1,6 +1,5 @@
 package org.sosly.villagetale.event;
 
-import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Event;
 import org.sosly.villagetale.api.IZoneType;
@@ -13,7 +12,7 @@ public class RegisterZoneTypesEvent extends Event {
         this.registry = zoneTypes;
     }
 
-    public void register(ResourceLocation id, Supplier<IZoneType> supplier) {
-        registry.register(id, supplier);
+    public void register(ResourceLocation id, IZoneType type) {
+        registry.register(id, type);
     }
 }

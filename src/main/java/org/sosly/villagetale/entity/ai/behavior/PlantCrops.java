@@ -132,7 +132,7 @@ public class PlantCrops extends Behavior<Villager> {
 
         BlockState cropBlock = getCropBlock(seeds);
         if (cropBlock != null) {
-            level.setBlock(pos, cropBlock, 3);
+            level.setBlock(pos.above(), cropBlock, 3);
             level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
             villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
             seeds.shrink(1);

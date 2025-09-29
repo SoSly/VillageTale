@@ -7,7 +7,6 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.level.block.BedBlock;
@@ -16,15 +15,14 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagesHelper;
 
-public class HasBedInHomeZone extends Sensor<Villager> {
+public class HasBed extends Sensor<Villager> {
     private static final int CLAIM_DURATION = 24000;
 
-    public HasBedInHomeZone() {
+    public HasBed() {
         super(200);
     }
 
@@ -41,13 +39,12 @@ public class HasBedInHomeZone extends Sensor<Villager> {
             return;
         }
 
-        IVillageZone zone = findHomeZone(level, villageId.get(), homeZoneId.get());
+        IVillageZone zone = VillagesHelper.getHomeZone(level, villager);
         if (zone == null) {
             return;
         }
 
-        List<BlockPos> availableBeds = zone.getAvailableClaims(level.getGameTime(), Optional.of((state) -> state.is(BlockTags.BEDS)));
-
+        List<BlockPos> availableBeds = zone.getAvailableClaims(level.getGameTime(), Optional.of(HasBed::isBedHead));
         if (availableBeds.isEmpty()) {
             return;
         }
@@ -61,10 +58,9 @@ public class HasBedInHomeZone extends Sensor<Villager> {
             return;
         }
 
-        BlockPos bedHead = getBedHeadPosition(level, nearest);
-        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), bedHead), 24000L);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), nearest), 24000L);
         VillageTale.LOGGER.info("Villager {} claimed bed at {} in home zone {}",
-                villager.getUUID(), bedHead, zone.getName());
+                villager.getUUID(), nearest, zone.getName());
     }
 
     @Override
@@ -73,20 +69,6 @@ public class HasBedInHomeZone extends Sensor<Villager> {
             MemoryModuleTypes.HOME_ZONE.get(),
             MemoryModuleTypes.VILLAGE.get()
         );
-    }
-
-    private IVillageZone findHomeZone(ServerLevel level, UUID villageId, UUID homeZoneId) {
-        IVillageCapability villageCapability = VillagesHelper.getVillageCapability(level, villageId);
-        if (villageCapability == null) {
-            return null;
-        }
-
-        IVillageZone zone = VillagesHelper.getZoneById(level, villageId, homeZoneId);
-        if (zone == null) {
-            return null;
-        }
-
-        return zone;
     }
 
     private BlockPos findNearestBed(List<BlockPos> beds, BlockPos villagerPos) {
@@ -104,17 +86,13 @@ public class HasBedInHomeZone extends Sensor<Villager> {
         return nearest;
     }
 
-    private BlockPos getBedHeadPosition(ServerLevel level, BlockPos bedPos) {
-        BlockState blockState = level.getBlockState(bedPos);
-        if (!(blockState.getBlock() instanceof BedBlock)) {
-            return bedPos;
+    private static boolean isBedHead(BlockState state) {
+        if (!(state.getBlock() instanceof BedBlock)) {
+            return false;
         }
 
-        BedPart bedPart = blockState.getValue(BedBlock.PART);
-        if (bedPart != BedPart.FOOT) {
-            return bedPos;
-        }
-
-        return bedPos.relative(blockState.getValue(BedBlock.FACING));
+        BedPart part = state.getValue(BedBlock.PART);
+        return part == BedPart.HEAD;
     }
+
 }

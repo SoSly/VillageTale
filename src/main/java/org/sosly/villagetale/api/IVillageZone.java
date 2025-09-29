@@ -159,4 +159,42 @@ public interface IVillageZone {
      * @param filter List of allowed items as ItemStacks
      */
     void setFilter(List<ItemStack> filter);
+
+    /**
+     * Claims an entity for a villager with specified duration.
+     * @param entityId UUID of entity to claim
+     * @param villagerUUID UUID of claiming villager
+     * @param durationTicks Duration in ticks before claim expires
+     * @param currentTime Current game time for expiration checking
+     * @return true if entity was successfully claimed, false if already claimed
+     */
+    boolean claim(UUID entityId, UUID villagerUUID, int durationTicks, long currentTime);
+
+    /**
+     * Releases a claimed entity.
+     * @param entityId UUID of entity to release
+     * @return true if the entity was claimed and released, false otherwise
+     */
+    boolean release(UUID entityId);
+
+    /**
+     * Returns all entity claims in this zone. Automatically cleans expired claims.
+     * @param currentTime Current game time for expiration checking
+     * @return Map of entity UUIDs to claiming villager UUID, empty Optional means unclaimed
+     */
+    Map<UUID, Optional<UUID>> getEntityClaims(long currentTime);
+
+    /**
+     * Get currently active entity claims, automatically cleaning expired claims.
+     * @param currentTime The current game time for expiry checking
+     * @return Map of entity UUIDs to villager UUIDs for active claims only
+     */
+    Map<UUID, UUID> getActiveEntityClaims(long currentTime);
+
+    /**
+     * Get available (unclaimed) entities in the zone.
+     * @param currentTime The current game time for expiry checking
+     * @return List of entity UUIDs that can be claimed
+     */
+    List<UUID> getAvailableEntityClaims(long currentTime);
 }

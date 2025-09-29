@@ -2,7 +2,6 @@ package org.sosly.villagetale.zone.type;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -27,14 +26,9 @@ public class Farmland extends AbstractZoneType {
         return ID;
     }
 
-    @Override
-    public boolean isPOI(Level level, BlockPos pos) {
-        return (isHarvestableBlock(level, pos) || isPlantableBlock(level, pos) || isTillableBlock(level, pos));
-    }
-
-
     public static boolean isHarvestableBlock(Level level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
+        BlockPos above = pos.above();
+        BlockState state = level.getBlockState(above);
         if (!(state.getBlock() instanceof CropBlock)) {
             return false;
         }
@@ -43,27 +37,21 @@ public class Farmland extends AbstractZoneType {
         return block.getAge(state) >= block.getMaxAge();
     }
 
-    public static boolean isPlantableBlock(Level level, BlockPos pos) {
-        return isPlantableBlock(level, pos, new ItemStack(Items.WHEAT_SEEDS))
-            || isPlantableBlock(level, pos, new ItemStack(Items.NETHER_WART))
-            || isPlantableBlock(level, pos, new ItemStack(Items.SWEET_BERRIES));
-    }
-
     public static boolean isPlantableBlock(Level level, BlockPos pos, ItemStack seed) {
-        BlockState above = level.getBlockState(pos);
-        if (!above.isAir()) {
+        BlockPos above = pos.above();
+        if (!level.getBlockState(above).isAir()) {
             return false;
         }
 
         if (seed.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
-            BlockState blockState = block.defaultBlockState();
-            return block.canSurvive(blockState, level, pos);
+            BlockState defaultState = block.defaultBlockState();
+            return block.canSurvive(defaultState, level, above);
         }
 
         CropBlock crop = (CropBlock) Blocks.WHEAT;
         BlockState cropState = crop.defaultBlockState();
-        return crop.canSurvive(cropState, level, pos);
+        return crop.canSurvive(cropState, level, above);
     }
 
     public static boolean isTillableBlock(Level level, BlockPos pos) {

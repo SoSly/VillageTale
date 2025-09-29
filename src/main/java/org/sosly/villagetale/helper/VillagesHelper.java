@@ -49,7 +49,15 @@ public class VillagesHelper {
                 .orElse(null);
     }
 
+    public static IVillageZone getHomeZone(ServerLevel level, Villager villager) {
+        UUID villageId = villager.getVillage().get();
+        UUID homeId = villager.getBrain().getMemory(MemoryModuleTypes.HOME_ZONE.get()).orElse(null);
+        if (homeId == null) {
+            return null;
+        }
 
+        return getZoneById(level, villageId, homeId);
+    }
 
     public static IVillageZone getWorkplaceZone(ServerLevel level, Villager villager) {
         UUID villageId = villager.getVillage().get();

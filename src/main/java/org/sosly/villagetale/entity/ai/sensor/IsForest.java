@@ -81,30 +81,28 @@ public class IsForest extends Sensor<Villager> {
         BlockPos nearestSpot = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (int y = -scanRadius; y <= scanRadius; y++) {
-            for (int x = -scanRadius; x <= scanRadius; x++) {
-                for (int z = -scanRadius; z <= scanRadius; z++) {
-                    BlockPos pos = villagerPos.offset(x, y, z);
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int z = -scanRadius; z <= scanRadius; z++) {
+                BlockPos pos = villagerPos.offset(x, 0, z);
 
-                    if (!zone.containsPosition(pos)) {
+                if (!zone.containsPosition(pos)) {
+                    continue;
+                }
+
+                if (needs2x2) {
+                    if (!canPlace2x2Sapling(level, pos, zone) || !has2x2Spacing(level, pos)) {
                         continue;
                     }
-
-                    if (needs2x2) {
-                        if (!canPlace2x2Sapling(level, pos, zone) || !has2x2Spacing(level, pos)) {
-                            continue;
-                        }
-                    } else {
-                        if (!canPlantSapling(level, pos) || !hasProperSpacing(level, pos)) {
-                            continue;
-                        }
+                } else {
+                    if (!canPlantSapling(level, pos) || !hasProperSpacing(level, pos)) {
+                        continue;
                     }
+                }
 
-                    double distance = villagerPos.distSqr(pos);
-                    if (distance < nearestDistance) {
-                        nearestDistance = distance;
-                        nearestSpot = pos;
-                    }
+                double distance = villagerPos.distSqr(pos);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestSpot = pos;
                 }
             }
         }

@@ -1,0 +1,12 @@
+{
+  "claims": {
+    "type": "block",
+    "values": [
+      "minecraft:campfire",
+      "minecraft:crafting_table",
+      "minecraft:furnace",
+      "minecraft:smoker",
+      "minecraft:soul_campfire"
+    ]
+  }
+}

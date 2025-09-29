@@ -1,0 +1,16 @@
+{
+  "claims": {
+    "type": "block",
+    "values": [
+      "#minecraft:logs"
+    ]
+  },
+  "filters": [
+    {
+      "type": "item",
+      "values": [
+        "#minecraft:saplings"
+      ]
+    }
+  ]
+}
