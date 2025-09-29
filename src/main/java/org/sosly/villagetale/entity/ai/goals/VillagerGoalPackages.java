@@ -43,8 +43,8 @@ public class VillagerGoalPackages {
             Pair.of(1, new MoveToTargetSink()),
             Pair.of(1, new WakeUp()),
             Pair.of(2, new EatFood()),
-            Pair.of(3, new GetFromContainer()),
             Pair.of(3, new PutInContainer()),
+            Pair.of(4, new GetFromContainer()),
             Pair.of(99, UpdateActivityFromSchedule.create())
         );
     }

@@ -90,9 +90,16 @@ public enum ItemMatcher {
                 return List.of();
             }
 
+            int ingredientCount = (int) recipe.getIngredients().stream()
+                    .filter(ingredient -> !ingredient.isEmpty())
+                    .count();
+            
+            int minimum = Math.max(0, ingredientCount - 1);
+            int target = Math.max(ingredientCount * 3, 9);
+            
             return List.of(new WantedItem((item) -> recipe.getIngredients()
                     .stream()
-                    .anyMatch(ingredient -> ingredient.test(item)), 9, 9));
+                    .anyMatch(ingredient -> ingredient.test(item)), target, minimum));
         }
     };
 
