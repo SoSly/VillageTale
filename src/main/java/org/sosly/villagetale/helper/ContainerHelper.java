@@ -16,7 +16,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.sosly.villagetale.entity.FakePlayer;
+import com.mojang.authlib.GameProfile;
+import net.minecraftforge.common.util.FakePlayer;
+
+import java.util.UUID;
 
 public class ContainerHelper {
 
@@ -47,7 +50,7 @@ public class ContainerHelper {
         level.blockEvent(containerPos, level.getBlockState(containerPos).getBlock(), 1, 1);
 
         if (blockEntity instanceof RandomizableContainerBlockEntity container) {
-            FakePlayer fakePlayer = new FakePlayer(level);
+            FakePlayer fakePlayer = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "[VillageTale]"));
             container.startOpen(fakePlayer);
         }
     }
@@ -63,7 +66,7 @@ public class ContainerHelper {
         level.blockEvent(containerPos, level.getBlockState(containerPos).getBlock(), 1, 0);
 
         if (blockEntity instanceof RandomizableContainerBlockEntity container) {
-            FakePlayer fakePlayer = new FakePlayer(level);
+            FakePlayer fakePlayer = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "[VillageTale]"));
             container.stopOpen(fakePlayer);
         }
     }

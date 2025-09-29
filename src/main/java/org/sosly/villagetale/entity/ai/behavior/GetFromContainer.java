@@ -31,7 +31,7 @@ import org.sosly.villagetale.helper.InventoryHelper;
 public class GetFromContainer extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 100;
     private static final int CLAIM_DURATION = 60;
-    private static final int SEARCH_DURATION = 20;
+    private static final int SEARCH_DURATION = 40;
 
     private BlockPos targetContainer;
     private boolean atContainer;
@@ -72,8 +72,9 @@ public class GetFromContainer extends Behavior<Villager> {
         this.claimedZone = null;
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
+        int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
         villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
-            new WalkTarget(this.targetContainer, 0.5F, 1), 200L);
+            new WalkTarget(this.targetContainer, 0.5F, closeEnoughDistance), 200L);
 
         VillageTale.LOGGER.debug("GetFromContainer started walking to {} for villager {}",
             this.targetContainer, villager.getId());
@@ -104,6 +105,15 @@ public class GetFromContainer extends Behavior<Villager> {
         this.searchTicks++;
 
         if (this.searchTicks < SEARCH_DURATION) {
+            int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
+                new WalkTarget(this.targetContainer, 0.5F, closeEnoughDistance), 20L);
+
+            villager.getLookControl().setLookAt(
+                this.targetContainer.getX() + 0.5,
+                this.targetContainer.getY() + 0.5,
+                this.targetContainer.getZ() + 0.5
+            );
             return;
         }
 
@@ -115,7 +125,6 @@ public class GetFromContainer extends Behavior<Villager> {
     private void handleArrival(ServerLevel level, Villager villager, long gameTime) {
         this.atContainer = true;
         this.searchTicks = 0;
-        villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 
         if (!claimContainer(level, villager, gameTime)) {
             stopBehavior(villager);
