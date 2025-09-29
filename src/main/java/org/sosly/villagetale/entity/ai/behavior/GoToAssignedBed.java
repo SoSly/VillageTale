@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import org.sosly.villagetale.entity.Villager;
 
 public class GoToAssignedBed extends Behavior<Villager> {
-    private static final double ARRIVAL_DISTANCE = 2.0D;
+    private static final double ARRIVAL_DISTANCE = 1.0D;
     private static final int WALK_PRECISION = 1;
     private final float speedModifier;
 
@@ -57,12 +57,12 @@ public class GoToAssignedBed extends Behavior<Villager> {
         if (homePos == null) {
             return false;
         }
-        
+
         BlockPos bedPos = homePos.pos();
         return !bedPos.closerToCenterThan(villager.position(), ARRIVAL_DISTANCE);
     }
-    
-    
+
+
     @Override
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
