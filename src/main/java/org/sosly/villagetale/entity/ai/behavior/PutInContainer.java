@@ -21,6 +21,9 @@ import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.zone.type.Storage;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class PutInContainer extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 200;
@@ -172,6 +175,11 @@ public class PutInContainer extends Behavior<Villager> {
         }
 
         for (BlockPos containerPos : claims.keySet()) {
+            BlockState state = level.getBlockState(containerPos);
+            if (!isPrimaryContainer(state)) {
+                continue;
+            }
+            
             for (ResourceLocation itemId : itemsToDeposit.keySet()) {
                 net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(itemId);
 
@@ -269,5 +277,18 @@ public class PutInContainer extends Behavior<Villager> {
 
     private void stopBehavior(Villager villager) {
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+    }
+    
+    private static boolean isPrimaryContainer(BlockState state) {
+        if (!(state.getBlock() instanceof ChestBlock)) {
+            return true;
+        }
+        
+        ChestType chestType = state.getValue(ChestBlock.TYPE);
+        if (chestType == ChestType.SINGLE) {
+            return true;
+        }
+        
+        return chestType != ChestType.RIGHT;
     }
 }

@@ -28,6 +28,9 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
 import org.sosly.villagetale.zone.type.Storage;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class IsItemInStorage extends Sensor<Villager> {
 
@@ -109,6 +112,11 @@ public class IsItemInStorage extends Sensor<Villager> {
         addToScannedList(villager, zone.getUUID(), alreadyScanned);
 
         for (BlockPos containerPos : claims.keySet()) {
+            BlockState state = level.getBlockState(containerPos);
+            if (!isPrimaryContainer(state)) {
+                continue;
+            }
+            
             ResourceLocation itemId = ContainerHelper.getFirstMatchingItemId(level, containerPos, wantedItem.getMatcher());
             if (itemId == null) {
                 continue;
@@ -217,5 +225,18 @@ public class IsItemInStorage extends Sensor<Villager> {
             MemoryModuleTypes.VILLAGE.get(),
             MemoryModuleTypes.COULD_NOT_FIND_ITEM.get()
         );
+    }
+    
+    private static boolean isPrimaryContainer(BlockState state) {
+        if (!(state.getBlock() instanceof ChestBlock)) {
+            return true;
+        }
+        
+        ChestType chestType = state.getValue(ChestBlock.TYPE);
+        if (chestType == ChestType.SINGLE) {
+            return true;
+        }
+        
+        return chestType != ChestType.RIGHT;
     }
 }

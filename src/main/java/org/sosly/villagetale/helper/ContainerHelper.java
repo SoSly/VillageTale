@@ -8,13 +8,35 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.entity.FakePlayer;
 
 public class ContainerHelper {
+
+    private static Container getContainer(ServerLevel level, BlockPos containerPos) {
+        BlockState blockState = level.getBlockState(containerPos);
+        
+        if (blockState.getBlock() instanceof ChestBlock chestBlock) {
+            Container container = ChestBlock.getContainer(chestBlock, blockState, level, containerPos, false);
+            if (container != null) {
+                return container;
+            }
+        }
+        
+        BlockEntity blockEntity = level.getBlockEntity(containerPos);
+        if (!(blockEntity instanceof Container container)) {
+            return null;
+        }
+        
+        return container;
+    }
 
     public static void openContainer(ServerLevel level, BlockPos containerPos) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
@@ -47,8 +69,8 @@ public class ContainerHelper {
     }
 
     public static ItemStack extractItemFromContainer(ServerLevel level, BlockPos containerPos, Predicate<ItemStack> itemMatcher, int maxAmount) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return ItemStack.EMPTY;
         }
 
@@ -67,8 +89,8 @@ public class ContainerHelper {
     }
 
     public static ItemStack extractItemFromContainer(ServerLevel level, BlockPos containerPos, ItemStack targetItem) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return ItemStack.EMPTY;
         }
 
@@ -86,8 +108,8 @@ public class ContainerHelper {
     }
 
     public static boolean hasMatchingItem(ServerLevel level, BlockPos containerPos, Predicate<ItemStack> itemMatcher) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return false;
         }
 
@@ -101,8 +123,8 @@ public class ContainerHelper {
     }
 
     public static ResourceLocation getFirstMatchingItemId(ServerLevel level, BlockPos containerPos, Predicate<ItemStack> itemMatcher) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return null;
         }
 
@@ -116,8 +138,8 @@ public class ContainerHelper {
     }
 
     public static int depositItemToContainer(ServerLevel level, BlockPos containerPos, ItemStack itemToDeposit, int maxAmount) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return 0;
         }
 
@@ -161,8 +183,8 @@ public class ContainerHelper {
     }
 
     public static boolean hasAvailableSpace(ServerLevel level, BlockPos containerPos, ItemStack itemToCheck) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return false;
         }
 
@@ -183,8 +205,8 @@ public class ContainerHelper {
     }
 
     public static boolean hasAvailableSpace(ServerLevel level, BlockPos containerPos, net.minecraft.world.item.Item item) {
-        BlockEntity blockEntity = level.getBlockEntity(containerPos);
-        if (!(blockEntity instanceof Container container)) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
             return false;
         }
 
