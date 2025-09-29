@@ -326,7 +326,7 @@ public class ZoneService {
                     // Clear any existing home-related memories before setting new one
                     villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
                     villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.LAST_SLEPT);
-                    villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.HOME_ZONE.get(), zoneId, 24000L);
+                    villager.getBrain().setMemory(MemoryModuleTypes.HOME_ZONE.get(), zoneId);
                 } else if (villager.getProfession().isValidWorkZone(zone)) {
                     // Clear any existing work-related memories before setting new one
                     villager.getBrain().eraseMemory(MemoryModuleTypes.WORK_POS.get());
@@ -335,7 +335,7 @@ public class ZoneService {
                     villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());
                     villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get());
                     villager.getBrain().eraseMemory(MemoryModuleTypes.CURRENT_RECIPE.get());
-                    villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WORK_ZONE.get(), zoneId, 24000L);
+                    villager.getBrain().setMemory(MemoryModuleTypes.WORK_ZONE.get(), zoneId);
                 }
 
                 return Result.success(Component.translatable(

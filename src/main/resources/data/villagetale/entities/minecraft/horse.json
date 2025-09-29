@@ -1,0 +1,11 @@
+{
+  "food": [
+    "minecraft:golden_apple",
+    "minecraft:golden_carrot",
+    "minecraft:wheat",
+    "minecraft:apple",
+    "minecraft:sugar",
+    "minecraft:hay_block"
+  ],
+  "tools": []
+}

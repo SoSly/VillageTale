@@ -275,23 +275,23 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
         if (tag.contains("VillageId")) {
             UUID villageId = UUID.fromString(tag.getString("VillageId"));
-            this.brain.setMemoryWithExpiry(MemoryModuleTypes.VILLAGE.get(), villageId, 24000L);
+            this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
         }
 
         ResourceLocation profession = Commoner.ID;
         if (tag.contains("Profession") && ResourceLocation.tryParse(tag.getString("Profession")) != null) {
             profession = ResourceLocation.tryParse(tag.getString("Profession"));
         }
-        this.brain.setMemoryWithExpiry(MemoryModuleTypes.PROFESSION.get(), profession, 24000L);
+        this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), profession);
 
         if (tag.contains("WorkZoneId")) {
             UUID workZoneId = UUID.fromString(tag.getString("WorkZoneId"));
-            this.brain.setMemoryWithExpiry(MemoryModuleTypes.WORK_ZONE.get(), workZoneId, 24000L);
+            this.brain.setMemory(MemoryModuleTypes.WORK_ZONE.get(), workZoneId);
         }
 
         if (tag.contains("HomeZoneId")) {
             UUID homeZoneId = UUID.fromString(tag.getString("HomeZoneId"));
-            this.brain.setMemoryWithExpiry(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId, 24000L);
+            this.brain.setMemory(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId);
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {
@@ -389,7 +389,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.brain.eraseMemory(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get());
         this.brain.eraseMemory(MemoryModuleTypes.BUSY.get());
         
-        this.brain.setMemoryWithExpiry(MemoryModuleTypes.PROFESSION.get(), professionId, 24000L);
+        this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), professionId);
 
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
@@ -459,7 +459,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
         this.brain.eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
         
-        this.brain.setMemoryWithExpiry(MemoryModuleTypes.VILLAGE.get(), villageId, 24000L);
+        this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
         VillageTale.LOGGER.info("Villager {} assigned to village {}", this.getUUID(), villageId);
     }
 

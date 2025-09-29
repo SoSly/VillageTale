@@ -1,0 +1,16 @@
+{
+  "claims": {
+    "type": "entity",
+    "values": [
+      "#villagetale:herdable"
+    ]
+  },
+  "filters": [
+    {
+      "type": "entity",
+      "values": [
+        "#villagetale:herdable"
+      ]
+    }
+  ]
+}

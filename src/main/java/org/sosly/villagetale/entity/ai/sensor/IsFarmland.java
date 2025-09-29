@@ -31,7 +31,12 @@ public class IsFarmland extends Sensor<Villager> {
             return;
         }
 
-        IVillageZone zone = VillagesHelper.getZoneById(level, villager.getVillage().get(), workplaceId);
+        Optional<UUID> village = villager.getVillage();
+        if (village.isEmpty()) {
+            return;
+        }
+
+        IVillageZone zone = VillagesHelper.getZoneById(level, village.get(), workplaceId);
         if (zone == null) {
             return;
         }
