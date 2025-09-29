@@ -128,7 +128,7 @@ public class IsItemInStorage extends Sensor<Villager> {
     private void addToScannedList(Villager villager, UUID zoneId, List<UUID> alreadyScanned) {
         List<UUID> updatedList = new ArrayList<>(alreadyScanned);
         updatedList.add(zoneId);
-        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get(), updatedList, 1200L);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get(), updatedList, 1000L);
 
         VillageTale.LOGGER.debug("IsItemInStorage added zone {} to scanned list for villager {}",
             zoneId, villager.getId());
