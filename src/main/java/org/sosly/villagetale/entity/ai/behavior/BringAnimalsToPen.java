@@ -7,7 +7,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -16,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.entity.ai.goal.FollowWhenLeashed;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -47,6 +50,7 @@ public class BringAnimalsToPen extends Behavior<Villager> {
     private BlockPos penCenter;
     private int phaseTicks;
     private boolean hasLeadAttached;
+    private Goal followGoal;
     
     public BringAnimalsToPen() {
         super(ImmutableMap.of(
@@ -64,10 +68,6 @@ public class BringAnimalsToPen extends Behavior<Villager> {
         
         IVillageZone zone = VillagesHelper.getWorkplaceZone(level, villager);
         if (zone == null) {
-            return false;
-        }
-        
-        if (!zone.containsPosition(villager.blockPosition())) {
             return false;
         }
         
@@ -186,6 +186,9 @@ public class BringAnimalsToPen extends Behavior<Villager> {
             hasLeadAttached = true;
             lead.shrink(1);
             
+            followGoal = new FollowWhenLeashed(targetAnimal, 1.0);
+            targetAnimal.goalSelector.addGoal(1, followGoal);
+            
             level.playSound(null, targetAnimal.blockPosition(), 
                 SoundEvents.LEASH_KNOT_PLACE, SoundSource.NEUTRAL, 0.5F, 1.0F);
             
@@ -202,6 +205,11 @@ public class BringAnimalsToPen extends Behavior<Villager> {
                     targetAnimal.setLeashedTo(villager, true);
                     hasLeadAttached = true;
                     lead.shrink(1);
+                    
+                    if (followGoal == null) {
+                        followGoal = new FollowWhenLeashed(targetAnimal, 1.0);
+                        targetAnimal.goalSelector.addGoal(1, followGoal);
+                    }
                 }
             } else {
                 currentPhase = Phase.APPROACHING;
@@ -234,6 +242,11 @@ public class BringAnimalsToPen extends Behavior<Villager> {
             if (hasLeadAttached && targetAnimal.getLeashHolder() == villager) {
                 targetAnimal.setLeashedTo(null, true);
                 
+                if (followGoal != null) {
+                    targetAnimal.goalSelector.removeGoal(followGoal);
+                    followGoal = null;
+                }
+                
                 ItemStack leadDrop = new ItemStack(Items.LEAD);
                 if (!villager.getInventory().canAddItem(leadDrop)) {
                     villager.spawnAtLocation(leadDrop);
@@ -246,6 +259,11 @@ public class BringAnimalsToPen extends Behavior<Villager> {
             }
             
             villager.getFoodData().addExhaustion(WORK_EXHAUSTION);
+            
+            if (villager.getBrain().hasMemoryValue(MemoryModuleTypes.GATES_TO_CLOSE.get())) {
+                villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
+            }
+            
             phaseTicks = BEHAVIOR_DURATION;
         }
     }
@@ -268,6 +286,10 @@ public class BringAnimalsToPen extends Behavior<Villager> {
         if (hasLeadAttached && targetAnimal != null && targetAnimal.getLeashHolder() == villager) {
             targetAnimal.setLeashedTo(null, true);
             
+            if (followGoal != null) {
+                targetAnimal.goalSelector.removeGoal(followGoal);
+            }
+            
             ItemStack leadDrop = new ItemStack(Items.LEAD);
             if (!villager.getInventory().canAddItem(leadDrop)) {
                 villager.spawnAtLocation(leadDrop);
@@ -286,6 +308,7 @@ public class BringAnimalsToPen extends Behavior<Villager> {
         currentPhase = null;
         phaseTicks = 0;
         hasLeadAttached = false;
+        followGoal = null;
         penCenter = null;
         
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

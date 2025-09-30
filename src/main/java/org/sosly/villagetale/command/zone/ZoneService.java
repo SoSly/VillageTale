@@ -1,13 +1,16 @@
 package org.sosly.villagetale.command.zone;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -259,6 +262,14 @@ public class ZoneService {
             sender.accept(Component.translatable(String.format("%s.command.zone.info_filter_header", VillageTale.MOD_ID)));
             for (ItemStack filter : filters) {
                 sender.accept(Component.literal("  - " + filter.getHoverName().getString() + " x" + filter.getCount()));
+            }
+        }
+
+        Set<ResourceLocation> entityTypeFilter = zone.getEntityTypeFilter();
+        if (!entityTypeFilter.isEmpty()) {
+            sender.accept(Component.translatable(String.format("%s.command.zone.info_entity_type_filter_header", VillageTale.MOD_ID)));
+            for (ResourceLocation entityTypeId : entityTypeFilter) {
+                sender.accept(Component.literal("  - " + entityTypeId.toString()));
             }
         }
     }
@@ -561,5 +572,156 @@ public class ZoneService {
         return Result.success(Component.translatable(
                 String.format("%s.command.zone.filter_list", VillageTale.MOD_ID),
                 zone.getName(), itemList));
+    }
+
+    public static Result addEntityTypeFilter(ServerLevel level, UUID villageId, UUID zoneId, ResourceLocation entityTypeId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(entityTypeId);
+        if (entityType == EntityType.PIG && entityTypeId.getPath().equals("pig")) {
+            // Default pig case - valid
+        } else if (!BuiltInRegistries.ENTITY_TYPE.containsKey(entityTypeId)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.invalid_entity_type", VillageTale.MOD_ID), entityTypeId));
+        }
+
+        if (!(zone.getType() instanceof AbstractZoneType abstractZoneType)) {
+            Set<ResourceLocation> currentTypes = zone.getEntityTypeFilter();
+            if (currentTypes.contains(entityTypeId)) {
+                return Result.failure(Component.translatable(
+                        String.format("%s.command.zone.entity_type_already_exists", VillageTale.MOD_ID), entityTypeId));
+            }
+            
+            Set<ResourceLocation> updatedTypes = new HashSet<>(currentTypes);
+            updatedTypes.add(entityTypeId);
+            zone.setEntityTypeFilter(updatedTypes);
+            
+            return Result.success(Component.translatable(
+                    String.format("%s.command.zone.entity_type_added", VillageTale.MOD_ID), entityTypeId, zone.getName()));
+        }
+        
+        Set<ResourceLocation> validFilter = abstractZoneType.getEntityFilter();
+        if (!validFilter.isEmpty() && !validFilter.contains(entityTypeId)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.invalid_entity_type_for_zone", VillageTale.MOD_ID), 
+                    entityTypeId, zone.getType().getID()));
+        }
+
+        Set<ResourceLocation> currentTypes = zone.getEntityTypeFilter();
+        if (currentTypes.contains(entityTypeId)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.entity_type_already_exists", VillageTale.MOD_ID), entityTypeId));
+        }
+
+        Set<ResourceLocation> updatedTypes = new HashSet<>(currentTypes);
+        updatedTypes.add(entityTypeId);
+        zone.setEntityTypeFilter(updatedTypes);
+
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.entity_type_added", VillageTale.MOD_ID), entityTypeId, zone.getName()));
+    }
+
+    public static Result removeEntityTypeFilter(ServerLevel level, UUID villageId, UUID zoneId, ResourceLocation entityTypeId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        Set<ResourceLocation> currentTypes = zone.getEntityTypeFilter();
+        if (!currentTypes.contains(entityTypeId)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.entity_type_not_found", VillageTale.MOD_ID), entityTypeId));
+        }
+
+        Set<ResourceLocation> updatedTypes = new HashSet<>(currentTypes);
+        updatedTypes.remove(entityTypeId);
+        zone.setEntityTypeFilter(updatedTypes);
+
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.entity_type_removed", VillageTale.MOD_ID), entityTypeId, zone.getName()));
+    }
+
+    public static Result clearEntityTypeFilter(ServerLevel level, UUID villageId, UUID zoneId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        zone.setEntityTypeFilter(new HashSet<>());
+
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.entity_type_filter_cleared", VillageTale.MOD_ID), zone.getName()));
+    }
+
+    public static Result listEntityTypeFilter(ServerLevel level, UUID villageId, UUID zoneId) {
+        IVillageCapability capability = getVillageCapability(level, villageId);
+        if (capability == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        IVillageZone zone = capability.getZones().stream()
+                .filter(z -> z.getUUID().equals(zoneId))
+                .findFirst()
+                .orElse(null);
+
+        if (zone == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.not_found", VillageTale.MOD_ID), zoneId));
+        }
+
+        Set<ResourceLocation> entityTypes = zone.getEntityTypeFilter();
+
+        if (entityTypes.isEmpty()) {
+            return Result.success(Component.translatable(
+                    String.format("%s.command.zone.no_entity_types", VillageTale.MOD_ID), zone.getName()));
+        }
+
+        // Build a list of entity type names
+        List<String> entityTypeNames = new ArrayList<>();
+        for (ResourceLocation entityTypeId : entityTypes) {
+            entityTypeNames.add(entityTypeId.toString());
+        }
+
+        String entityTypeList = String.join(", ", entityTypeNames);
+        return Result.success(Component.translatable(
+                String.format("%s.command.zone.entity_type_list", VillageTale.MOD_ID),
+                zone.getName(), entityTypeList));
     }
 }

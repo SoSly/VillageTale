@@ -11,14 +11,15 @@ import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.data.BlockOrTagMatcher;
+import org.sosly.villagetale.data.EntityTypeOrTagMatcher;
 import org.sosly.villagetale.data.ItemOrTagMatcher;
 
 public abstract class AbstractZoneType implements IZoneType {
     private String claimType;
     private final BlockOrTagMatcher blockMatcher = new BlockOrTagMatcher();
-    private final Set<ResourceLocation> entityTypes = new HashSet<>();
+    private final EntityTypeOrTagMatcher entityTypeMatcher = new EntityTypeOrTagMatcher();
     private final ItemOrTagMatcher itemFilter = new ItemOrTagMatcher();
-    private final Set<ResourceLocation> entityFilter = new HashSet<>();
+    private final EntityTypeOrTagMatcher entityFilter = new EntityTypeOrTagMatcher();
 
     public String getClaimType() {
         return claimType;
@@ -26,7 +27,7 @@ public abstract class AbstractZoneType implements IZoneType {
 
     public Set<ResourceLocation> getAcceptedEntityTypes() {
         if ("entity".equals(claimType)) {
-            return entityTypes;
+            return new HashSet<>(entityTypeMatcher.getAllEntityTypeIds());
         }
         return new HashSet<>();
     }
@@ -36,7 +37,7 @@ public abstract class AbstractZoneType implements IZoneType {
     }
 
     public Set<ResourceLocation> getEntityFilter() {
-        return entityFilter;
+        return new HashSet<>(entityFilter.getAllEntityTypeIds());
     }
 
     @Override
@@ -86,16 +87,10 @@ public abstract class AbstractZoneType implements IZoneType {
 
         switch (claimType) {
             case "block" -> blockMatcher.loadFromJson(claims.getAsJsonArray("values"));
-            case "entity" -> loadEntityTypes(claims.getAsJsonArray("values"));
+            case "entity" -> entityTypeMatcher.loadFromJson(claims.getAsJsonArray("values"));
         }
     }
 
-    private void loadEntityTypes(JsonElement values) {
-        entityTypes.clear();
-        for (JsonElement value : values.getAsJsonArray()) {
-            entityTypes.add(new ResourceLocation(value.getAsString()));
-        }
-    }
 
     private void loadFilters(JsonElement filters) {
         for (JsonElement filterElement : filters.getAsJsonArray()) {
@@ -109,14 +104,8 @@ public abstract class AbstractZoneType implements IZoneType {
 
         switch (filterType) {
             case "item" -> itemFilter.loadFromJson(values.getAsJsonArray());
-            case "entity" -> loadEntityFilter(values);
+            case "entity" -> entityFilter.loadFromJson(values.getAsJsonArray());
         }
     }
 
-    private void loadEntityFilter(JsonElement values) {
-        entityFilter.clear();
-        for (JsonElement value : values.getAsJsonArray()) {
-            entityFilter.add(new ResourceLocation(value.getAsString()));
-        }
-    }
 }

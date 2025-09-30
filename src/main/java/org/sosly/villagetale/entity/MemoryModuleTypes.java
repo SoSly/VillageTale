@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -84,6 +85,10 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<Boolean>> BUSY =
             MEMORY_MODULE_TYPES.register("busy",
                     () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+
+    public static final RegistryObject<MemoryModuleType<Set<GlobalPos>>> GATES_TO_CLOSE =
+            MEMORY_MODULE_TYPES.register("gates_to_close",
+                    () -> new MemoryModuleType<>(Optional.empty()));
 
     // Crafter Memories
     public static final RegistryObject<MemoryModuleType<ResourceLocation>> CURRENT_RECIPE =

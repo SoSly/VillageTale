@@ -5,9 +5,9 @@ import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -15,9 +15,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.entity.schedule.ScheduleBuilder;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
@@ -52,49 +50,39 @@ public class Herder extends AbstractProfession {
         }
 
         IVillageZone workplace = VillagesHelper.getWorkplaceZone(serverLevel, villager);
-        if (workplace == null || workplace.getFilter().isEmpty()) {
+        if (workplace == null || workplace.getEntityTypeFilter().isEmpty()) {
             return List.of(new WantedItem(stack -> stack.is(Items.LEAD), 2, 1));
         }
 
-        List<ItemStack> filter = workplace.getFilter();
         List<ItemOrTagMatcher> foodMatchers = new ArrayList<>();
         List<ItemOrTagMatcher> toolMatchers = new ArrayList<>();
 
-        for (ItemStack filterItem : filter) {
-            EntityType<?> entityType = getEntityTypeFromItem(filterItem);
-            if (entityType != null) {
-                ResourceLocation entityId = EntityType.getKey(entityType);
-                EntityDataLoader.EntityData data = EntityDataLoader.getEntityData(entityId);
-                if (!data.food.isEmpty()) {
-                    foodMatchers.add(data.food);
-                }
-                if (!data.tools.isEmpty()) {
-                    toolMatchers.add(data.tools);
-                }
+        Set<ResourceLocation> entityTypeFilter = workplace.getEntityTypeFilter();
+        for (ResourceLocation entityId : entityTypeFilter) {
+            EntityDataLoader.EntityData data = EntityDataLoader.getEntityData(entityId);
+            if (!data.food.isEmpty()) {
+                foodMatchers.add(data.food);
+            }
+            if (!data.tools.isEmpty()) {
+                toolMatchers.add(data.tools);
             }
         }
 
         List<IWantedItem> result = new ArrayList<>();
-        result.add(new WantedItem(stack -> stack.is(Items.LEAD), 2, 1));
+        result.add(new WantedItem(stack -> stack.is(Items.LEAD), 1, 0));
 
         for (ItemOrTagMatcher matcher : foodMatchers) {
             result.add(new WantedItem(matcher::matches, 16, 0));
         }
-        
+
         for (ItemOrTagMatcher matcher : toolMatchers) {
-            result.add(new WantedItem(matcher::matches, 2, 1));
+            result.add(new WantedItem(matcher::matches, 1, 0));
         }
 
         return result;
     }
 
 
-    private EntityType<?> getEntityTypeFromItem(ItemStack stack) {
-        if (stack.getItem() instanceof SpawnEggItem spawnEgg) {
-            return spawnEgg.getType(stack.getTag());
-        }
-        return null;
-    }
 
     @Override
     public Optional<IWantedItem> getTool() {

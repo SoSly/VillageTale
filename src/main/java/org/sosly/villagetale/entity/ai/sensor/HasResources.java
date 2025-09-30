@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
-import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -43,13 +42,9 @@ public class HasResources extends Sensor<Villager> {
             villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.WANTED_ITEM.get(), neededItem, 2400L);
             villager.getBrain().eraseMemory(MemoryModuleTypes.ALREADY_SCANNED_STORAGES.get());
             villager.getBrain().eraseMemory(MemoryModuleTypes.FOUND_ITEM.get());
-
-            VillageTale.LOGGER.debug("HasResources set WANTED_ITEM for villager {} (needs more of an item type)",
-                villager.getId());
             return;
         }
 
-        // Check if we have target amounts and can clear the want
         if (!hasExistingWant) {
             return;
         }
@@ -59,12 +54,9 @@ public class HasResources extends Sensor<Villager> {
             return;
         }
 
-        // Check if current want is satisfied
         int currentCount = countResources(villager, currentWant);
         if (currentCount >= currentWant.getAmount()) {
             villager.getBrain().eraseMemory(MemoryModuleTypes.WANTED_ITEM.get());
-            VillageTale.LOGGER.debug("HasResources cleared WANTED_ITEM for villager {} (reached target amount)",
-                villager.getId());
         }
     }
 

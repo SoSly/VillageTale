@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
@@ -65,9 +64,9 @@ public class IsWanderingAnimal extends Sensor<Villager> {
         }
 
         IVillageZone pen = workZone.get();
-        List<ItemStack> filter = pen.getFilter();
+        Set<ResourceLocation> entityTypeFilter = pen.getEntityTypeFilter();
 
-        if (filter.isEmpty()) {
+        if (entityTypeFilter.isEmpty()) {
             return;
         }
 
@@ -90,7 +89,7 @@ public class IsWanderingAnimal extends Sensor<Villager> {
             }
 
             EntityType<?> animalType = animal.getType();
-            if (!matchesFilter(animalType, filter)) {
+            if (!matchesFilter(animalType, entityTypeFilter)) {
                 continue;
             }
 
@@ -101,15 +100,9 @@ public class IsWanderingAnimal extends Sensor<Villager> {
         villager.getBrain().eraseMemory(MemoryModuleTypes.WANDERING_ANIMAL.get());
     }
 
-    private boolean matchesFilter(EntityType<?> entityType, List<ItemStack> filter) {
-        for (ItemStack filterItem : filter) {
-            if (filterItem.getItem() instanceof SpawnEggItem spawnEgg) {
-                if (spawnEgg.getType(filterItem.getTag()) == entityType) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private boolean matchesFilter(EntityType<?> entityType, Set<ResourceLocation> entityTypeFilter) {
+        ResourceLocation entityId = EntityType.getKey(entityType);
+        return entityTypeFilter.contains(entityId);
     }
 
     @Override

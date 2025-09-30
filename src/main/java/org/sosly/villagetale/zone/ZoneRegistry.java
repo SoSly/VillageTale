@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
@@ -15,6 +16,7 @@ import org.sosly.villagetale.zone.type.Farmland;
 import org.sosly.villagetale.zone.type.Forest;
 import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.Kitchen;
+import org.sosly.villagetale.zone.type.Pen;
 import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.zone.type.TownHall;
 
@@ -57,6 +59,7 @@ public class ZoneRegistry {
         TYPES.put(Forest.ID, new Forest());
         TYPES.put(Home.ID, new Home());
         TYPES.put(Kitchen.ID, new Kitchen());
+        TYPES.put(Pen.ID, new Pen());
         TYPES.put(Storage.ID, new Storage());
         TYPES.put(TownHall.ID, new TownHall());
         // end todo

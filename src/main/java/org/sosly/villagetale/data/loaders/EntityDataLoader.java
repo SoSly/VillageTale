@@ -55,7 +55,6 @@ public class EntityDataLoader extends SimpleJsonResourceReloadListener {
                 entityId = new ResourceLocation(entry.getKey().getNamespace(), path);
             }
             ENTITY_DATA.put(entityId, data);
-            LOGGER.debug("Loaded data for entity: {}", entityId);
         }
     }
 

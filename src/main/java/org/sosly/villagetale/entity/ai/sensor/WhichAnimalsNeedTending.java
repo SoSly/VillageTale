@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -15,8 +16,6 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.animal.goat.Goat;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
@@ -60,16 +59,16 @@ public class WhichAnimalsNeedTending extends Sensor<Villager> {
         }
 
         IVillageZone pen = workZone.get();
-        List<ItemStack> filter = pen.getFilter();
+        Set<ResourceLocation> entityTypeFilter = pen.getEntityTypeFilter();
 
-        if (filter.isEmpty()) {
+        if (entityTypeFilter.isEmpty()) {
             return;
         }
 
         List<Animal> nearbyAnimals = level.getEntitiesOfClass(Animal.class, villager.getBoundingBox().inflate(CommonConfig.scanRadius),
             animal -> animal.distanceToSqr(villager) <= CommonConfig.scanRadius * CommonConfig.scanRadius 
                 && pen.containsPosition(animal.blockPosition()) 
-                && matchesFilter(animal.getType(), filter));
+                && matchesFilter(animal.getType(), entityTypeFilter));
 
         long currentTime = level.getGameTime();
 
@@ -125,15 +124,9 @@ public class WhichAnimalsNeedTending extends Sensor<Villager> {
         return currentTime - lastMilkTime >= CommonConfig.milkCooldownTicks;
     }
 
-    private boolean matchesFilter(EntityType<?> entityType, List<ItemStack> filter) {
-        for (ItemStack filterItem : filter) {
-            if (filterItem.getItem() instanceof SpawnEggItem spawnEgg) {
-                if (spawnEgg.getType(filterItem.getTag()) == entityType) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private boolean matchesFilter(EntityType<?> entityType, Set<ResourceLocation> entityTypeFilter) {
+        ResourceLocation entityId = EntityType.getKey(entityType);
+        return entityTypeFilter.contains(entityId);
     }
 
     @Override

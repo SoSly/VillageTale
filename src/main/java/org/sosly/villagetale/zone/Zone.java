@@ -3,9 +3,11 @@ package org.sosly.villagetale.zone;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -30,6 +32,7 @@ public class Zone implements IVillageZone {
     private final ConcurrentHashMap<BlockPos, Claim> claims = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Claim> entityClaims = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<ItemStack> filter = new CopyOnWriteArrayList<>();
+    private final Set<ResourceLocation> entityTypeFilter = Collections.synchronizedSet(new HashSet<>());
     private volatile UUID id;
     private volatile int ordinal;
     private volatile IZoneShape shape;
@@ -310,6 +313,20 @@ public class Zone implements IVillageZone {
         markDirty();
     }
 
+    @Override
+    public Set<ResourceLocation> getEntityTypeFilter() {
+        return Collections.unmodifiableSet(new HashSet<>(entityTypeFilter));
+    }
+
+    @Override
+    public void setEntityTypeFilter(Set<ResourceLocation> entityTypes) {
+        this.entityTypeFilter.clear();
+        if (entityTypes != null) {
+            this.entityTypeFilter.addAll(entityTypes);
+        }
+        markDirty();
+    }
+
     public synchronized CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putUUID("id", this.id);
@@ -351,6 +368,16 @@ public class Zone implements IVillageZone {
                 filterList.add(itemTag);
             }
             tag.put("filter", filterList);
+        }
+
+        if (!entityTypeFilter.isEmpty()) {
+            ListTag entityTypeList = new ListTag();
+            for (ResourceLocation entityType : entityTypeFilter) {
+                CompoundTag entityTypeTag = new CompoundTag();
+                entityTypeTag.putString("id", entityType.toString());
+                entityTypeList.add(entityTypeTag);
+            }
+            tag.put("entity_type_filter", entityTypeList);
         }
 
         // Only persist long-duration claims
@@ -437,6 +464,16 @@ public class Zone implements IVillageZone {
                 if (!stack.isEmpty()) {
                     filter.add(stack);
                 }
+            }
+        }
+
+        entityTypeFilter.clear();
+        if (tag.contains("entity_type_filter")) {
+            ListTag entityTypeList = tag.getList("entity_type_filter", 10);
+            for (int i = 0; i < entityTypeList.size(); i++) {
+                CompoundTag entityTypeTag = entityTypeList.getCompound(i);
+                ResourceLocation entityType = new ResourceLocation(entityTypeTag.getString("id"));
+                entityTypeFilter.add(entityType);
             }
         }
 

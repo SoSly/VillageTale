@@ -8,6 +8,7 @@ import org.sosly.villagetale.zone.type.Farmland;
 import org.sosly.villagetale.zone.type.Forest;
 import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.Kitchen;
+import org.sosly.villagetale.zone.type.Pen;
 import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.zone.type.TownHall;
 
@@ -19,6 +20,7 @@ public class Types {
         event.register(Forest.ID, new Forest());
         event.register(Home.ID, new Home());
         event.register(Kitchen.ID, new Kitchen());
+        event.register(Pen.ID, new Pen());
         event.register(Storage.ID, new Storage());
         event.register(TownHall.ID, new TownHall());
     }

@@ -20,12 +20,14 @@ import net.minecraft.world.entity.ai.behavior.VillagerCalmDown;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
-import org.sosly.villagetale.entity.ai.behavior.PutInContainer;
+import org.sosly.villagetale.entity.ai.behavior.CloseOpenedGates;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
 import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
 import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorage;
 import org.sosly.villagetale.entity.ai.behavior.GoToWorkZone;
+import org.sosly.villagetale.entity.ai.behavior.InteractWithGate;
+import org.sosly.villagetale.entity.ai.behavior.PutInContainer;
 import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
 import org.sosly.villagetale.entity.ai.behavior.WakeUp;
@@ -38,6 +40,8 @@ public class VillagerGoalPackages {
         return ImmutableList.of(
             Pair.of(0, new Swim(0.8F)),
             Pair.of(0, InteractWithDoor.create()),
+            Pair.of(0, InteractWithGate.create()),
+            Pair.of(0, CloseOpenedGates.create()),
             Pair.of(0, new LookAtTargetSink(45, 90)),
             Pair.of(0, VillagerPanicTrigger.create()),
             Pair.of(1, new MoveToTargetSink()),

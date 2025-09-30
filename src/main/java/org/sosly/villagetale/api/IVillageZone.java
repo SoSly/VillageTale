@@ -3,10 +3,12 @@ package org.sosly.villagetale.api;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.sosly.villagetale.api.capability.IVillageCapability;
@@ -159,6 +161,20 @@ public interface IVillageZone {
      * @param filter List of allowed items as ItemStacks
      */
     void setFilter(List<ItemStack> filter);
+
+    /**
+     * Gets the entity type filter for this zone.
+     * Empty set means all entity types are acceptable for zone operations.
+     * Non-empty set restricts operations to only these specific entity types.
+     * @return Set of allowed entity type ResourceLocations (e.g., "minecraft:sheep")
+     */
+    Set<ResourceLocation> getEntityTypeFilter();
+
+    /**
+     * Sets the entity type filter for this zone.
+     * @param entityTypes Set of allowed entity type ResourceLocations
+     */
+    void setEntityTypeFilter(Set<ResourceLocation> entityTypes);
 
     /**
      * Claims an entity for a villager with specified duration.
