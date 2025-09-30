@@ -24,6 +24,14 @@ public class CommonConfig {
     private static final ForgeConfigSpec.DoubleValue SCAN_RADIUS = builder
             .comment("The range villagers will scan for dropped items or in storage containers")
             .defineInRange("scanRadius", 16d, 4, 32);
+    
+    private static final ForgeConfigSpec.IntValue MILK_COOLDOWN_TICKS = builder
+            .comment("Cooldown in ticks before a cow can be milked again (20 ticks = 1 second)")
+            .defineInRange("milkCooldownTicks", 12000, 1200, 48000);
+    
+    private static final ForgeConfigSpec.IntValue PLUCK_COOLDOWN_TICKS = builder
+            .comment("Cooldown in ticks before a chicken can be plucked again (20 ticks = 1 second)")
+            .defineInRange("pluckCooldownTicks", 12000, 1200, 48000);
 
     static {
         builder.pop();
@@ -37,11 +45,15 @@ public class CommonConfig {
     public static double collectionDistance;
     public static double interactionDistance;
     public static double scanRadius;
+    public static int milkCooldownTicks;
+    public static int pluckCooldownTicks;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
         collectionDistance = COLLECTION_DISTANCE.get();
         interactionDistance = INTERACTION_DISTANCE.get();
         scanRadius = SCAN_RADIUS.get();
+        milkCooldownTicks = MILK_COOLDOWN_TICKS.get();
+        pluckCooldownTicks = PLUCK_COOLDOWN_TICKS.get();
     }
 }

@@ -8,6 +8,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -27,7 +28,7 @@ public class MemoryModuleTypes {
     // Shared Memories
     public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
         MEMORY_MODULE_TYPES.register("already_scanned_storages",
-                () -> new MemoryModuleType<>(Optional.empty()));
+                () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID))));
 
     public static final RegistryObject<MemoryModuleType<Boolean>> CAN_EAT =
         MEMORY_MODULE_TYPES.register("can_eat",
@@ -55,7 +56,7 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<Map<ResourceLocation, Integer>>> ITEMS_TO_DEPOSIT =
             MEMORY_MODULE_TYPES.register("items_to_deposit",
-                    () -> new MemoryModuleType<>(Optional.empty()));
+                    () -> new MemoryModuleType<>(Optional.of(Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT))));
     public static final RegistryObject<MemoryModuleType<ResourceLocation>> PROFESSION =
         MEMORY_MODULE_TYPES.register("profession",
                 () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC)));
@@ -82,15 +83,15 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<Boolean>> BUSY =
             MEMORY_MODULE_TYPES.register("busy",
-                    () -> new MemoryModuleType<>(Optional.empty()));
+                    () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
 
     // Crafter Memories
     public static final RegistryObject<MemoryModuleType<ResourceLocation>> CURRENT_RECIPE =
             MEMORY_MODULE_TYPES.register("current_recipe",
-                    () -> new MemoryModuleType<>(Optional.empty()));
+                    () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC)));
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_WORKSTATION =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_workstation",
-                    () -> new MemoryModuleType<>(Optional.empty()));
+                    () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
     // Farmer Memories
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_TILLABLE_SOIL =
@@ -104,13 +105,29 @@ public class MemoryModuleTypes {
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
     // Forester Memories
-    public static final RegistryObject<MemoryModuleType<Optional<Tree>>> NEAREST_TREE =
+    public static final RegistryObject<MemoryModuleType<Tree>> NEAREST_TREE =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_log",
                     () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_REPLANTABLE_SPOT =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_replantable_spot",
                     () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
+    // Herder Memories
+    public static final RegistryObject<MemoryModuleType<Entity>> BREEDABLE_ANIMAL =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_breedable_animal",
+                    () -> new MemoryModuleType<>(Optional.empty()));
+    public static final RegistryObject<MemoryModuleType<Entity>> PLUCKABLE_ANIMAL =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_pluckable_animal",
+                    () -> new MemoryModuleType<>(Optional.empty()));
+    public static final RegistryObject<MemoryModuleType<Entity>> MILKABLE_ANIMAL =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_milkable_animal",
+                    () -> new MemoryModuleType<>(Optional.empty()));
+    public static final RegistryObject<MemoryModuleType<Entity>> SHEARABLE_ANIMAL =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_shearable_animal",
+                    () -> new MemoryModuleType<>(Optional.empty()));
+    public static final RegistryObject<MemoryModuleType<Entity>> WANDERING_ANIMAL =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_wander_animal",
+                    () -> new MemoryModuleType<>(Optional.empty()));
 
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);

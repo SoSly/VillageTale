@@ -45,7 +45,7 @@ A living document exploring which professions belong in VillageTale and why.
 - **Where they work:** Guard Post zone, Patrol Route zone
 
 ### Herder
-- **What they do:** Breeds animals, shears sheep, milks cows, collects eggs, captures wandering animals
+- **What they do:** Breeds animals, shears sheep, milks cows, plucks feathers, captures wandering animals
 - **Where they work:** Pen zone
 
 ### Leatherworker

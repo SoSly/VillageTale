@@ -66,7 +66,7 @@ public class IsForest extends Sensor<Villager> {
             return;
         }
 
-        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_TREE.get(), tree, 600L);
+        villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_TREE.get(), tree.get(), 600L);
     }
 
     private void findNearestReplantableSpot(ServerLevel level, Villager villager, IVillageZone zone) {

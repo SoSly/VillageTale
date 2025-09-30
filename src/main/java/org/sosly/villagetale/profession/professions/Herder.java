@@ -17,6 +17,7 @@ import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
@@ -24,8 +25,17 @@ import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.data.loaders.EntityDataLoader;
 import org.sosly.villagetale.entity.Activities;
+import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.entity.ai.SensorTypes;
+import org.sosly.villagetale.entity.ai.behavior.BringAnimalsToPen;
+import org.sosly.villagetale.entity.ai.behavior.FeedAnimal;
+import org.sosly.villagetale.entity.ai.behavior.MilkAnimal;
+import org.sosly.villagetale.entity.ai.behavior.PickUpItems;
+import org.sosly.villagetale.entity.ai.behavior.PluckAnimal;
+import org.sosly.villagetale.entity.ai.behavior.ShearAnimal;
 import org.sosly.villagetale.helper.VillagesHelper;
+import org.sosly.villagetale.zone.type.Pen;
 
 public class Herder extends AbstractProfession {
     public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "herder");
@@ -48,6 +58,7 @@ public class Herder extends AbstractProfession {
 
         List<ItemStack> filter = workplace.getFilter();
         List<ItemOrTagMatcher> foodMatchers = new ArrayList<>();
+        List<ItemOrTagMatcher> toolMatchers = new ArrayList<>();
 
         for (ItemStack filterItem : filter) {
             EntityType<?> entityType = getEntityTypeFromItem(filterItem);
@@ -56,6 +67,9 @@ public class Herder extends AbstractProfession {
                 EntityDataLoader.EntityData data = EntityDataLoader.getEntityData(entityId);
                 if (!data.food.isEmpty()) {
                     foodMatchers.add(data.food);
+                }
+                if (!data.tools.isEmpty()) {
+                    toolMatchers.add(data.tools);
                 }
             }
         }
@@ -66,21 +80,19 @@ public class Herder extends AbstractProfession {
         for (ItemOrTagMatcher matcher : foodMatchers) {
             result.add(new WantedItem(matcher::matches, 16, 0));
         }
+        
+        for (ItemOrTagMatcher matcher : toolMatchers) {
+            result.add(new WantedItem(matcher::matches, 2, 1));
+        }
 
         return result;
     }
 
 
     private EntityType<?> getEntityTypeFromItem(ItemStack stack) {
-        if (stack.is(Items.COW_SPAWN_EGG)) return EntityType.COW;
-        if (stack.is(Items.SHEEP_SPAWN_EGG)) return EntityType.SHEEP;
-        if (stack.is(Items.CHICKEN_SPAWN_EGG)) return EntityType.CHICKEN;
-        if (stack.is(Items.PIG_SPAWN_EGG)) return EntityType.PIG;
-        if (stack.is(Items.HORSE_SPAWN_EGG)) return EntityType.HORSE;
-        if (stack.is(Items.DONKEY_SPAWN_EGG)) return EntityType.DONKEY;
-        if (stack.is(Items.MULE_SPAWN_EGG)) return EntityType.MULE;
-        if (stack.is(Items.RABBIT_SPAWN_EGG)) return EntityType.RABBIT;
-        if (stack.is(Items.GOAT_SPAWN_EGG)) return EntityType.GOAT;
+        if (stack.getItem() instanceof SpawnEggItem spawnEgg) {
+            return spawnEgg.getType(stack.getTag());
+        }
         return null;
     }
 
@@ -93,7 +105,7 @@ public class Herder extends AbstractProfession {
 
     @Override
     public boolean isValidWorkZone(IVillageZone zone) {
-        return false;
+        return zone.getType().getID().equals(Pen.ID);
     }
 
     @Override
@@ -109,30 +121,32 @@ public class Herder extends AbstractProfession {
     @Override
     public ImmutableList<MemoryModuleType<?>> getMemoryModules() {
         return ImmutableList.of(
-//            MemoryModuleTypes.BREEDABLE_ANIMAL.get(),
-//            MemoryModuleTypes.PLUCKABLE_CHICKEN.get(),
-//            MemoryModuleTypes.MILKABLE_COW.get(),
-//            MemoryModuleTypes.SHEARABLE_SHEEP.get()
+            MemoryModuleTypes.BREEDABLE_ANIMAL.get(),
+            MemoryModuleTypes.MILKABLE_ANIMAL.get(),
+            MemoryModuleTypes.PLUCKABLE_ANIMAL.get(),
+            MemoryModuleTypes.SHEARABLE_ANIMAL.get(),
+            MemoryModuleTypes.WANDERING_ANIMAL.get()
         );
     }
 
     @Override
     public ImmutableList<SensorType<? extends Sensor<? super Villager>>> getSensors() {
         return ImmutableList.of(
-//            SensorTypes.HAS_WORK_ZONE.get(),
-//            SensorTypes.IS_WANDERING_ANIMAL.get(),
-//            SensorTypes.WHICH_ANIMALS_NEED_TENDING.get()
+            SensorTypes.HAS_WORK_ZONE.get(),
+            SensorTypes.IS_WANDERING_ANIMAL.get(),
+            SensorTypes.WHICH_ANIMALS_NEED_TENDING.get()
         );
     }
 
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-//                Pair.of(1, new PickUpItems()),
-//                Pair.of(10, new MilkCow()),
-//                Pair.of(10, new ShearSheep()),
-//                Pair.of(10, new PluckFeathers()),
-//                Pair.of(13, new FeedAnimals())
+                Pair.of(1, new PickUpItems()),
+                Pair.of(9, new BringAnimalsToPen()),
+                Pair.of(10, new MilkAnimal()),
+                Pair.of(10, new PluckAnimal()),
+                Pair.of(10, new ShearAnimal()),
+                Pair.of(13, new FeedAnimal())
         );
     }
 }

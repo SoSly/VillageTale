@@ -6,7 +6,6 @@ import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.professions.Cook;
 import org.sosly.villagetale.profession.professions.Farmer;
 import org.sosly.villagetale.profession.professions.Forester;
-import org.sosly.villagetale.profession.professions.Herder;
 
 //@Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Professions {
@@ -16,5 +15,6 @@ public class Professions {
         event.register(new Cook());
         event.register(new Farmer());
         event.register(new Forester());
+//        event.register(new Herder());
     }
 }

@@ -16,8 +16,10 @@ import org.sosly.villagetale.entity.ai.sensor.IsFarmland;
 import org.sosly.villagetale.entity.ai.sensor.IsForest;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
 import org.sosly.villagetale.entity.ai.sensor.IsItemInStorage;
+import org.sosly.villagetale.entity.ai.sensor.IsWanderingAnimal;
 import org.sosly.villagetale.entity.ai.sensor.WhatShouldBeCrafted;
 import org.sosly.villagetale.entity.ai.sensor.WhereShouldICraft;
+import org.sosly.villagetale.entity.ai.sensor.WhichAnimalsNeedTending;
 
 public class SensorTypes {
     public static final DeferredRegister<SensorType<?>> SENSOR_TYPES =
@@ -52,12 +54,17 @@ public class SensorTypes {
     public static final RegistryObject<SensorType<IsItemInStorage>> IS_ITEM_IN_STORAGE =
             SENSOR_TYPES.register("is_item_in_storage", () -> new SensorType<>(IsItemInStorage::new));
 
+    public static final RegistryObject<SensorType<IsWanderingAnimal>> IS_WANDERING_ANIMAL =
+            SENSOR_TYPES.register("is_wandering_animal", () -> new SensorType<>(IsWanderingAnimal::new));
 
     public static final RegistryObject<SensorType<WhatShouldBeCrafted>> WHAT_SHOULD_BE_CRAFTED =
             SENSOR_TYPES.register("what_should_be_crafted", () -> new SensorType<>(WhatShouldBeCrafted::new));
 
     public static final RegistryObject<SensorType<WhereShouldICraft>> WHERE_SHOULD_I_CRAFT =
             SENSOR_TYPES.register("where_should_i_craft", () -> new SensorType<>(WhereShouldICraft::new));
+
+    public static final RegistryObject<SensorType<WhichAnimalsNeedTending>> WHICH_ANIMALS_NEED_TENDING =
+            SENSOR_TYPES.register("which_animals_need_tending", () -> new SensorType<>(WhichAnimalsNeedTending::new));
 
 
     public static void register(IEventBus eventBus) {

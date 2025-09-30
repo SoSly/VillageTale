@@ -393,7 +393,7 @@ public class VillagerService {
 
             if (profession.getID().equals(new ResourceLocation("villagetale", "lumberjack"))) {
                 villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_TREE.get()).ifPresent(tree -> {
-                    BlockPos base = tree.get().getBase();
+                    BlockPos base = tree.getBase();
                     sender.accept(Component.literal(String.format("Nearest Tree: %d, %d, %d",
                             base.getX(), base.getY(), base.getZ())));
                 });

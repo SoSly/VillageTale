@@ -64,8 +64,7 @@ public class ChopTree extends Behavior<Villager> {
         this.axe = tool;
         this.workplace = zone;
         this.tree = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_TREE.get())
-                .orElseThrow()
-                .get();
+                .orElseThrow();
 
         return true;
     }
