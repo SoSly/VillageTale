@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Commoner (unemployed)
     - Cook (creates foods from recipes)
     - Farmer (tills soil, plants seeds, harvests crops)
-    - Lumberjack (cuts trees, plants trees)
+    - Forester (cuts trees, plants trees)
+    - Herder (manages animals, brings them to pens)
 
 **Villages & Zones**
 - Town Hall block - establish your village (automatically named after you)
@@ -22,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zone system for defining areas within villages
 - Four zone shapes available: box, cylinder, point, or route
 - Many zone types available:
-    farmland, forest, home, kitchen, storage, townhall
-- Zones can be filtered to only accept specific items (e.g., wheat-only farms)
+    farmland, forest, home, kitchen, pen, storage, townhall
+- Zones can be filtered to only accept specific items or entity types (e.g., wheat-only farms, sheep-only pens)
 
 **Commands**
 - `/vt assign` - Assign homes to villagers
@@ -34,4 +35,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/vt zone create/delete/rename/info/list` - Manage village zones
 - `/vt zone path add/clear` - Build custom path-shaped zones
 - `/vt zone claim/release` - Temporarily claim positions within zones for villagers
-- `/vt zone filter add/remove/clear/list` - Control what items zones accept (e.g., limit farmland to specific crops)
+- `/vt zone filter add/remove/clear/list` - Control what items or entity types zones accept (e.g., limit farmland to specific crops, limit pens to specific animals)
