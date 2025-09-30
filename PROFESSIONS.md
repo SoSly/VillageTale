@@ -34,7 +34,7 @@ A living document exploring which professions belong in VillageTale and why.
 
 ### Fisher
 - **What they do:** Fishes at water sources, provides fish as alternative food source
-- **Where they work:** Fishing zone
+- **Where they work:** Dock zone
 
 ### Gardener
 - **What they do:** Cultivates and breeds flowers, maintains flower gardens, provides dyes

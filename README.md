@@ -12,6 +12,28 @@ Build a village where every life matters. Villagers craft with real materials, d
 
 Village Tale brings Minecraft villages to life with villagers who wake up hungry, work until their tools break, fall in love, grieve their losses, and raise children who learn through play. Inspired by TekTopia, this mod creates a living settlement where emergent stories unfold from the intersection of work, family, and community. Build a village and watch as its stories write themselves—no more lifeless NPCs standing at workstations!
 
+## Alpha 1 Scope
+
+**This mod is in early alpha.** The vision above describes where we're headed, but Alpha 1 focuses on core village mechanics:
+
+**What's Included:**
+- Town Hall and village territory management
+- Mayor's Ledger for hiring villagers and creating zones
+- Zone system with boundary visualization (F3+V toggle)
+- Eight professions: Cook, Farmer, Forester, Herder, Butcher, Fisher, Carpenter, Leatherworker
+- Hunger system and daily schedules
+- Real crafting with materials from shared storage
+- Self-sustaining village economy (food, tools, materials)
+
+**Coming Later:**
+- Stats system (Strength, Endurance, Intelligence)
+- Relationships, families, and children
+- Happiness and social systems
+- Quest system and traveling merchants
+- Additional professions and advanced features
+
+Alpha 1 establishes the foundation—working villagers who eat, sleep, and produce what your village needs. Feedback welcome as we build toward the full vision!
+
 ## Getting Started
 
 1. Build a Town Hall to establish your village
@@ -85,17 +107,23 @@ A happy village is a productive village:
 
 ## Professions
 
-### Currently Planned
-- **Guards:** Patrol the village and defend against threats
-- **Miners:** Dig shafts and extract underground resources
-- **Foresters:** Manage tree farms and provide wood
-- **Herders:** Tend to and breed livestock
-- **Farmers:** Grow crops and manage fields (enhancing vanilla farmers)
-- **Blacksmiths:** Craft tools, weapons, and armor (enhancing vanilla toolsmiths/weaponsmiths/armorers)
-- **Children:** Not a profession, but a life stage focused on play and learning
+### Alpha 1 Professions
+- **Cook:** Prepares food from raw ingredients using taught recipes (Kitchen zone)
+- **Farmer:** Tills soil, plants seeds, harvests crops (Farmland zone)
+- **Forester:** Cuts and plants trees (Forest zone)
+- **Herder:** Breeds animals, shears sheep, captures wandering livestock (Pen zone)
+- **Butcher:** Slaughters animals and processes meat/leather (Butchery zone)
+- **Fisher:** Catches fish at water sources (Dock zone)
+- **Carpenter:** Crafts wooden tools and construction materials (Woodshop zone)
+- **Leatherworker:** Crafts leather armor, books, leads, and items (Tannery zone)
 
-### Integration with Vanilla
-We're reimagining vanilla professions to fit the VillageTale system—farmers will actually farm, blacksmiths will actually forge, and so on. More details coming as development progresses!
+### Planned Professions
+- **Guards/Archers:** Patrol and defend against threats
+- **Miners:** Extract underground resources
+- **Blacksmith:** Craft metal tools, weapons, and armor
+- **Smelter:** Process ores and smelt materials
+- **Mason:** Process stone into decorative blocks
+- **And many more!** See [PROFESSIONS.md](PROFESSIONS.md) for the full list
 
 ## Requirements
 - **Minecraft:** 1.20.1
