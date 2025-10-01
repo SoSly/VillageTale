@@ -19,7 +19,6 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.ZoneBoundaryPacket;
-import org.sosly.villagetale.zone.shape.Box;
 import net.minecraftforge.network.PacketDistributor;
 
 public class VillageCapability implements IVillageCapability {
@@ -83,17 +82,7 @@ public class VillageCapability implements IVillageCapability {
             return;
         }
 
-        if (!(zone.getShape() instanceof Box)) {
-            return;
-        }
-
-        Box box = (Box) zone.getShape();
-        ZoneBoundaryPacket packet = new ZoneBoundaryPacket(
-            zone.getUUID(),
-            this.id,
-            zone.getShape().getID(),
-            box.getBounds()
-        );
+        ZoneBoundaryPacket packet = zone.getShape().createBoundaryPacket(zone.getUUID(), this.id);
         NetworkHandler.CHANNEL.send(
             PacketDistributor.DIMENSION.with(() -> chunk.get().getLevel().dimension()),
             packet
