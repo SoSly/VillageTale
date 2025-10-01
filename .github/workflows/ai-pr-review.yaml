@@ -122,24 +122,24 @@ jobs:
           )
 
           # Run CLI in non-interactive mode with retries for malformed/empty output
-          echo "Running AI review with Claude Sonnet..."
-          echo "Command: claude --print --model sonnet"
+          echo "Running AI review with Claude..."
+          echo "Command: claude --print"
           echo "Diff size: $(wc -c < diff.patch) bytes"
           echo "Timeout: ${CLAUDE_TIMEOUT} seconds"
 
-          MAX_RETRIES=2
+          MAX_RETRIES=5
           RETRY_COUNT=0
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
 
-            if cat diff.patch | timeout ${CLAUDE_TIMEOUT} claude --print --model sonnet "${SYSTEM_PROMPT}
+            if cat diff.patch | timeout ${CLAUDE_TIMEOUT} claude --print "${SYSTEM_PROMPT}
 
           ${INSTRUCTION}" > ai_output_raw.txt; then
               # Strip markdown code blocks if present
               if grep -q '```json' ai_output_raw.txt; then
                 echo "Stripping markdown code block wrapper..."
-                sed -n '/^```json$/,/^```$/{/^```/d;p}' ai_output_raw.txt > ai_output.json
+                sed -n '/^[[:space:]]*```json/,/^[[:space:]]*```$/{//d;p}' ai_output_raw.txt > ai_output.json
               else
                 cp ai_output_raw.txt ai_output.json
               fi
@@ -232,12 +232,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # Guard: create a default status if missing
+          # Guard: create a default status based on job success/failure
           if [ ! -f status.json ]; then
-            echo '{"state":"success","description":"AI Review completed"}' > status.json
+            if [ "${{ job.status }}" = "success" ]; then
+              echo '{"state":"success","description":"AI Review completed"}' > status.json
+            else
+              echo '{"state":"failure","description":"AI Review workflow failed"}' > status.json
+            fi
           fi
-          STATE=$(jq -r '.state // "success"' status.json)
-          DESC=$(jq -r '.description // "AI Review completed"' status.json)
+          STATE=$(jq -r '.state // "failure"' status.json)
+          DESC=$(jq -r '.description // "AI Review failed"' status.json)
           SHA="${{ github.event.pull_request.head.sha }}"
           gh api \
             -X POST \
