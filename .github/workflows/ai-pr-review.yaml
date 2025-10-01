@@ -130,7 +130,7 @@ jobs:
               # Strip markdown code blocks if present
               if grep -q '```json' ai_output_raw.txt; then
                 echo "Stripping markdown code block wrapper..."
-                sed -n '/```json/,/```/{/```/!p;}' ai_output_raw.txt | sed '1d' > ai_output.json
+                sed -n '/^```json$/,/^```$/{/^```/d;p}' ai_output_raw.txt > ai_output.json
               else
                 cp ai_output_raw.txt ai_output.json
               fi
