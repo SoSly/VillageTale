@@ -38,7 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -52,15 +52,11 @@ jobs:
           jq --version
           curl --version
 
-      - name: Install Claude CLI
+      - name: Verify Claude CLI availability
         run: |
           set -euo pipefail
-          if ! command -v claude >/dev/null 2>&1; then
-            echo "Installing claude via npm..."
-            npm install -g @anthropic-ai/claude-code
-            command -v claude >/dev/null 2>&1 || { echo "claude not found after install" >&2; exit 1; }
-          fi
-          claude --version || true
+          echo "Checking npx access to Claude CLI..."
+          npx --yes @anthropic-ai/claude-code --version || true
 
 
       - name: Gather PR context
@@ -123,7 +119,7 @@ jobs:
 
           # Run CLI in non-interactive mode with retries for malformed/empty output
           echo "Running AI review with Claude..."
-          echo "Command: claude --print"
+          echo "Command: npx @anthropic-ai/claude-code --print"
           echo "Diff size: $(wc -c < diff.patch) bytes"
           echo "Timeout: ${CLAUDE_TIMEOUT} seconds"
 
@@ -133,7 +129,7 @@ jobs:
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
 
-            if cat diff.patch | timeout ${CLAUDE_TIMEOUT} claude --print "${SYSTEM_PROMPT}
+            if cat diff.patch | timeout ${CLAUDE_TIMEOUT} npx --yes @anthropic-ai/claude-code --print "${SYSTEM_PROMPT}
 
           ${INSTRUCTION}" > ai_output_raw.txt; then
               # Strip markdown code blocks if present
@@ -167,7 +163,7 @@ jobs:
             fi
           done
           
-          # If all retries failed, create fallback response and exit with error
+          # If all retries failed, create fallback response
           if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
             echo "All retry attempts failed, creating fallback response"
             cat > ai_output.json <<'FALLBACK'
@@ -181,7 +177,7 @@ jobs:
           }
           FALLBACK
             echo "ERROR: AI review failed after all retry attempts"
-            exit 1
+            echo "WORKFLOW_FAILED=true" >> "$GITHUB_ENV"
           fi
 
           echo "AI review completed"
@@ -197,15 +193,53 @@ jobs:
           echo "## Summary" > review.md
           cat summary.txt >> review.md
 
-          # Add comments to review body instead of inline (GitHub API is too restrictive for inline)
-          COMMENT_COUNT=$(jq -r '.comments | length' ai_output.json)
-          if [ "$COMMENT_COUNT" -gt 0 ]; then
-            echo -e "\n\n## Comments" >> review.md
-            jq -r '.comments[] | "\n### \(.file):\(.line)\n\(.body)"' ai_output.json >> review.md
+          # Parse diff to find which lines are actually in the diff (added or modified)
+          echo "Extracting changed line numbers from diff..."
+          awk '
+            /^\+\+\+ b\// {
+              file = substr($0, 7)
+            }
+            /^@@ -[0-9]+,[0-9]+ \+([0-9]+)/ {
+              match($0, /\+([0-9]+)/, arr)
+              line_num = arr[1]
+            }
+            /^\+[^+]/ {
+              print file ":" line_num
+              line_num++
+            }
+            /^[^+-]/ && !/^@@/ {
+              line_num++
+            }
+          ' diff.patch > changed_lines.txt
+
+          echo "Changed lines detected:"
+          head -n 20 changed_lines.txt
+
+          # Filter comments: inline for changed lines, body for others
+          jq -r --slurpfile changed_lines <(cat changed_lines.txt) '
+            .comments as $all_comments |
+            ([$changed_lines[0] | split("\n")[] | select(length > 0)] | map(split(":") | {file: .[0], line: (.[1] | tonumber)})) as $changed |
+            {
+              inline: ($all_comments | map(select(. as $c | $changed | any(.file == $c.file and .line == $c.line))) | map({path: .file, line: .line, side: "RIGHT", body: .body})),
+              body_only: ($all_comments | map(select(. as $c | $changed | any(.file == $c.file and .line == $c.line) | not)))
+            }
+          ' ai_output.json > filtered_comments.json
+
+          # Extract inline comments
+          jq -r '.inline' filtered_comments.json > comments.json
+
+          # Add non-inlineable comments to review body
+          BODY_COMMENT_COUNT=$(jq -r '.body_only | length' filtered_comments.json)
+          if [ "$BODY_COMMENT_COUNT" -gt 0 ]; then
+            echo -e "\n\n## Additional Comments" >> review.md
+            echo "(Comments on unchanged lines)" >> review.md
+            jq -r '.body_only[] | "\n### \(.file):\(.line)\n\(.body)"' filtered_comments.json >> review.md
           fi
 
           echo "Generated review body:"
           cat review.md
+          echo "Inline comments:"
+          cat comments.json
 
           # Extract status
           jq -r '.status // {state: "success", description: "AI Review completed"}' ai_output.json > status.json
@@ -216,11 +250,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Build review payload with body only (no inline comments due to GitHub API restrictions)
+          # Build review payload with body + filtered inline comments
           jq -n \
             --arg event "${REVIEW_EVENT}" \
             --arg body "$(cat review.md)" \
-            '{ event: $event, body: $body }' > review_payload.json
+            --argjson comments "$(cat comments.json)" \
+            '{ event: $event, body: $body, comments: $comments }' > review_payload.json
+
+          echo "Final review payload:"
+          cat review_payload.json
 
           # Post the review
           gh api \
@@ -235,12 +273,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # Guard: create a default status based on job success/failure
+          # Guard: create a default status based on whether workflow failed
           if [ ! -f status.json ]; then
-            if [ "${{ job.status }}" = "success" ]; then
-              echo '{"state":"success","description":"AI Review completed"}' > status.json
-            else
+            if [ "${WORKFLOW_FAILED:-false}" = "true" ]; then
               echo '{"state":"failure","description":"AI Review workflow failed"}' > status.json
+            else
+              echo '{"state":"success","description":"AI Review completed"}' > status.json
             fi
           fi
           STATE=$(jq -r '.state // "failure"' status.json)
@@ -252,3 +290,9 @@ jobs:
             -f state="$STATE" \
             -f context="AI PR Review" \
             -f description="$DESC"
+
+          # Fail the workflow if AI review failed
+          if [ "${WORKFLOW_FAILED:-false}" = "true" ]; then
+            echo "Failing workflow due to AI review failure"
+            exit 1
+          fi
