@@ -5,6 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -56,8 +59,7 @@ public class BoundaryRenderer {
         }
 
         for (ZoneBoundaryData zone : data.getZones().values()) {
-            BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), 0.4f, 0.8f, 0.4f, 0.6f);
-            outline.render(poseStack, consumer, cameraPos);
+            renderZone(zone, poseStack, consumer, cameraPos);
         }
 
         bufferSource.endBatch();
@@ -65,5 +67,34 @@ public class BoundaryRenderer {
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
         RenderSystem.enableDepthTest();
+    }
+
+    private static void renderZone(ZoneBoundaryData zone, PoseStack poseStack, VertexConsumer consumer, Vec3 cameraPos) {
+        ResourceLocation shapeType = zone.getShapeType();
+        float red = 0.4f, green = 0.8f, blue = 0.4f, alpha = 0.6f;
+
+        if (shapeType.toString().equals("villagetale:box")) {
+            BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), red, green, blue, alpha);
+            outline.render(poseStack, consumer, cameraPos);
+        } else if (shapeType.toString().equals("villagetale:cylinder")) {
+            if (zone.getCenter() != null) {
+                CylinderOutline outline = new CylinderOutline(
+                    zone.getCenter(), zone.getRadius(), zone.getHeight(),
+                    red, green, blue, alpha
+                );
+                outline.render(poseStack, consumer, cameraPos);
+            }
+        } else if (shapeType.toString().equals("villagetale:point")) {
+            AABB bounds = zone.getBounds();
+            BlockPos pos = new BlockPos((int) bounds.minX, (int) bounds.minY, (int) bounds.minZ);
+            AABB pointBox = new AABB(pos).inflate(0.5);
+            BoundaryOutline outline = new BoundaryOutline(pointBox, red, green, blue, alpha);
+            outline.render(poseStack, consumer, cameraPos);
+        } else if (shapeType.toString().equals("villagetale:route")) {
+            if (zone.getWaypoints() != null && !zone.getWaypoints().isEmpty()) {
+                RouteOutline outline = new RouteOutline(zone.getWaypoints(), red, green, blue, alpha);
+                outline.render(poseStack, consumer, cameraPos);
+            }
+        }
     }
 }

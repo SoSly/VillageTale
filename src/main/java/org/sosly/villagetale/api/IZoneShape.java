@@ -1,15 +1,17 @@
 package org.sosly.villagetale.api;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.sosly.villagetale.network.ZoneBoundaryPacket;
 
 public interface IZoneShape {
     boolean containsPosition(BlockPos pos);
-    
+
     default boolean containsPosition(BlockPos pos, int buffer) {
         return containsPosition(pos);
     }
@@ -23,4 +25,6 @@ public interface IZoneShape {
     CompoundTag serializeNBT();
 
     void deserializeNBT(CompoundTag nbt);
+
+    ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId);
 }

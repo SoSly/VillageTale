@@ -15,7 +15,6 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.VillageBoundaryPacket;
 import org.sosly.villagetale.network.ZoneBoundaryPacket;
-import org.sosly.villagetale.zone.shape.Box;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class BoundarySyncHandler {
@@ -60,18 +59,17 @@ public class BoundarySyncHandler {
 
     private static void syncZonesToPlayer(ServerPlayer player, IVillageCapability villageCapability) {
         for (IVillageZone zone : villageCapability.getZones()) {
-            if (zone.getShape() instanceof Box) {
-                Box box = (Box) zone.getShape();
-                ZoneBoundaryPacket packet = new ZoneBoundaryPacket(
+            if (zone.getShape() != null) {
+                ZoneBoundaryPacket packet = zone.getShape().createBoundaryPacket(
                     zone.getUUID(),
-                    villageCapability.getUUID(),
-                    zone.getShape().getID(),
-                    box.getBounds()
+                    villageCapability.getUUID()
                 );
-                NetworkHandler.CHANNEL.send(
-                    PacketDistributor.PLAYER.with(() -> player),
-                    packet
-                );
+                if (packet != null) {
+                    NetworkHandler.CHANNEL.send(
+                        PacketDistributor.PLAYER.with(() -> player),
+                        packet
+                    );
+                }
             }
         }
     }

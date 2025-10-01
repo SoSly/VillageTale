@@ -27,7 +27,6 @@ import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.ZoneBoundaryPacket;
-import org.sosly.villagetale.zone.shape.Box;
 import net.minecraftforge.network.PacketDistributor;
 
 public class Zone implements IVillageZone {
@@ -526,18 +525,14 @@ public class Zone implements IVillageZone {
         if (currentVillage != null && currentVillage.getChunk() != null) {
             currentVillage.getChunk().setUnsaved(true);
 
-            if (level != null && !level.isClientSide && shape instanceof Box) {
-                Box box = (Box) shape;
-                ZoneBoundaryPacket packet = new ZoneBoundaryPacket(
-                    id,
-                    currentVillage.getUUID(),
-                    shape.getID(),
-                    box.getBounds()
-                );
-                NetworkHandler.CHANNEL.send(
-                    PacketDistributor.DIMENSION.with(() -> level.dimension()),
-                    packet
-                );
+            if (level != null && !level.isClientSide && shape != null) {
+                ZoneBoundaryPacket packet = shape.createBoundaryPacket(id, currentVillage.getUUID());
+                if (packet != null) {
+                    NetworkHandler.CHANNEL.send(
+                        PacketDistributor.DIMENSION.with(() -> level.dimension()),
+                        packet
+                    );
+                }
             }
         }
     }

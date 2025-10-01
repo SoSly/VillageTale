@@ -76,7 +76,11 @@ public class ClientPacketHandler {
             packet.getZoneId(),
             packet.getVillageId(),
             packet.getShapeType(),
-            packet.getBounds()
+            packet.getBounds(),
+            packet.getCenter(),
+            packet.getRadius(),
+            packet.getHeight(),
+            packet.getWaypoints()
         );
         BoundaryDataStorage.getInstance().addZone(mc.level.dimension(), data);
     }

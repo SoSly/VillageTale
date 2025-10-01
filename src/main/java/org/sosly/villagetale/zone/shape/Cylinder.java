@@ -8,10 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
+import org.sosly.villagetale.network.ZoneBoundaryPacket;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -110,6 +112,15 @@ public class Cylinder implements IZoneShape {
         this.radius = nbt.getInt("radius");
         this.height = nbt.getInt("height");
         this.baseCenter = BlockPos.of(nbt.getLong("baseCenter"));
+    }
+
+    @Override
+    public ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId) {
+        AABB bounds = new AABB(
+            baseCenter.getX() - radius, baseCenter.getY(), baseCenter.getZ() - radius,
+            baseCenter.getX() + radius, baseCenter.getY() + height, baseCenter.getZ() + radius
+        );
+        return new ZoneBoundaryPacket(zoneId, villageId, getID(), bounds, baseCenter, radius, height, null);
     }
 
     public static Builder builder(Level level, IVillageCapability village, int ordinal) {

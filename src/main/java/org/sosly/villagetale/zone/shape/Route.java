@@ -11,10 +11,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.network.ZoneBoundaryPacket;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -81,6 +83,19 @@ public class Route implements IZoneShape {
             long point = points.getInt(i);
             this.points.add(BlockPos.of(point));
         }
+    }
+
+    @Override
+    public ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId) {
+        if (points.isEmpty()) {
+            return null;
+        }
+        BlockPos first = points.get(0);
+        AABB bounds = new AABB(first);
+        for (BlockPos waypoint : points) {
+            bounds = bounds.minmax(new AABB(waypoint));
+        }
+        return new ZoneBoundaryPacket(zoneId, villageId, getID(), bounds, null, 0, 0, points);
     }
 
     public static Builder builder(Level level, IVillageCapability village, int ordinal) {
