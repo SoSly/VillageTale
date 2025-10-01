@@ -55,10 +55,10 @@ jobs:
       - name: Load project configuration
         run: |
           set -euo pipefail
-          # Extract values from gradle.properties
-          MINECRAFT_VERSION=$(grep '^minecraft_version' gradle.properties | cut -d'=' -f2 | tr -d ' ')
-          API_NAME=$(grep '^api_name' gradle.properties | cut -d'=' -f2 | tr -d ' ')
-          API_VERSION=$(grep '^api_version' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          # Extract values from gradle.properties (match exact property names)
+          MINECRAFT_VERSION=$(grep '^minecraft_version[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          API_NAME=$(grep '^api_name[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          API_VERSION=$(grep '^api_version[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
 
           echo "MINECRAFT_VERSION=$MINECRAFT_VERSION" >> "$GITHUB_ENV"
           echo "API_NAME=$API_NAME" >> "$GITHUB_ENV"
