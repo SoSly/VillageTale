@@ -107,9 +107,9 @@ jobs:
           EOF
           )
 
-          # Run CLI in execute mode with retries for malformed/empty output
+          # Run CLI in non-interactive mode with retries for malformed/empty output
           echo "Running AI review..."
-          echo "Command: claude -x"
+          echo "Command: claude --print"
           echo "Diff size: $(wc -c < diff.patch) bytes"
 
           MAX_RETRIES=5
@@ -118,7 +118,7 @@ jobs:
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
 
-            if cat diff.patch | timeout 60 claude -x "${SYSTEM_PROMPT}
+            if cat diff.patch | timeout 60 claude --print "${SYSTEM_PROMPT}
 
           ${INSTRUCTION}" > ai_output.json; then
               # Check if output contains valid JSON with required elements
