@@ -197,11 +197,15 @@ jobs:
           echo "## Summary" > review.md
           cat summary.txt >> review.md
 
-          # Extract and format comments for GitHub API
-          jq -r '.comments // [] | map({path: .file, line: .line, side: "RIGHT", body: .body})' ai_output.json > comments.json
+          # Add comments to review body instead of inline (GitHub API is too restrictive for inline)
+          COMMENT_COUNT=$(jq -r '.comments | length' ai_output.json)
+          if [ "$COMMENT_COUNT" -gt 0 ]; then
+            echo -e "\n\n## Comments" >> review.md
+            jq -r '.comments[] | "\n### \(.file):\(.line)\n\(.body)"' ai_output.json >> review.md
+          fi
 
-          echo "Generated comments JSON:"
-          cat comments.json
+          echo "Generated review body:"
+          cat review.md
 
           # Extract status
           jq -r '.status // {state: "success", description: "AI Review completed"}' ai_output.json > status.json
@@ -212,12 +216,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Build review payload with body + comments array
+          # Build review payload with body only (no inline comments due to GitHub API restrictions)
           jq -n \
             --arg event "${REVIEW_EVENT}" \
             --arg body "$(cat review.md)" \
-            --argjson comments "$(cat comments.json)" \
-            '{ event: $event, body: $body, comments: $comments }' > review_payload.json
+            '{ event: $event, body: $body }' > review_payload.json
 
           # Post the review
           gh api \
