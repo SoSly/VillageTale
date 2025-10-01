@@ -15,19 +15,9 @@ env:
   REVIEW_EVENT: COMMENT
   # Timeout for Claude API calls in seconds (increase for large PRs)
   CLAUDE_TIMEOUT: 180
-  # Maximum diff size in bytes (cost control)
-  MAX_DIFF_SIZE: 102400
-  # System prompt for Claude
-  SYSTEM_PROMPT: |
-    Review this Minecraft 1.20.1 mod PR focusing on:
-    - Minecraft/Forge conventions and best practices
-    - Capability system usage and entity AI goals
-    - Resource usage and performance (tick loops, chunk loading)
-    - Code style: early returns, always use braces, sparse comments
-    - VillageTale specific: zone systems, villager behaviors, work mechanics
+  # Maximum diff size in bytes (cost control) - 1MB
+  MAX_DIFF_SIZE: 1048576
 
-    Be direct and critical. Skip the praise unless something is genuinely clever.
-    Focus on actual problems, not style nitpicks.
 
 jobs:
   review:
@@ -62,6 +52,22 @@ jobs:
           npx --yes @anthropic-ai/claude-code --version || true
 
 
+      - name: Load project configuration
+        run: |
+          set -euo pipefail
+          # Extract values from gradle.properties
+          MINECRAFT_VERSION=$(grep '^minecraft_version' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          API_NAME=$(grep '^api_name' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          API_VERSION=$(grep '^api_version' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+
+          echo "MINECRAFT_VERSION=$MINECRAFT_VERSION" >> "$GITHUB_ENV"
+          echo "API_NAME=$API_NAME" >> "$GITHUB_ENV"
+          echo "API_VERSION=$API_VERSION" >> "$GITHUB_ENV"
+
+          echo "Loaded project config:"
+          echo "  Minecraft: $MINECRAFT_VERSION"
+          echo "  API: $API_NAME $API_VERSION"
+
       - name: Gather PR context
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,34 +97,19 @@ jobs:
           # Mask API key in logs
           echo "::add-mask::${ANTHROPIC_API_KEY}"
 
-          # Compose the instruction sent to cli (JSON output format)
-          INSTRUCTION=$(cat <<'EOF'
-          You are reviewing a pull request diff. Output ONLY valid JSON, no markdown, no explanations, just the JSON object.
+          # Load and template the prompts
+          echo "Loading prompts from markdown files..."
+          SYSTEM_PROMPT=$(cat .github/workflows/ai-pr-review/system.md | \
+            sed "s/{{MINECRAFT_VERSION}}/${MINECRAFT_VERSION}/g" | \
+            sed "s/{{API_NAME}}/${API_NAME}/g" | \
+            sed "s/{{API_VERSION}}/${API_VERSION}/g")
 
-          Output a JSON review with this exact structure:
-          {
-            "summary": "2-3 sentence assessment of the changes",
-            "comments": [
-              {
-                "file": "path/to/file",
-                "line": 123,
-                "body": "Issue description"
-              }
-            ],
-            "status": {
-              "state": "success",
-              "description": "Brief reason under 120 chars"
-            }
-          }
+          INSTRUCTION=$(cat .github/workflows/ai-pr-review/instruction.md)
 
-          Rules:
-          - If there are no issues, return empty comments array: "comments": []
-          - State should be "success" unless there are critical issues that must be fixed
-          - For YAML/config files, focus on syntax and configuration correctness
-          - For the "line" field, use the ABSOLUTE line number from the file (the number shown after the + in the diff)
-          - Output ONLY the JSON object, nothing else before or after it
-          EOF
-          )
+          echo "System prompt:"
+          echo "$SYSTEM_PROMPT"
+          echo ""
+          echo "Instruction loaded from file"
 
           # Validate diff size before sending to API (cost control)
           DIFF_SIZE=$(wc -c < diff.patch)
@@ -229,8 +220,15 @@ jobs:
             }
             /^@@ / {
               # Extract the starting line number for additions from hunk header
-              match($0, /\+([0-9]+)/, arr)
-              new_line = arr[1]
+              # Format: @@ -old_start,old_count +new_start,new_count @@
+              split($0, parts, " ")
+              for (i in parts) {
+                if (parts[i] ~ /^\+[0-9]+/) {
+                  new_line = substr(parts[i], 2)
+                  sub(/,.*/, "", new_line)
+                  break
+                }
+              }
             }
             /^\+[^+]/ {
               # This is an added line
@@ -252,8 +250,8 @@ jobs:
             .comments as $all_comments |
             ($changed_lines_raw | split("\n") | map(select(length > 0) | split(":") | {file: .[0], line: (.[1] | tonumber)})) as $changed |
             {
-              inline: ($all_comments | map(select(. as $c | $changed | any(.file == $c.file and .line == $c.line))) | map({path: .file, line: .line, side: "RIGHT", body: .body})),
-              body_only: ($all_comments | map(select(. as $c | $changed | any(.file == $c.file and .line == $c.line) | not)))
+              inline: ($all_comments | map(select(. as $c | ($changed | any(.file == $c.file and .line == $c.line)))) | map({path: .file, line: .line, side: "RIGHT", body: .body})),
+              body_only: ($all_comments | map(select(. as $c | ($changed | any(.file == $c.file and .line == $c.line)) | not)))
             }
           ' ai_output.json > filtered_comments.json
 
@@ -324,6 +322,7 @@ jobs:
           fi
           STATE=$(jq -r '.state // "failure"' status.json)
           DESC=$(jq -r '.description // "AI Review failed"' status.json)
+          # Use PR head SHA from event context (latest at workflow start)
           SHA="${{ github.event.pull_request.head.sha }}"
           gh api \
             -X POST \
