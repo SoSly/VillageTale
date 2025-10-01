@@ -114,19 +114,27 @@ jobs:
           )
 
           # Run CLI in non-interactive mode with retries for malformed/empty output
-          echo "Running AI review..."
-          echo "Command: claude --print"
+          echo "Running AI review with Claude Sonnet..."
+          echo "Command: claude --print --model sonnet"
           echo "Diff size: $(wc -c < diff.patch) bytes"
 
-          MAX_RETRIES=5
+          MAX_RETRIES=2
           RETRY_COUNT=0
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
 
-            if cat diff.patch | timeout 60 claude --print "${SYSTEM_PROMPT}
+            if cat diff.patch | timeout 60 claude --print --model sonnet "${SYSTEM_PROMPT}
 
-          ${INSTRUCTION}" > ai_output.json; then
+          ${INSTRUCTION}" > ai_output_raw.txt; then
+              # Strip markdown code blocks if present
+              if grep -q '```json' ai_output_raw.txt; then
+                echo "Stripping markdown code block wrapper..."
+                sed -n '/```json/,/```/{/```/!p;}' ai_output_raw.txt | sed '1d' > ai_output.json
+              else
+                cp ai_output_raw.txt ai_output.json
+              fi
+
               # Check if output contains valid JSON with required elements
               if jq -e '.summary and .comments and .status' ai_output.json > /dev/null 2>&1; then
                 echo "Valid JSON review received"
@@ -134,7 +142,7 @@ jobs:
               else
                 echo "Invalid or empty JSON received, retrying..."
                 echo "--- Debug: Raw output ---"
-                head -n 20 ai_output.json || true
+                head -n 20 ai_output_raw.txt || true
                 echo "--- End debug output ---"
                 RETRY_COUNT=$((RETRY_COUNT + 1))
               fi
@@ -152,7 +160,7 @@ jobs:
           
           # If all retries failed, create fallback response and exit with error
           if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-            echo "All 5 retry attempts failed, creating fallback response"
+            echo "All retry attempts failed, creating fallback response"
             cat > ai_output.json <<'FALLBACK'
           {
             "summary": "AI review failed after multiple attempts. The review system encountered an error.",
