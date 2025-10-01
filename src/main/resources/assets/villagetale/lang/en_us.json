@@ -100,5 +100,8 @@
   "block.villagetale.townhall": "Town Hall",
   "villagetale.village.default_name": "%s's Village",
   "villagetale.townhall.already_exists": "Cannot place Town Hall - %s already has a Town Hall at %s",
-  "villagetale.townhall.too_close": "Cannot create village - too close to another village (minimum 30 chunks distance required)"
+  "villagetale.townhall.too_close": "Cannot create village - too close to another village (minimum 30 chunks distance required)",
+
+  "key.categories.villagetale": "VillageTale",
+  "key.villagetale.toggle_village_boundaries": "Toggle Village Boundaries (F3+V)"
 }

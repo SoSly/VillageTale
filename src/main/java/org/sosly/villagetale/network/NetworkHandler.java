@@ -30,13 +30,29 @@ public class NetworkHandler {
             VillagerProfessionSyncPacket::decode,
             VillagerProfessionSyncPacket::handle
         );
-        
+
         CHANNEL.registerMessage(
             packetId++,
             VillagerEquipmentSyncPacket.class,
             VillagerEquipmentSyncPacket::encode,
             VillagerEquipmentSyncPacket::decode,
             VillagerEquipmentSyncPacket::handle
+        );
+
+        CHANNEL.registerMessage(
+            packetId++,
+            VillageBoundaryPacket.class,
+            VillageBoundaryPacket::encode,
+            VillageBoundaryPacket::decode,
+            VillageBoundaryPacket::handle
+        );
+
+        CHANNEL.registerMessage(
+            packetId++,
+            ZoneBoundaryPacket.class,
+            ZoneBoundaryPacket::encode,
+            ZoneBoundaryPacket::decode,
+            ZoneBoundaryPacket::handle
         );
     }
 

@@ -7,17 +7,23 @@ import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.data.VillageInfo;
+import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.VillageBoundaryPacket;
 
 public class VillagesCapability implements IVillagesCapability {
 
     private final Map<UUID, VillageInfo> villages;
     private final Map<String, UUID> villagesByName;
+    private final Level level;
 
-    public VillagesCapability() {
+    public VillagesCapability(Level level) {
         this.villages = new HashMap<>();
         this.villagesByName = new HashMap<>();
+        this.level = level;
     }
 
     @Override
@@ -61,6 +67,18 @@ public class VillagesCapability implements IVillagesCapability {
 
         villages.put(villageId, newVillage);
         villagesByName.put(villageName, villageId);
+
+        if (!level.isClientSide) {
+            VillageBoundaryPacket packet = new VillageBoundaryPacket(
+                villageId,
+                villageStartingChunk,
+                squadius
+            );
+            NetworkHandler.CHANNEL.send(
+                PacketDistributor.DIMENSION.with(() -> level.dimension()),
+                packet
+            );
+        }
 
         return villageId;
     }

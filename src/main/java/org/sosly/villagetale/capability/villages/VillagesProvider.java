@@ -4,6 +4,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
@@ -19,8 +20,8 @@ public class VillagesProvider implements ICapabilitySerializable<CompoundTag> {
     private final VillagesCapability capability;
     private final LazyOptional<IVillagesCapability> lazyOptional;
 
-    public VillagesProvider() {
-        this.capability = new VillagesCapability();
+    public VillagesProvider(Level level) {
+        this.capability = new VillagesCapability(level);
         this.lazyOptional = LazyOptional.of(() -> capability);
     }
 

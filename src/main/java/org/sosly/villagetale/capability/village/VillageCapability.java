@@ -17,6 +17,10 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.ZoneBoundaryPacket;
+import org.sosly.villagetale.zone.shape.Box;
+import net.minecraftforge.network.PacketDistributor;
 
 public class VillageCapability implements IVillageCapability {
 
@@ -72,6 +76,22 @@ public class VillageCapability implements IVillageCapability {
         VillageTale.LOGGER.info("Added zone {} to village {}, total zones: {}",
             zone.getUUID(), this.id, zones.size());
         markDirty();
+
+        if (chunk != null && chunk.get() != null && !chunk.get().getLevel().isClientSide) {
+            if (zone.getShape() instanceof Box) {
+                Box box = (Box) zone.getShape();
+                ZoneBoundaryPacket packet = new ZoneBoundaryPacket(
+                    zone.getUUID(),
+                    this.id,
+                    zone.getShape().getID(),
+                    box.getBounds()
+                );
+                NetworkHandler.CHANNEL.send(
+                    PacketDistributor.DIMENSION.with(() -> chunk.get().getLevel().dimension()),
+                    packet
+                );
+            }
+        }
     }
 
     @Override

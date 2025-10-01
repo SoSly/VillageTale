@@ -61,7 +61,7 @@ public class Capabilities {
 
     @SubscribeEvent
     public static void onAttachLevelCapabilities(AttachCapabilitiesEvent<Level> event) {
-        VillagesProvider provider = new VillagesProvider();
+        VillagesProvider provider = new VillagesProvider(event.getObject());
         event.addCapability(VILLAGES_CAPABILITY_KEY, provider);
     }
 }

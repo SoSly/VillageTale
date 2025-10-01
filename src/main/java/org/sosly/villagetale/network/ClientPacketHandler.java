@@ -8,6 +8,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.sosly.villagetale.client.BoundaryDataStorage;
+import org.sosly.villagetale.data.VillageBoundaryData;
+import org.sosly.villagetale.data.ZoneBoundaryData;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,17 +37,47 @@ public class ClientPacketHandler {
 
     public static void clearCache() {
         professionCache.clear();
+        BoundaryDataStorage.getInstance().clearAll();
     }
-    
+
     public static void handleEquipmentSync(VillagerEquipmentSyncPacket packet) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return;
         }
-        
+
         Entity entity = mc.level.getEntity(packet.getEntityId());
         if (entity instanceof LivingEntity livingEntity) {
             livingEntity.setItemInHand(packet.getHand(), packet.getItemStack());
         }
+    }
+
+    public static void handleVillageBoundary(VillageBoundaryPacket packet) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+
+        VillageBoundaryData data = new VillageBoundaryData(
+            packet.getVillageId(),
+            packet.getCenterChunk(),
+            packet.getSquadius()
+        );
+        BoundaryDataStorage.getInstance().addVillage(mc.level.dimension(), data);
+    }
+
+    public static void handleZoneBoundary(ZoneBoundaryPacket packet) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+
+        ZoneBoundaryData data = new ZoneBoundaryData(
+            packet.getZoneId(),
+            packet.getVillageId(),
+            packet.getShapeType(),
+            packet.getBounds()
+        );
+        BoundaryDataStorage.getInstance().addZone(mc.level.dimension(), data);
     }
 }
