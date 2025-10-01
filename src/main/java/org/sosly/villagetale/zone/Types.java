@@ -11,6 +11,7 @@ import org.sosly.villagetale.zone.type.Kitchen;
 import org.sosly.villagetale.zone.type.Pen;
 import org.sosly.villagetale.zone.type.Storage;
 import org.sosly.villagetale.zone.type.TownHall;
+import org.sosly.villagetale.zone.type.Woodshop;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Types {
@@ -23,5 +24,6 @@ public class Types {
         event.register(Pen.ID, new Pen());
         event.register(Storage.ID, new Storage());
         event.register(TownHall.ID, new TownHall());
+        event.register(Woodshop.ID, new Woodshop());
     }
 }
