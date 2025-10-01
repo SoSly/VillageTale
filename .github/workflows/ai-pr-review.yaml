@@ -1,7 +1,7 @@
 name: AI PR Review
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
@@ -14,6 +14,8 @@ env:
   REVIEW_EVENT: COMMENT
   # Timeout for Claude API calls in seconds (increase for large PRs)
   CLAUDE_TIMEOUT: 180
+  # Maximum diff size in bytes (cost control)
+  MAX_DIFF_SIZE: 102400
   # System prompt for Claude
   SYSTEM_PROMPT: |
     Review this Minecraft 1.20.1 mod PR focusing on:
@@ -38,7 +40,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -117,14 +120,38 @@ jobs:
           EOF
           )
 
-          # Run CLI in non-interactive mode with retries for malformed/empty output
-          echo "Running AI review with Claude..."
-          echo "Command: npx @anthropic-ai/claude-code --print"
-          echo "Diff size: $(wc -c < diff.patch) bytes"
-          echo "Timeout: ${CLAUDE_TIMEOUT} seconds"
+          # Validate diff size before sending to API (cost control)
+          DIFF_SIZE=$(wc -c < diff.patch)
+          echo "Diff size: ${DIFF_SIZE} bytes"
+          echo "Max allowed: ${MAX_DIFF_SIZE} bytes"
 
-          MAX_RETRIES=5
-          RETRY_COUNT=0
+          if [ "$DIFF_SIZE" -gt "${MAX_DIFF_SIZE}" ]; then
+            echo "ERROR: Diff too large for AI review (${DIFF_SIZE} > ${MAX_DIFF_SIZE} bytes)"
+            echo "Skipping AI review to avoid excessive API costs"
+            cat > ai_output.json <<'SKIP'
+          {
+            "summary": "Diff too large for automated review. This PR exceeds the configured size limit for cost control.",
+            "comments": [],
+            "status": {
+              "state": "success",
+              "description": "Skipped - diff too large"
+            }
+          }
+          SKIP
+            # Skip to the end but still post a review
+            echo "DIFF_TOO_LARGE=true" >> "$GITHUB_ENV"
+          else
+            echo "Diff size within limits, proceeding with review"
+          fi
+
+          # Run CLI in non-interactive mode with retries for malformed/empty output
+          if [ "${DIFF_TOO_LARGE:-false}" = "false" ]; then
+            echo "Running AI review with Claude..."
+            echo "Command: npx @anthropic-ai/claude-code --print"
+            echo "Timeout: ${CLAUDE_TIMEOUT} seconds"
+
+            MAX_RETRIES=5
+            RETRY_COUNT=0
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
@@ -179,6 +206,7 @@ jobs:
             echo "ERROR: AI review failed after all retry attempts"
             echo "WORKFLOW_FAILED=true" >> "$GITHUB_ENV"
           fi
+          fi  # End of DIFF_TOO_LARGE check
 
           echo "AI review completed"
           echo "--- JSON Output ---"
@@ -193,32 +221,36 @@ jobs:
           echo "## Summary" > review.md
           cat summary.txt >> review.md
 
-          # Parse diff to find which lines are actually in the diff (added or modified)
+          # Parse diff to find which lines are actually in the diff (added lines only)
           echo "Extracting changed line numbers from diff..."
           awk '
             /^\+\+\+ b\// {
               file = substr($0, 7)
             }
-            /^@@ -[0-9]+,[0-9]+ \+([0-9]+)/ {
+            /^@@ / {
+              # Extract the starting line number for additions from hunk header
               match($0, /\+([0-9]+)/, arr)
-              line_num = arr[1]
+              new_line = arr[1]
             }
             /^\+[^+]/ {
-              print file ":" line_num
-              line_num++
+              # This is an added line
+              print file ":" new_line
+              new_line++
             }
-            /^[^+-]/ && !/^@@/ {
-              line_num++
+            /^[^+-@]/ {
+              # Context line - exists in both, increment
+              new_line++
             }
+            # Deleted lines (^-) do not increment new_line
           ' diff.patch > changed_lines.txt
 
           echo "Changed lines detected:"
           head -n 20 changed_lines.txt
 
           # Filter comments: inline for changed lines, body for others
-          jq -r --slurpfile changed_lines <(cat changed_lines.txt) '
+          jq -r --rawfile changed_lines_raw changed_lines.txt '
             .comments as $all_comments |
-            ([$changed_lines[0] | split("\n")[] | select(length > 0)] | map(split(":") | {file: .[0], line: (.[1] | tonumber)})) as $changed |
+            ($changed_lines_raw | split("\n") | map(select(length > 0) | split(":") | {file: .[0], line: (.[1] | tonumber)})) as $changed |
             {
               inline: ($all_comments | map(select(. as $c | $changed | any(.file == $c.file and .line == $c.line))) | map({path: .file, line: .line, side: "RIGHT", body: .body})),
               body_only: ($all_comments | map(select(. as $c | $changed | any(.file == $c.file and .line == $c.line) | not)))
@@ -260,12 +292,21 @@ jobs:
           echo "Final review payload:"
           cat review_payload.json
 
-          # Post the review
-          gh api \
+          # Post the review with error handling
+          if gh api \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             "repos/${{ github.repository }}/pulls/$PR/reviews" \
-            --input review_payload.json
+            --input review_payload.json; then
+            echo "Review posted successfully"
+          else
+            echo "ERROR: Failed to post review via gh api"
+            echo "Attempting fallback: posting as issue comment"
+            gh pr comment "$PR" --body "$(cat review.md)" || {
+              echo "ERROR: Fallback comment also failed"
+              exit 1
+            }
+          fi
 
       - name: Set commit status from AI StatusJSON
         if: always()
