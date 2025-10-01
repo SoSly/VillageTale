@@ -73,25 +73,38 @@ public class BoundaryRenderer {
         ResourceLocation shapeType = zone.getShapeType();
         float red = 0.4f, green = 0.8f, blue = 0.4f, alpha = 0.6f;
 
-        if (shapeType.toString().equals("villagetale:box")) {
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "box"))) {
             BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
-        } else if (shapeType.toString().equals("villagetale:cylinder")) {
-            if (zone.getCenter() != null) {
-                CylinderOutline outline = new CylinderOutline(
-                    zone.getCenter(), zone.getRadius(), zone.getHeight(),
-                    red, green, blue, alpha
-                );
-                outline.render(poseStack, consumer, cameraPos);
+            return;
+        }
+
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "cylinder"))) {
+            if (zone.getCenter() == null) {
+                return;
             }
-        } else if (shapeType.toString().equals("villagetale:point")) {
+
+            CylinderOutline outline = new CylinderOutline(
+                zone.getCenter(), zone.getRadius(), zone.getHeight(),
+                red, green, blue, alpha
+            );
+            outline.render(poseStack, consumer, cameraPos);
+            return;
+        }
+
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "point"))) {
             BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
-        } else if (shapeType.toString().equals("villagetale:route")) {
-            if (zone.getWaypoints() != null && !zone.getWaypoints().isEmpty()) {
-                RouteOutline outline = new RouteOutline(zone.getWaypoints(), red, green, blue, alpha);
-                outline.render(poseStack, consumer, cameraPos);
+            return;
+        }
+
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "route"))) {
+            if (zone.getWaypoints() == null || zone.getWaypoints().isEmpty()) {
+                return;
             }
+
+            RouteOutline outline = new RouteOutline(zone.getWaypoints(), red, green, blue, alpha);
+            outline.render(poseStack, consumer, cameraPos);
         }
     }
 }

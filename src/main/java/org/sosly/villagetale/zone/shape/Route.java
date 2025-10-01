@@ -90,11 +90,13 @@ public class Route implements IZoneShape {
         if (points.isEmpty()) {
             return null;
         }
+
         BlockPos first = points.get(0);
         AABB bounds = new AABB(first);
         for (BlockPos waypoint : points) {
             bounds = bounds.minmax(new AABB(waypoint));
         }
+
         return new ZoneBoundaryPacket(zoneId, villageId, getID(), bounds, null, 0, 0, points);
     }
 

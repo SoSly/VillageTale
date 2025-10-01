@@ -141,6 +141,7 @@ public class Zone implements IVillageZone {
         if (removed) {
             markDirty();
         }
+
         return removed;
     }
 
@@ -157,12 +158,14 @@ public class Zone implements IVillageZone {
         Map<BlockPos, Optional<UUID>> result = new HashMap<>();
         for (BlockPos pos : pois.get()) {
             Claim claim = claims.get(pos);
-            if (claim != null && !claim.isExpired(currentTime)) {
-                result.put(pos, Optional.of(claim.getVillagerUUID()));
-            } else {
+            if (claim == null || claim.isExpired(currentTime)) {
                 result.put(pos, Optional.empty());
+                continue;
             }
+
+            result.put(pos, Optional.of(claim.getVillagerUUID()));
         }
+
         return result;
     }
 
@@ -203,18 +206,23 @@ public class Zone implements IVillageZone {
 
         boolean[] claimed = {false};
         claims.compute(pos, (key, existingClaim) -> {
-            if (existingClaim == null || existingClaim.isExpired(currentTime)) {
-                claimed[0] = true;
-                return newClaim;
+            if (existingClaim != null && !existingClaim.isExpired(currentTime)) {
+                return existingClaim;
             }
-            return existingClaim;
+
+            claimed[0] = true;
+            return newClaim;
         });
 
-        if (claimed[0] && durationTicks > 6000) {
+        if (!claimed[0]) {
+            return false;
+        }
+
+        if (durationTicks > 6000) {
             markDirty();
         }
 
-        return claimed[0];
+        return true;
     }
 
     @Override
@@ -251,18 +259,23 @@ public class Zone implements IVillageZone {
 
         boolean[] claimed = {false};
         entityClaims.compute(entityId, (key, existingClaim) -> {
-            if (existingClaim == null || existingClaim.isExpired(currentTime)) {
-                claimed[0] = true;
-                return newClaim;
+            if (existingClaim != null && !existingClaim.isExpired(currentTime)) {
+                return existingClaim;
             }
-            return existingClaim;
+
+            claimed[0] = true;
+            return newClaim;
         });
 
-        if (claimed[0] && durationTicks > 6000) {
+        if (!claimed[0]) {
+            return false;
+        }
+
+        if (durationTicks > 6000) {
             markDirty();
         }
 
-        return claimed[0];
+        return true;
     }
 
     @Override
@@ -276,10 +289,13 @@ public class Zone implements IVillageZone {
 
         Map<UUID, Optional<UUID>> result = new HashMap<>();
         for (Map.Entry<UUID, Claim> entry : entityClaims.entrySet()) {
-            if (!entry.getValue().isExpired(currentTime)) {
-                result.put(entry.getKey(), Optional.of(entry.getValue().getVillagerUUID()));
+            if (entry.getValue().isExpired(currentTime)) {
+                continue;
             }
+
+            result.put(entry.getKey(), Optional.of(entry.getValue().getVillagerUUID()));
         }
+
         return result;
     }
 
@@ -289,10 +305,13 @@ public class Zone implements IVillageZone {
 
         Map<UUID, UUID> result = new HashMap<>();
         for (Map.Entry<UUID, Claim> entry : entityClaims.entrySet()) {
-            if (!entry.getValue().isExpired(currentTime)) {
-                result.put(entry.getKey(), entry.getValue().getVillagerUUID());
+            if (entry.getValue().isExpired(currentTime)) {
+                continue;
             }
+
+            result.put(entry.getKey(), entry.getValue().getVillagerUUID());
         }
+
         return result;
     }
 
@@ -464,9 +483,11 @@ public class Zone implements IVillageZone {
             for (int i = 0; i < filterList.size(); i++) {
                 CompoundTag itemTag = filterList.getCompound(i);
                 ItemStack stack = ItemStack.of(itemTag);
-                if (!stack.isEmpty()) {
-                    filter.add(stack);
+                if (stack.isEmpty()) {
+                    continue;
                 }
+
+                filter.add(stack);
             }
         }
 
@@ -522,18 +543,24 @@ public class Zone implements IVillageZone {
 
     private void markDirty() {
         IVillageCapability currentVillage = village;
-        if (currentVillage != null && currentVillage.getChunk() != null) {
-            currentVillage.getChunk().setUnsaved(true);
-
-            if (level != null && !level.isClientSide && shape != null) {
-                ZoneBoundaryPacket packet = shape.createBoundaryPacket(id, currentVillage.getUUID());
-                if (packet != null) {
-                    NetworkHandler.CHANNEL.send(
-                        PacketDistributor.DIMENSION.with(() -> level.dimension()),
-                        packet
-                    );
-                }
-            }
+        if (currentVillage == null || currentVillage.getChunk() == null) {
+            return;
         }
+
+        currentVillage.getChunk().setUnsaved(true);
+
+        if (level == null || level.isClientSide || shape == null) {
+            return;
+        }
+
+        ZoneBoundaryPacket packet = shape.createBoundaryPacket(id, currentVillage.getUUID());
+        if (packet == null) {
+            return;
+        }
+
+        NetworkHandler.CHANNEL.send(
+            PacketDistributor.DIMENSION.with(() -> level.dimension()),
+            packet
+        );
     }
 }

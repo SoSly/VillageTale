@@ -73,25 +73,31 @@ public class VillageCapability implements IVillageCapability {
     @Override
     public void addZone(IVillageZone zone) {
         zones.put(zone.getUUID(), zone);
-        VillageTale.LOGGER.info("Added zone {} to village {}, total zones: {}",
-            zone.getUUID(), this.id, zones.size());
         markDirty();
 
-        if (chunk != null && chunk.get() != null && !chunk.get().getLevel().isClientSide) {
-            if (zone.getShape() instanceof Box) {
-                Box box = (Box) zone.getShape();
-                ZoneBoundaryPacket packet = new ZoneBoundaryPacket(
-                    zone.getUUID(),
-                    this.id,
-                    zone.getShape().getID(),
-                    box.getBounds()
-                );
-                NetworkHandler.CHANNEL.send(
-                    PacketDistributor.DIMENSION.with(() -> chunk.get().getLevel().dimension()),
-                    packet
-                );
-            }
+        if (chunk == null || chunk.get() == null) {
+            return;
         }
+
+        if (chunk.get().getLevel().isClientSide) {
+            return;
+        }
+
+        if (!(zone.getShape() instanceof Box)) {
+            return;
+        }
+
+        Box box = (Box) zone.getShape();
+        ZoneBoundaryPacket packet = new ZoneBoundaryPacket(
+            zone.getUUID(),
+            this.id,
+            zone.getShape().getID(),
+            box.getBounds()
+        );
+        NetworkHandler.CHANNEL.send(
+            PacketDistributor.DIMENSION.with(() -> chunk.get().getLevel().dimension()),
+            packet
+        );
     }
 
     @Override
@@ -123,6 +129,7 @@ public class VillageCapability implements IVillageCapability {
         if (villagers.contains(villager)) {
             return;
         }
+
         villagers.add(villager);
         markDirty();
     }
@@ -159,6 +166,7 @@ public class VillageCapability implements IVillageCapability {
         if (chunk == null) {
             return;
         }
+
         chunk.setUnsaved(true);
     }
 

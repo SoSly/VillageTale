@@ -24,6 +24,7 @@ public class BoundarySyncHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
         syncBoundariesToPlayer(player);
     }
 
@@ -32,6 +33,7 @@ public class BoundarySyncHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
         syncBoundariesToPlayer(player);
     }
 
@@ -59,18 +61,23 @@ public class BoundarySyncHandler {
 
     private static void syncZonesToPlayer(ServerPlayer player, IVillageCapability villageCapability) {
         for (IVillageZone zone : villageCapability.getZones()) {
-            if (zone.getShape() != null) {
-                ZoneBoundaryPacket packet = zone.getShape().createBoundaryPacket(
-                    zone.getUUID(),
-                    villageCapability.getUUID()
-                );
-                if (packet != null) {
-                    NetworkHandler.CHANNEL.send(
-                        PacketDistributor.PLAYER.with(() -> player),
-                        packet
-                    );
-                }
+            if (zone.getShape() == null) {
+                continue;
             }
+
+            ZoneBoundaryPacket packet = zone.getShape().createBoundaryPacket(
+                zone.getUUID(),
+                villageCapability.getUUID()
+            );
+
+            if (packet == null) {
+                continue;
+            }
+
+            NetworkHandler.CHANNEL.send(
+                PacketDistributor.PLAYER.with(() -> player),
+                packet
+            );
         }
     }
 }

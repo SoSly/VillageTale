@@ -37,6 +37,7 @@ public class VillagesCapability implements IVillagesCapability {
                 return village;
             }
         }
+
         return null;
     }
 
@@ -68,17 +69,19 @@ public class VillagesCapability implements IVillagesCapability {
         villages.put(villageId, newVillage);
         villagesByName.put(villageName, villageId);
 
-        if (!level.isClientSide) {
-            VillageBoundaryPacket packet = new VillageBoundaryPacket(
-                villageId,
-                villageStartingChunk,
-                squadius
-            );
-            NetworkHandler.CHANNEL.send(
-                PacketDistributor.DIMENSION.with(() -> level.dimension()),
-                packet
-            );
+        if (level.isClientSide) {
+            return villageId;
         }
+
+        VillageBoundaryPacket packet = new VillageBoundaryPacket(
+            villageId,
+            villageStartingChunk,
+            squadius
+        );
+        NetworkHandler.CHANNEL.send(
+            PacketDistributor.DIMENSION.with(() -> level.dimension()),
+            packet
+        );
 
         return villageId;
     }
@@ -113,6 +116,7 @@ public class VillagesCapability implements IVillagesCapability {
                 return false;
             }
         }
+
         return true;
     }
 

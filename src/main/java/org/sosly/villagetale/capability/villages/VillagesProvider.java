@@ -57,9 +57,11 @@ public class VillagesProvider implements ICapabilitySerializable<CompoundTag> {
         for (int i = 0; i < villageList.size(); i++) {
             CompoundTag villageTag = villageList.getCompound(i);
             VillageInfo village = VillageInfo.deserializeNBT(villageTag);
-            if (village != null) {
-                capability.loadVillage(village);
+            if (village == null) {
+                continue;
             }
+
+            capability.loadVillage(village);
         }
     }
 

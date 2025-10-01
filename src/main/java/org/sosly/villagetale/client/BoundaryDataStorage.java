@@ -28,6 +28,7 @@ public class BoundaryDataStorage {
         if (dimension == null || village == null) {
             return;
         }
+
         getDimensionData(dimension).villages.put(village.getVillageId(), village);
     }
 
@@ -35,6 +36,7 @@ public class BoundaryDataStorage {
         if (dimension == null || villageId == null) {
             return;
         }
+
         getDimensionData(dimension).villages.remove(villageId);
     }
 
@@ -42,6 +44,7 @@ public class BoundaryDataStorage {
         if (dimension == null || zone == null) {
             return;
         }
+
         getDimensionData(dimension).zones.put(zone.getZoneId(), zone);
     }
 
@@ -49,6 +52,7 @@ public class BoundaryDataStorage {
         if (dimension == null || zoneId == null) {
             return;
         }
+
         getDimensionData(dimension).zones.remove(zoneId);
     }
 
@@ -64,6 +68,7 @@ public class BoundaryDataStorage {
         if (dimension == null) {
             return;
         }
+
         dimensionData.remove(dimension);
     }
 

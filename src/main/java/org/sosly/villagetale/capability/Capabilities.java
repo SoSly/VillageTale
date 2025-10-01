@@ -53,7 +53,7 @@ public class Capabilities {
         if (!(event.getObject() instanceof Villager)) {
             return;
         }
-        
+
         RecipeKnowledgeProvider provider = new RecipeKnowledgeProvider();
         event.addCapability(RECIPE_KNOWLEDGE_KEY, provider);
     }

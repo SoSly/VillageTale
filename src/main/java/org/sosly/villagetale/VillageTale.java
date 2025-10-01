@@ -45,7 +45,6 @@ public class VillageTale {
 
         modEventBus.addListener(this::setup);
         modEventBus.addListener(this::onEntityAttributeCreation);
-        modEventBus.addListener(org.sosly.villagetale.client.KeyBindings::register);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.build());
 

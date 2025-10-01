@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.sosly.villagetale.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "villagetale.refmap.json",
+  "mixins": [],
+  "client": [
+    "KeyboardHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
