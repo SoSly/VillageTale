@@ -86,24 +86,30 @@ jobs:
 
           # Compose the instruction sent to cli (JSON output format)
           INSTRUCTION=$(cat <<'EOF'
-          Output a JSON review with this structure:
+          You are reviewing a pull request diff. Output ONLY valid JSON, no markdown, no explanations, just the JSON object.
+
+          Output a JSON review with this exact structure:
           {
-            "summary": "2-3 sentence assessment focusing on correctness and Minecraft-specific concerns",
+            "summary": "2-3 sentence assessment of the changes",
             "comments": [
               {
-                "file": "path/to/file.java",
+                "file": "path/to/file",
                 "line": 123,
                 "body": "Issue description"
               }
             ],
             "status": {
-              "state": "success | failure",
+              "state": "success",
               "description": "Brief reason under 120 chars"
             }
           }
 
-          IMPORTANT: For the "line" field, use the ABSOLUTE line number from the file (the number shown after the + in the diff), NOT the position in the diff.
-          Example: If you see "+48    if (hunger < 3) {" then use "line": 48
+          Rules:
+          - If there are no issues, return empty comments array: "comments": []
+          - State should be "success" unless there are critical issues that must be fixed
+          - For YAML/config files, focus on syntax and configuration correctness
+          - For the "line" field, use the ABSOLUTE line number from the file (the number shown after the + in the diff)
+          - Output ONLY the JSON object, nothing else before or after it
           EOF
           )
 
@@ -127,6 +133,9 @@ jobs:
                 break
               else
                 echo "Invalid or empty JSON received, retrying..."
+                echo "--- Debug: Raw output ---"
+                head -n 20 ai_output.json || true
+                echo "--- End debug output ---"
                 RETRY_COUNT=$((RETRY_COUNT + 1))
               fi
             else
@@ -141,19 +150,21 @@ jobs:
             fi
           done
           
-          # If all retries failed, create fallback response
+          # If all retries failed, create fallback response and exit with error
           if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
             echo "All 5 retry attempts failed, creating fallback response"
             cat > ai_output.json <<'FALLBACK'
           {
-            "summary": "AI review failed after multiple attempts.",
+            "summary": "AI review failed after multiple attempts. The review system encountered an error.",
             "comments": [],
             "status": {
-              "state": "success",
-              "description": "AI Review completed with fallback"
+              "state": "failure",
+              "description": "AI Review failed - check workflow logs"
             }
           }
           FALLBACK
+            echo "ERROR: AI review failed after all retry attempts"
+            exit 1
           fi
 
           echo "AI review completed"
