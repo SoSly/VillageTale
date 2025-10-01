@@ -85,10 +85,7 @@ public class BoundaryRenderer {
                 outline.render(poseStack, consumer, cameraPos);
             }
         } else if (shapeType.toString().equals("villagetale:point")) {
-            AABB bounds = zone.getBounds();
-            BlockPos pos = new BlockPos((int) bounds.minX, (int) bounds.minY, (int) bounds.minZ);
-            AABB pointBox = new AABB(pos).inflate(0.5);
-            BoundaryOutline outline = new BoundaryOutline(pointBox, red, green, blue, alpha);
+            BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
         } else if (shapeType.toString().equals("villagetale:route")) {
             if (zone.getWaypoints() != null && !zone.getWaypoints().isEmpty()) {
