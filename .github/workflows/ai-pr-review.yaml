@@ -12,6 +12,8 @@ permissions:
 env:
   # Change to APPROVE / REQUEST_CHANGES / COMMENT
   REVIEW_EVENT: COMMENT
+  # Timeout for Claude API calls in seconds (increase for large PRs)
+  CLAUDE_TIMEOUT: 180
   # System prompt for Claude
   SYSTEM_PROMPT: |
     Review this Minecraft 1.20.1 mod PR focusing on:
@@ -81,8 +83,14 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set -euo pipefail
-          # Mask API key in logs just in case
-          if [ -n "${ANTHROPIC_API_KEY:-}" ]; then echo "::add-mask::${ANTHROPIC_API_KEY}"; fi
+          # Validate API key is set
+          if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "ERROR: ANTHROPIC_API_KEY secret is not configured"
+            echo "Please add ANTHROPIC_API_KEY to your repository secrets"
+            exit 1
+          fi
+          # Mask API key in logs
+          echo "::add-mask::${ANTHROPIC_API_KEY}"
 
           # Compose the instruction sent to cli (JSON output format)
           INSTRUCTION=$(cat <<'EOF'
@@ -117,6 +125,7 @@ jobs:
           echo "Running AI review with Claude Sonnet..."
           echo "Command: claude --print --model sonnet"
           echo "Diff size: $(wc -c < diff.patch) bytes"
+          echo "Timeout: ${CLAUDE_TIMEOUT} seconds"
 
           MAX_RETRIES=2
           RETRY_COUNT=0
@@ -124,7 +133,7 @@ jobs:
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
 
-            if cat diff.patch | timeout 60 claude --print --model sonnet "${SYSTEM_PROMPT}
+            if cat diff.patch | timeout ${CLAUDE_TIMEOUT} claude --print --model sonnet "${SYSTEM_PROMPT}
 
           ${INSTRUCTION}" > ai_output_raw.txt; then
               # Strip markdown code blocks if present
