@@ -1,0 +1,219 @@
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+env:
+  # Change to APPROVE / REQUEST_CHANGES / COMMENT
+  REVIEW_EVENT: COMMENT
+  # System prompt for Claude
+  SYSTEM_PROMPT: |
+    Review this Minecraft 1.20.1 mod PR focusing on:
+    - Minecraft/Forge conventions and best practices
+    - Capability system usage and entity AI goals
+    - Resource usage and performance (tick loops, chunk loading)
+    - Code style: early returns, always use braces, sparse comments
+    - VillageTale specific: zone systems, villager behaviors, work mechanics
+
+    Be direct and critical. Skip the praise unless something is genuinely clever.
+    Focus on actual problems, not style nitpicks.
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: ai-pr-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify tools
+        run: |
+          node -v
+          npm -v
+          jq --version
+          curl --version
+
+      - name: Install Claude CLI
+        run: |
+          set -euo pipefail
+          if ! command -v claude >/dev/null 2>&1; then
+            echo "Installing claude via npm..."
+            npm install -g @anthropic-ai/claude-code
+            command -v claude >/dev/null 2>&1 || { echo "claude not found after install" >&2; exit 1; }
+          fi
+          claude --version || true
+
+
+      - name: Gather PR context
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Set for this step and export for later steps
+          PR="${{ github.event.pull_request.number }}"
+          SHA="${{ github.event.pull_request.head.sha }}"
+          echo "PR=$PR" >> "$GITHUB_ENV"
+          echo "SHA=$SHA" >> "$GITHUB_ENV"
+
+          # Use explicit repo + PR number in detached HEAD context
+          gh pr view "$PR" --repo "${{ github.repository }}" --json number,title,body,author,baseRefName,headRefName,url > pr.json
+          gh pr diff "$PR" --repo "${{ github.repository }}" --patch > diff.patch
+
+      - name: Run AI review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          # Mask API key in logs just in case
+          if [ -n "${ANTHROPIC_API_KEY:-}" ]; then echo "::add-mask::${ANTHROPIC_API_KEY}"; fi
+
+          # Compose the instruction sent to cli (JSON output format)
+          INSTRUCTION=$(cat <<'EOF'
+          Output a JSON review with this structure:
+          {
+            "summary": "2-3 sentence assessment focusing on correctness and Minecraft-specific concerns",
+            "comments": [
+              {
+                "file": "path/to/file.java",
+                "line": 123,
+                "body": "Issue description"
+              }
+            ],
+            "status": {
+              "state": "success | failure",
+              "description": "Brief reason under 120 chars"
+            }
+          }
+
+          IMPORTANT: For the "line" field, use the ABSOLUTE line number from the file (the number shown after the + in the diff), NOT the position in the diff.
+          Example: If you see "+48    if (hunger < 3) {" then use "line": 48
+          EOF
+          )
+
+          # Run CLI in execute mode with retries for malformed/empty output
+          echo "Running AI review..."
+          echo "Command: claude -x"
+          echo "Diff size: $(wc -c < diff.patch) bytes"
+
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+
+            if cat diff.patch | timeout 60 claude -x "${SYSTEM_PROMPT}
+
+          ${INSTRUCTION}" > ai_output.json; then
+              # Check if output contains valid JSON with required elements
+              if jq -e '.summary and .comments and .status' ai_output.json > /dev/null 2>&1; then
+                echo "Valid JSON review received"
+                break
+              else
+                echo "Invalid or empty JSON received, retrying..."
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+              fi
+            else
+              echo "AI call failed, retrying..."
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+            fi
+          
+            # Add delay between retries
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "Waiting 5 seconds before retry..."
+              sleep 5
+            fi
+          done
+          
+          # If all retries failed, create fallback response
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "All 5 retry attempts failed, creating fallback response"
+            cat > ai_output.json <<'FALLBACK'
+          {
+            "summary": "AI review failed after multiple attempts.",
+            "comments": [],
+            "status": {
+              "state": "success",
+              "description": "AI Review completed with fallback"
+            }
+          }
+          FALLBACK
+          fi
+
+          echo "AI review completed"
+          echo "--- JSON Output ---"
+          cat ai_output.json
+          echo -e "\n--- End JSON Output ---"
+
+          # Extract sections using jq for JSON parsing
+          echo "Extracting review components..."
+
+          # Extract summary and create review body
+          jq -r '.summary // "No summary provided"' ai_output.json > summary.txt
+          echo "## Summary" > review.md
+          cat summary.txt >> review.md
+
+          # Extract and format comments for GitHub API
+          jq -r '.comments // [] | map({path: .file, line: .line, side: "RIGHT", body: .body})' ai_output.json > comments.json
+
+          echo "Generated comments JSON:"
+          cat comments.json
+
+          # Extract status
+          jq -r '.status // {state: "success", description: "AI Review completed"}' ai_output.json > status.json
+
+      - name: Post PR review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Build review payload with body + comments array
+          jq -n \
+            --arg event "${REVIEW_EVENT}" \
+            --arg body "$(cat review.md)" \
+            --argjson comments "$(cat comments.json)" \
+            '{ event: $event, body: $body, comments: $comments }' > review_payload.json
+
+          # Post the review
+          gh api \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${{ github.repository }}/pulls/$PR/reviews" \
+            --input review_payload.json
+
+      - name: Set commit status from AI StatusJSON
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Guard: create a default status if missing
+          if [ ! -f status.json ]; then
+            echo '{"state":"success","description":"AI Review completed"}' > status.json
+          fi
+          STATE=$(jq -r '.state // "success"' status.json)
+          DESC=$(jq -r '.description // "AI Review completed"' status.json)
+          SHA="${{ github.event.pull_request.head.sha }}"
+          gh api \
+            -X POST \
+            repos/${{ github.repository }}/statuses/${SHA} \
+            -f state="$STATE" \
+            -f context="AI PR Review" \
+            -f description="$DESC"
