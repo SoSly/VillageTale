@@ -100,6 +100,7 @@
   "villagetale.zone.woodshop": "Wood Shop",
   "villagetale.zone.numbered": "%s #%d",
   "block.villagetale.townhall": "Town Hall",
+  "item.villagetale.ledger": "Ledger",
   "villagetale.village.default_name": "%s's Village",
   "villagetale.townhall.already_exists": "Cannot place Town Hall. %s already has a Town Hall at %s",
   "villagetale.townhall.too_close": "Cannot create village this close to another village (minimum 30 chunks distance required)",

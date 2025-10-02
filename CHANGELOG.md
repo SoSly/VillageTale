@@ -18,7 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Herder (manages animals, brings them to pens)
 
 **Villages & Zones**
+- Ledger item - craftable tool for managing villages
 - Town Hall block - establish your village (automatically named after you)
+- Bell recipe added
 - Villages must be at least 30 chunks apart
 - Zone system for defining areas within villages
 - Four zone shapes available: box, cylinder, point, or route

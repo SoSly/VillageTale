@@ -14,6 +14,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.sosly.villagetale.block.BlockTypes;
 import org.sosly.villagetale.command.VillageTaleCommand;
+import org.sosly.villagetale.item.ItemTypes;
 import org.sosly.villagetale.compat.CompatRegistry;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.Activities;
@@ -38,6 +39,7 @@ public class VillageTale {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         BlockTypes.register(modEventBus);
+        ItemTypes.register(modEventBus);
         EntityTypes.register(modEventBus);
         MemoryModuleTypes.register(modEventBus);
         SensorTypes.register(modEventBus);
