@@ -10,86 +10,64 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.function.BiFunction;
 
 @OnlyIn(Dist.CLIENT)
 public class NoShadowEditBox extends EditBox {
-    private final Font font;
-    private String value = "";
-    private int frame;
-    private boolean bordered = true;
-    private boolean isEditable = true;
-    private int displayPos;
-    private int cursorPos;
-    private int highlightPos;
-    private int textColor = 14737632;
-    private int textColorUneditable = 7368816;
-    @Nullable
-    private String suggestion;
-    @Nullable
-    private Component hint;
-    private BiFunction<String, Integer, FormattedCharSequence> formatter = (text, pos) ->
-        FormattedCharSequence.forward(text, net.minecraft.network.chat.Style.EMPTY);
+    private static final Field FONT_FIELD;
+    private static final Field FRAME_FIELD;
+    private static final Field BORDERED_FIELD;
+    private static final Field IS_EDITABLE_FIELD;
+    private static final Field DISPLAY_POS_FIELD;
+    private static final Field HIGHLIGHT_POS_FIELD;
+    private static final Field TEXT_COLOR_FIELD;
+    private static final Field TEXT_COLOR_UNEDITABLE_FIELD;
+    private static final Field SUGGESTION_FIELD;
+    private static final Field HINT_FIELD;
+    private static final Field FORMATTER_FIELD;
+
+    static {
+        try {
+            FONT_FIELD = EditBox.class.getDeclaredField("font");
+            FONT_FIELD.setAccessible(true);
+
+            FRAME_FIELD = EditBox.class.getDeclaredField("frame");
+            FRAME_FIELD.setAccessible(true);
+
+            BORDERED_FIELD = EditBox.class.getDeclaredField("bordered");
+            BORDERED_FIELD.setAccessible(true);
+
+            IS_EDITABLE_FIELD = EditBox.class.getDeclaredField("isEditable");
+            IS_EDITABLE_FIELD.setAccessible(true);
+
+            DISPLAY_POS_FIELD = EditBox.class.getDeclaredField("displayPos");
+            DISPLAY_POS_FIELD.setAccessible(true);
+
+            HIGHLIGHT_POS_FIELD = EditBox.class.getDeclaredField("highlightPos");
+            HIGHLIGHT_POS_FIELD.setAccessible(true);
+
+            TEXT_COLOR_FIELD = EditBox.class.getDeclaredField("textColor");
+            TEXT_COLOR_FIELD.setAccessible(true);
+
+            TEXT_COLOR_UNEDITABLE_FIELD = EditBox.class.getDeclaredField("textColorUneditable");
+            TEXT_COLOR_UNEDITABLE_FIELD.setAccessible(true);
+
+            SUGGESTION_FIELD = EditBox.class.getDeclaredField("suggestion");
+            SUGGESTION_FIELD.setAccessible(true);
+
+            HINT_FIELD = EditBox.class.getDeclaredField("hint");
+            HINT_FIELD.setAccessible(true);
+
+            FORMATTER_FIELD = EditBox.class.getDeclaredField("formatter");
+            FORMATTER_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Failed to initialize NoShadowEditBox reflection", e);
+        }
+    }
 
     public NoShadowEditBox(Font pFont, int pX, int pY, int pWidth, int pHeight, Component pMessage) {
         super(pFont, pX, pY, pWidth, pHeight, pMessage);
-        this.font = pFont;
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        ++this.frame;
-    }
-
-    @Override
-    public void setValue(String pText) {
-        super.setValue(pText);
-        this.value = super.getValue();
-        this.cursorPos = super.getCursorPosition();
-        this.highlightPos = this.cursorPos;
-    }
-
-    @Override
-    public void setBordered(boolean pEnableBackgroundDrawing) {
-        super.setBordered(pEnableBackgroundDrawing);
-        this.bordered = pEnableBackgroundDrawing;
-    }
-
-    @Override
-    public void setTextColor(int pColor) {
-        super.setTextColor(pColor);
-        this.textColor = pColor;
-    }
-
-    @Override
-    public void setTextColorUneditable(int pColor) {
-        super.setTextColorUneditable(pColor);
-        this.textColorUneditable = pColor;
-    }
-
-    @Override
-    public void setEditable(boolean pEnabled) {
-        super.setEditable(pEnabled);
-        this.isEditable = pEnabled;
-    }
-
-    @Override
-    public void setSuggestion(@Nullable String pSuggestion) {
-        super.setSuggestion(pSuggestion);
-        this.suggestion = pSuggestion;
-    }
-
-    @Override
-    public void setHint(Component pHint) {
-        super.setHint(pHint);
-        this.hint = pHint;
-    }
-
-    @Override
-    public void setFormatter(BiFunction<String, Integer, FormattedCharSequence> pTextFormatter) {
-        super.setFormatter(pTextFormatter);
-        this.formatter = pTextFormatter;
     }
 
     @Override
@@ -98,67 +76,83 @@ public class NoShadowEditBox extends EditBox {
             return;
         }
 
-        this.value = super.getValue();
-        this.cursorPos = super.getCursorPosition();
-        this.highlightPos = this.cursorPos;
+        try {
+            Font font = (Font) FONT_FIELD.get(this);
+            String value = this.getValue();
+            int frame = FRAME_FIELD.getInt(this);
+            boolean bordered = BORDERED_FIELD.getBoolean(this);
+            boolean isEditable = IS_EDITABLE_FIELD.getBoolean(this);
+            int displayPos = DISPLAY_POS_FIELD.getInt(this);
+            int cursorPos = this.getCursorPosition();
+            int highlightPos = HIGHLIGHT_POS_FIELD.getInt(this);
+            int textColor = TEXT_COLOR_FIELD.getInt(this);
+            int textColorUneditable = TEXT_COLOR_UNEDITABLE_FIELD.getInt(this);
+            String suggestion = (String) SUGGESTION_FIELD.get(this);
+            Component hint = (Component) HINT_FIELD.get(this);
+            @SuppressWarnings("unchecked")
+            BiFunction<String, Integer, FormattedCharSequence> formatter =
+                (BiFunction<String, Integer, FormattedCharSequence>) FORMATTER_FIELD.get(this);
 
-        if (this.bordered) {
-            int borderColor = this.isFocused() ? -1 : -6250336;
-            graphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, borderColor);
-            graphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
-        }
-
-        int color = this.isEditable ? this.textColor : this.textColorUneditable;
-        int cursorOffset = this.cursorPos - this.displayPos;
-        int highlightOffset = this.highlightPos - this.displayPos;
-        String visibleText = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
-        boolean cursorInBounds = cursorOffset >= 0 && cursorOffset <= visibleText.length();
-        boolean showCursor = this.isFocused() && this.frame / 6 % 2 == 0 && cursorInBounds;
-
-        int textX = this.bordered ? this.getX() + 4 : this.getX();
-        int textY = this.bordered ? this.getY() + (this.height - 8) / 2 : this.getY();
-        int textEndX = textX;
-
-        int clampedHighlight = Math.min(highlightOffset, visibleText.length());
-
-        if (!visibleText.isEmpty()) {
-            String beforeCursor = cursorInBounds ? visibleText.substring(0, cursorOffset) : visibleText;
-            textEndX = graphics.drawString(this.font, this.formatter.apply(beforeCursor, this.displayPos), textX, textY, color, false);
-        }
-
-        boolean cursorAtEnd = this.cursorPos < this.value.length() || this.value.length() >= super.getValue().length();
-        int cursorX = textEndX;
-
-        if (!cursorInBounds) {
-            cursorX = cursorOffset > 0 ? textX + this.width : textX;
-        } else if (cursorAtEnd) {
-            cursorX = textEndX - 1;
-            --textEndX;
-        }
-
-        if (!visibleText.isEmpty() && cursorInBounds && cursorOffset < visibleText.length()) {
-            graphics.drawString(this.font, this.formatter.apply(visibleText.substring(cursorOffset), this.cursorPos), textEndX, textY, color, false);
-        }
-
-        if (this.hint != null && visibleText.isEmpty() && !this.isFocused()) {
-            graphics.drawString(this.font, this.hint, textEndX, textY, color, false);
-        }
-
-        if (!cursorAtEnd && this.suggestion != null) {
-            graphics.drawString(this.font, this.suggestion, cursorX - 1, textY, -8355712, false);
-        }
-
-        if (showCursor) {
-            if (cursorAtEnd) {
-                graphics.fill(RenderType.guiOverlay(), cursorX, textY - 1, cursorX + 1, textY + 1 + 9, -3092272);
-            } else {
-                graphics.drawString(this.font, "_", cursorX, textY, color, false);
+            if (bordered) {
+                int borderColor = this.isFocused() ? -1 : -6250336;
+                graphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, borderColor);
+                graphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
             }
-        }
 
-        if (clampedHighlight != cursorOffset) {
-            int highlightEndX = textX + this.font.width(visibleText.substring(0, clampedHighlight));
-            this.renderHighlight(graphics, cursorX, textY - 1, highlightEndX - 1, textY + 1 + 9);
+            int color = isEditable ? textColor : textColorUneditable;
+            int cursorOffset = cursorPos - displayPos;
+            int highlightOffset = highlightPos - displayPos;
+            String visibleText = font.plainSubstrByWidth(value.substring(displayPos), this.getInnerWidth());
+            boolean cursorInBounds = cursorOffset >= 0 && cursorOffset <= visibleText.length();
+            boolean showCursor = this.isFocused() && frame / 6 % 2 == 0 && cursorInBounds;
+
+            int textX = bordered ? this.getX() + 4 : this.getX();
+            int textY = bordered ? this.getY() + (this.height - 8) / 2 : this.getY();
+            int textEndX = textX;
+
+            int clampedHighlight = Math.min(highlightOffset, visibleText.length());
+
+            if (!visibleText.isEmpty()) {
+                String beforeCursor = cursorInBounds ? visibleText.substring(0, cursorOffset) : visibleText;
+                textEndX = graphics.drawString(font, formatter.apply(beforeCursor, displayPos), textX, textY, color, false);
+            }
+
+            boolean cursorAtEnd = cursorPos < value.length() || value.length() >= this.getValue().length();
+            int cursorX = textEndX;
+
+            if (!cursorInBounds) {
+                cursorX = cursorOffset > 0 ? textX + this.width : textX;
+            } else if (cursorAtEnd) {
+                cursorX = textEndX - 1;
+                --textEndX;
+            }
+
+            if (!visibleText.isEmpty() && cursorInBounds && cursorOffset < visibleText.length()) {
+                graphics.drawString(font, formatter.apply(visibleText.substring(cursorOffset), cursorPos), textEndX, textY, color, false);
+            }
+
+            if (hint != null && visibleText.isEmpty() && !this.isFocused()) {
+                graphics.drawString(font, hint, textEndX, textY, color, false);
+            }
+
+            if (!cursorAtEnd && suggestion != null) {
+                graphics.drawString(font, suggestion, cursorX - 1, textY, -8355712, false);
+            }
+
+            if (showCursor) {
+                if (cursorAtEnd) {
+                    graphics.fill(RenderType.guiOverlay(), cursorX, textY - 1, cursorX + 1, textY + 1 + 9, -3092272);
+                } else {
+                    graphics.drawString(font, "_", cursorX, textY, color, false);
+                }
+            }
+
+            if (clampedHighlight != cursorOffset) {
+                int highlightEndX = textX + font.width(visibleText.substring(0, clampedHighlight));
+                this.renderHighlight(graphics, cursorX, textY - 1, highlightEndX - 1, textY + 1 + 9);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to render NoShadowEditBox", e);
         }
     }
 

@@ -163,7 +163,7 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
     @Override
-    public boolean updateVillageName(UUID villageId, String newName) {
+    public synchronized boolean updateVillageName(UUID villageId, String newName) {
         if (villageId == null || newName == null || newName.trim().isEmpty()) {
             return false;
         }

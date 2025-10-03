@@ -4,10 +4,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.network.NetworkEvent;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
+import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.ServerPacketHandler;
 
@@ -70,6 +73,26 @@ public class UpdateVillageInfoPacket extends BasePacket {
 
             if (msg.newName.length() > 64) {
                 player.sendSystemMessage(Component.literal("Village name is too long (max 64 characters)"));
+                return;
+            }
+
+            VillageInfo village = villagesCapability.getVillageById(msg.villageId);
+            if (village == null) {
+                player.sendSystemMessage(Component.literal("Village not found"));
+                return;
+            }
+
+            ChunkPos villageChunk = village.getVillageStartingChunk();
+            IVillageCapability villageCapability = level.getChunk(villageChunk.x, villageChunk.z)
+                .getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+
+            if (villageCapability == null) {
+                player.sendSystemMessage(Component.literal("Failed to update village: capability not found"));
+                return;
+            }
+
+            if (!villageCapability.hasPermission(player.getUUID(), IVillageCapability.Permission.OWNER)) {
+                player.sendSystemMessage(Component.literal("You do not have permission to rename this village"));
                 return;
             }
 

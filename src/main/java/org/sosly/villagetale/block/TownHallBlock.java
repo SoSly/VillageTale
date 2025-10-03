@@ -98,6 +98,19 @@ public class TownHallBlock extends Block {
             return InteractionResult.SUCCESS;
         }
 
+        ChunkPos villageChunk = village.getVillageStartingChunk();
+        IVillageCapability villageCapability = serverLevel.getChunk(villageChunk.x, villageChunk.z)
+            .getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+
+        if (villageCapability == null) {
+            return InteractionResult.FAIL;
+        }
+
+        if (!villageCapability.hasPermission(player.getUUID(), IVillageCapability.Permission.OWNER)) {
+            player.sendSystemMessage(Component.literal("You do not have permission to manage this village"));
+            return InteractionResult.SUCCESS;
+        }
+
         LedgerItem.setVillageUUID(heldItem, village.getVillageId());
 
         OpenTownHallScreenPacket packet = new OpenTownHallScreenPacket(village.getVillageId(), village.getVillageName());
