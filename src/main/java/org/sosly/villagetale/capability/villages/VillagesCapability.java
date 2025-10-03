@@ -163,7 +163,7 @@ public class VillagesCapability implements IVillagesCapability {
     }
 
     @Override
-    public synchronized boolean updateVillageName(UUID villageId, String newName) {
+    public boolean updateVillageName(UUID villageId, String newName) {
         if (villageId == null || newName == null || newName.trim().isEmpty()) {
             return false;
         }
@@ -178,13 +178,16 @@ public class VillagesCapability implements IVillagesCapability {
             return true;
         }
 
-        if (villagesByName.containsKey(newName)) {
-            return false;
+        synchronized (villagesByName) {
+            if (villagesByName.containsKey(newName)) {
+                return false;
+            }
+
+            villagesByName.remove(oldName);
+            village.setVillageName(newName);
+            villagesByName.put(newName, villageId);
         }
 
-        villagesByName.remove(oldName);
-        village.setVillageName(newName);
-        villagesByName.put(newName, villageId);
         return true;
     }
 
