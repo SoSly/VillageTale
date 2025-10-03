@@ -231,6 +231,10 @@ public class TownHallBlock extends Block {
         cap.setUUID(newVillageId);
         cap.setName(villageName);
 
+        if (player != null) {
+            cap.setPlayerPermission(player.getUUID(), IVillageCapability.Permission.OWNER);
+        }
+
         VillageInfo village = villagesCapability.getVillageById(newVillageId);
         if (village != null) {
             createTownHallZone(level, village);

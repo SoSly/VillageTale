@@ -85,7 +85,12 @@ public class IsItemInStorage extends Sensor<Villager> {
             return null;
         }
 
-        ChunkPos townHallChunk = new ChunkPos(village.getTownHallPos());
+        BlockPos townHallPos = village.getTownHallPos();
+        if (townHallPos == null) {
+            return null;
+        }
+
+        ChunkPos townHallChunk = new ChunkPos(townHallPos);
         LevelChunk chunk = level.getChunk(townHallChunk.x, townHallChunk.z);
 
         IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
@@ -157,7 +162,12 @@ public class IsItemInStorage extends Sensor<Villager> {
             return;
         }
 
-        ChunkPos townHallChunk = new ChunkPos(village.getTownHallPos());
+        BlockPos townHallPos = village.getTownHallPos();
+        if (townHallPos == null) {
+            return;
+        }
+
+        ChunkPos townHallChunk = new ChunkPos(townHallPos);
         LevelChunk chunk = level.getChunk(townHallChunk.x, townHallChunk.z);
 
         IVillageCapability villageCapability = chunk.getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
