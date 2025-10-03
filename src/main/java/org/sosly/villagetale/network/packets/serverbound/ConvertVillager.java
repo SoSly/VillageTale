@@ -1,5 +1,6 @@
 package org.sosly.villagetale.network.packets.serverbound;
 
+import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -14,8 +15,6 @@ import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.ServerPacketHandler;
-
-import java.util.function.Supplier;
 
 public class ConvertVillager extends BasePacket {
     private static final int EMERALD_COST = 10;
@@ -65,7 +64,7 @@ public class ConvertVillager extends BasePacket {
             ServerLevel level = player.serverLevel();
             Entity entity = level.getEntity(msg.villagerEntityId);
 
-            if (!(entity instanceof net.minecraft.world.entity.npc.Villager vanillaVillager)) {
+            if (!(entity instanceof Villager vanillaVillager)) {
                 player.sendSystemMessage(Component.literal("Invalid villager entity"));
                 return;
             }
