@@ -106,5 +106,11 @@
   "villagetale.townhall.too_close": "Cannot create village this close to another village (minimum 30 chunks distance required)",
 
   "key.categories.villagetale": "VillageTale",
-  "key.villagetale.toggle_village_boundaries": "Toggle Village Boundaries (F3+V)"
+  "key.villagetale.toggle_village_boundaries": "Toggle Village Boundaries (F3+V)",
+
+  "villagetale.gui.townhall.title": "Town Hall",
+  "villagetale.gui.townhall.village_name": "Village Name",
+  "villagetale.gui.townhall.village_name_label": "Village Name:",
+  "villagetale.gui.townhall.save": "Save",
+  "villagetale.gui.townhall.cancel": "Cancel"
 }

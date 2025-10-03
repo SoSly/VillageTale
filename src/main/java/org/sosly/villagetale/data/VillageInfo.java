@@ -12,7 +12,7 @@ public class VillageInfo {
     private BlockPos townHallPos;
     private final ChunkPos villageStartingChunk;
     private final int squadius;
-    private final String villageName;
+    private String villageName;
 
     public VillageInfo(UUID villageId, BlockPos townHallPos, ChunkPos villageStartingChunk, String villageName, int squadius) {
         this.villageId = villageId;
@@ -40,6 +40,10 @@ public class VillageInfo {
 
     public String getVillageName() {
         return villageName;
+    }
+
+    public void setVillageName(String villageName) {
+        this.villageName = villageName;
     }
 
     public int getSquadius() {

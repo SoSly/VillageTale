@@ -6,9 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkDirection;
 import org.jetbrains.annotations.Nullable;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
@@ -30,6 +33,9 @@ import org.sosly.villagetale.api.IVillageZone;
 import net.minecraft.world.level.ChunkPos;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
+import org.sosly.villagetale.item.LedgerItem;
+import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreenPacket;
 import org.sosly.villagetale.zone.type.TownHall;
 
 public class TownHallBlock extends Block {
@@ -64,11 +70,20 @@ public class TownHallBlock extends Block {
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemStack heldItem = player.getItemInHand(hand);
+        if (!(heldItem.getItem() instanceof LedgerItem)) {
+            return InteractionResult.PASS;
+        }
+
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
 
         if (!(level instanceof ServerLevel serverLevel)) {
+            return InteractionResult.FAIL;
+        }
+
+        if (!(player instanceof ServerPlayer serverPlayer)) {
             return InteractionResult.FAIL;
         }
 
@@ -83,7 +98,11 @@ public class TownHallBlock extends Block {
             return InteractionResult.SUCCESS;
         }
 
-        player.sendSystemMessage(Component.literal("Town Hall GUI not yet implemented. Village: " + village.getVillageName()));
+        LedgerItem.setVillageUUID(heldItem, village.getVillageId());
+
+        OpenTownHallScreenPacket packet = new OpenTownHallScreenPacket(village.getVillageId(), village.getVillageName());
+        NetworkHandler.CHANNEL.sendTo(packet, serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+
         return InteractionResult.SUCCESS;
     }
 

@@ -1,4 +1,4 @@
-package org.sosly.villagetale.renderer;
+package org.sosly.villagetale.renderer.debug;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

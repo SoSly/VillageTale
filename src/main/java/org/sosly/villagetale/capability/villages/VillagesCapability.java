@@ -162,6 +162,32 @@ public class VillagesCapability implements IVillagesCapability {
         return true;
     }
 
+    @Override
+    public boolean updateVillageName(UUID villageId, String newName) {
+        if (villageId == null || newName == null || newName.trim().isEmpty()) {
+            return false;
+        }
+
+        VillageInfo village = villages.get(villageId);
+        if (village == null) {
+            return false;
+        }
+
+        String oldName = village.getVillageName();
+        if (oldName.equals(newName)) {
+            return true;
+        }
+
+        if (villagesByName.containsKey(newName)) {
+            return false;
+        }
+
+        villagesByName.remove(oldName);
+        village.setVillageName(newName);
+        villagesByName.put(newName, villageId);
+        return true;
+    }
+
     public void loadVillage(VillageInfo village) {
         if (village == null) {
             return;

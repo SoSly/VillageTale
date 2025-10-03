@@ -10,10 +10,12 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.entity.Villager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreenPacket;
 import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSyncPacket;
 import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSyncPacket;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundaryPacket;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfoPacket;
 
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -57,6 +59,22 @@ public class NetworkHandler {
             ZoneBoundaryPacket::encode,
             ZoneBoundaryPacket::decode,
             ZoneBoundaryPacket::handle
+        );
+
+        CHANNEL.registerMessage(
+            packetId++,
+            UpdateVillageInfoPacket.class,
+            UpdateVillageInfoPacket::encode,
+            UpdateVillageInfoPacket::decode,
+            UpdateVillageInfoPacket::handle
+        );
+
+        CHANNEL.registerMessage(
+            packetId++,
+            OpenTownHallScreenPacket.class,
+            OpenTownHallScreenPacket::encode,
+            OpenTownHallScreenPacket::decode,
+            OpenTownHallScreenPacket::handle
         );
 
         VillageTale.LOGGER.info("VillageTale registered {} network messages", packetId);

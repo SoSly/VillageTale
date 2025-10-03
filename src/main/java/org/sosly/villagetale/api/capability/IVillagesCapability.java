@@ -70,4 +70,12 @@ public interface IVillagesCapability {
      * @return true if village was found and updated
      */
     boolean updateTownHallPos(UUID villageId, BlockPos newPos);
+
+    /**
+     * Updates the name of a village.
+     * @param villageId UUID of village to update
+     * @param newName New name for the village
+     * @return true if village was found and name was updated successfully
+     */
+    boolean updateVillageName(UUID villageId, String newName);
 }
