@@ -13,8 +13,8 @@ import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.VillageBoundaryPacket;
-import org.sosly.villagetale.network.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.VillageBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class BoundarySyncHandler {

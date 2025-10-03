@@ -1,17 +1,23 @@
-package org.sosly.villagetale.network;
+package org.sosly.villagetale.network.packets.clientbound;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.network.NetworkEvent;
+import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.client.BoundaryDataStorage;
+import org.sosly.villagetale.data.ZoneBoundaryData;
+import org.sosly.villagetale.network.BasePacket;
+import org.sosly.villagetale.network.ClientPacketHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class ZoneBoundaryPacket {
+public class ZoneBoundaryPacket extends BasePacket {
     private final UUID zoneId;
     private final UUID villageId;
     private final ResourceLocation shapeType;
@@ -66,40 +72,69 @@ public class ZoneBoundaryPacket {
     }
 
     public static ZoneBoundaryPacket decode(FriendlyByteBuf buffer) {
-        UUID zoneId = buffer.readUUID();
-        UUID villageId = buffer.readUUID();
-        ResourceLocation shapeType = buffer.readResourceLocation();
-        double minX = buffer.readDouble();
-        double minY = buffer.readDouble();
-        double minZ = buffer.readDouble();
-        double maxX = buffer.readDouble();
-        double maxY = buffer.readDouble();
-        double maxZ = buffer.readDouble();
-        AABB bounds = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+        ZoneBoundaryPacket msg;
 
-        BlockPos center = null;
-        if (buffer.readBoolean()) {
-            center = buffer.readBlockPos();
-        }
+        try {
+            UUID zoneId = buffer.readUUID();
+            UUID villageId = buffer.readUUID();
+            ResourceLocation shapeType = buffer.readResourceLocation();
+            double minX = buffer.readDouble();
+            double minY = buffer.readDouble();
+            double minZ = buffer.readDouble();
+            double maxX = buffer.readDouble();
+            double maxY = buffer.readDouble();
+            double maxZ = buffer.readDouble();
+            AABB bounds = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 
-        int radius = buffer.readInt();
-        int height = buffer.readInt();
-
-        List<BlockPos> waypoints = null;
-        if (buffer.readBoolean()) {
-            int size = buffer.readInt();
-            waypoints = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                waypoints.add(buffer.readBlockPos());
+            BlockPos center = null;
+            if (buffer.readBoolean()) {
+                center = buffer.readBlockPos();
             }
+
+            int radius = buffer.readInt();
+            int height = buffer.readInt();
+
+            List<BlockPos> waypoints = null;
+            if (buffer.readBoolean()) {
+                int size = buffer.readInt();
+                waypoints = new ArrayList<>(size);
+                for (int i = 0; i < size; i++) {
+                    waypoints.add(buffer.readBlockPos());
+                }
+            }
+
+            msg = new ZoneBoundaryPacket(zoneId, villageId, shapeType, bounds, center, radius, height, waypoints);
+        } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
+            VillageTale.LOGGER.error("Exception while reading ZoneBoundaryPacket: {}", err.toString());
+            return null;
         }
 
-        return new ZoneBoundaryPacket(zoneId, villageId, shapeType, bounds, center, radius, height, waypoints);
+        msg.messageIsValid = true;
+        return msg;
     }
 
     public static void handle(ZoneBoundaryPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ClientPacketHandler.handleZoneBoundary(msg));
-        ctx.get().setPacketHandled(true);
+        NetworkEvent.Context context = ctx.get();
+        if (ClientPacketHandler.validateBasics(msg, context)) {
+            context.enqueueWork(() -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.level == null) {
+                    return;
+                }
+
+                ZoneBoundaryData data = new ZoneBoundaryData(
+                    msg.zoneId,
+                    msg.villageId,
+                    msg.shapeType,
+                    msg.bounds,
+                    msg.center,
+                    msg.radius,
+                    msg.height,
+                    msg.waypoints
+                );
+                BoundaryDataStorage.getInstance().addZone(mc.level.dimension(), data);
+            });
+        }
     }
 
     public UUID getZoneId() {

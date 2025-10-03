@@ -12,7 +12,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.VillageBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.VillageBoundaryPacket;
 
 public class VillagesCapability implements IVillagesCapability {
 

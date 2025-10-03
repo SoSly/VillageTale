@@ -12,8 +12,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
+import org.sosly.villagetale.client.ClientDataManager;
 import org.sosly.villagetale.entity.Villager;
-import org.sosly.villagetale.network.ClientPacketHandler;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.renderer.model.VillagerModel;
 
@@ -29,10 +29,10 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 
     @Override
     public ResourceLocation getTextureLocation(Villager villager) {
-        ResourceLocation professionId = ClientPacketHandler.getCachedProfession(villager.getId());
+        ResourceLocation professionId = ClientDataManager.getCachedProfession(villager.getId());
         if (professionId != null) {
             return ProfessionRegistry.INSTANCE.getProfession(professionId)
-                .map(profession -> new ResourceLocation(profession.getID().getNamespace(), 
+                .map(profession -> new ResourceLocation(profession.getID().getNamespace(),
                     "textures/entity/villager/profession/" + profession.getID().getPath() + ".png"))
                 .orElse(VILLAGER_BASE_SKIN);
         }

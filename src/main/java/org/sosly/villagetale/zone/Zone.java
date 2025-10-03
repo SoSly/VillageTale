@@ -26,7 +26,7 @@ import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
 import net.minecraftforge.network.PacketDistributor;
 
 public class Zone implements IVillageZone {
