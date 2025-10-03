@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class ZoneBoundaryPacket extends BasePacket {
+public class ZoneBoundary extends BasePacket {
     private final UUID zoneId;
     private final UUID villageId;
     private final ResourceLocation shapeType;
@@ -27,12 +27,12 @@ public class ZoneBoundaryPacket extends BasePacket {
     private final int height;
     private final List<BlockPos> waypoints;
 
-    public ZoneBoundaryPacket(UUID zoneId, UUID villageId, ResourceLocation shapeType, AABB bounds) {
+    public ZoneBoundary(UUID zoneId, UUID villageId, ResourceLocation shapeType, AABB bounds) {
         this(zoneId, villageId, shapeType, bounds, null, 0, 0, null);
     }
 
-    public ZoneBoundaryPacket(UUID zoneId, UUID villageId, ResourceLocation shapeType, AABB bounds,
-                             BlockPos center, int radius, int height, List<BlockPos> waypoints) {
+    public ZoneBoundary(UUID zoneId, UUID villageId, ResourceLocation shapeType, AABB bounds,
+                        BlockPos center, int radius, int height, List<BlockPos> waypoints) {
         this.zoneId = zoneId;
         this.villageId = villageId;
         this.shapeType = shapeType;
@@ -43,7 +43,7 @@ public class ZoneBoundaryPacket extends BasePacket {
         this.waypoints = waypoints;
     }
 
-    public static void encode(ZoneBoundaryPacket msg, FriendlyByteBuf buffer) {
+    public static void encode(ZoneBoundary msg, FriendlyByteBuf buffer) {
         buffer.writeUUID(msg.zoneId);
         buffer.writeUUID(msg.villageId);
         buffer.writeResourceLocation(msg.shapeType);
@@ -71,8 +71,8 @@ public class ZoneBoundaryPacket extends BasePacket {
         }
     }
 
-    public static ZoneBoundaryPacket decode(FriendlyByteBuf buffer) {
-        ZoneBoundaryPacket msg;
+    public static ZoneBoundary decode(FriendlyByteBuf buffer) {
+        ZoneBoundary msg;
 
         try {
             UUID zoneId = buffer.readUUID();
@@ -103,9 +103,9 @@ public class ZoneBoundaryPacket extends BasePacket {
                 }
             }
 
-            msg = new ZoneBoundaryPacket(zoneId, villageId, shapeType, bounds, center, radius, height, waypoints);
+            msg = new ZoneBoundary(zoneId, villageId, shapeType, bounds, center, radius, height, waypoints);
         } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
-            VillageTale.LOGGER.error("Exception while reading ZoneBoundaryPacket: {}", err.toString());
+            VillageTale.LOGGER.error("Exception while reading ZoneBoundary: {}", err.toString());
             return null;
         }
 
@@ -113,7 +113,7 @@ public class ZoneBoundaryPacket extends BasePacket {
         return msg;
     }
 
-    public static void handle(ZoneBoundaryPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(ZoneBoundary msg, Supplier<NetworkEvent.Context> ctx) {
         NetworkEvent.Context context = ctx.get();
         if (ClientPacketHandler.validateBasics(msg, context)) {
             context.enqueueWork(() -> {

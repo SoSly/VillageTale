@@ -12,34 +12,40 @@ import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.BasePacket;
+import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.ServerPacketHandler;
 
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class UpdateVillageInfoPacket extends BasePacket {
+public class UpdateVillageInfo extends BasePacket {
     private final UUID villageId;
     private final String newName;
 
-    public UpdateVillageInfoPacket(UUID villageId, String newName) {
+    private UpdateVillageInfo(UUID villageId, String newName) {
         this.villageId = villageId;
         this.newName = newName;
     }
 
-    public static void encode(UpdateVillageInfoPacket msg, FriendlyByteBuf buffer) {
+    public static void send(UUID villageId, String newName) {
+        UpdateVillageInfo packet = new UpdateVillageInfo(villageId, newName);
+        NetworkHandler.CHANNEL.sendToServer(packet);
+    }
+
+    public static void encode(UpdateVillageInfo msg, FriendlyByteBuf buffer) {
         buffer.writeUUID(msg.villageId);
         buffer.writeUtf(msg.newName);
     }
 
-    public static UpdateVillageInfoPacket decode(FriendlyByteBuf buffer) {
-        UpdateVillageInfoPacket msg;
+    public static UpdateVillageInfo decode(FriendlyByteBuf buffer) {
+        UpdateVillageInfo msg;
 
         try {
             UUID villageId = buffer.readUUID();
             String newName = buffer.readUtf();
-            msg = new UpdateVillageInfoPacket(villageId, newName);
+            msg = new UpdateVillageInfo(villageId, newName);
         } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
-            VillageTale.LOGGER.error("Exception while reading UpdateVillageInfoPacket: {}", err.toString());
+            VillageTale.LOGGER.error("Exception while reading UpdateVillageInfo: {}", err.toString());
             return null;
         }
 
@@ -47,7 +53,7 @@ public class UpdateVillageInfoPacket extends BasePacket {
         return msg;
     }
 
-    public static void handle(UpdateVillageInfoPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(UpdateVillageInfo msg, Supplier<NetworkEvent.Context> ctx) {
         NetworkEvent.Context context = ctx.get();
         if (!ServerPacketHandler.validateBasics(msg, context)) {
             return;

@@ -26,7 +26,7 @@ import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import net.minecraftforge.network.PacketDistributor;
 
 public class Zone implements IVillageZone {
@@ -553,7 +553,7 @@ public class Zone implements IVillageZone {
             return;
         }
 
-        ZoneBoundaryPacket packet = shape.createBoundaryPacket(id, currentVillage.getUUID());
+        ZoneBoundary packet = shape.createBoundaryPacket(id, currentVillage.getUUID());
         if (packet == null) {
             return;
         }

@@ -16,7 +16,7 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.api.capability.IVillageCapability;
-import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -86,7 +86,7 @@ public class Route implements IZoneShape {
     }
 
     @Override
-    public ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId) {
+    public ZoneBoundary createBoundaryPacket(UUID zoneId, UUID villageId) {
         if (points.isEmpty()) {
             return null;
         }
@@ -97,7 +97,7 @@ public class Route implements IZoneShape {
             bounds = bounds.minmax(new AABB(waypoint));
         }
 
-        return new ZoneBoundaryPacket(zoneId, villageId, getID(), bounds, null, 0, 0, points);
+        return new ZoneBoundary(zoneId, villageId, getID(), bounds, null, 0, 0, points);
     }
 
     public static Builder builder(Level level, IVillageCapability village, int ordinal) {

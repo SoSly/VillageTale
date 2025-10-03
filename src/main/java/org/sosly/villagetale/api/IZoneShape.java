@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 
 public interface IZoneShape {
     boolean containsPosition(BlockPos pos);
@@ -26,5 +26,5 @@ public interface IZoneShape {
 
     void deserializeNBT(CompoundTag nbt);
 
-    ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId);
+    ZoneBoundary createBoundaryPacket(UUID zoneId, UUID villageId);
 }

@@ -27,9 +27,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
@@ -50,7 +50,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -201,6 +200,9 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     @Override
     protected void customServerAiStep() {
         this.level().getProfiler().push("villageTaleVillagerBrain");
+        if (!this.getBrain().isActive(Activity.CORE)) {
+            this.registerBrainGoals(this.getBrain());
+        }
         this.getBrain().tick((ServerLevel) this.level(), this);
         this.level().getProfiler().pop();
         this.foodData.tick(this);
@@ -258,6 +260,11 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (homeZoneId.isPresent()) {
             tag.putString("HomeZoneId", homeZoneId.get().toString());
         }
+
+        Optional<UUID> followingPlayerId = this.brain.getMemory(MemoryModuleTypes.FOLLOWING_PLAYER.get());
+        if (followingPlayerId.isPresent()) {
+            tag.putString("FollowingPlayerId", followingPlayerId.get().toString());
+        }
     }
 
     @Override
@@ -299,6 +306,11 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (tag.contains("HomeZoneId")) {
             UUID homeZoneId = UUID.fromString(tag.getString("HomeZoneId"));
             this.brain.setMemory(MemoryModuleTypes.HOME_ZONE.get(), homeZoneId);
+        }
+
+        if (tag.contains("FollowingPlayerId")) {
+            UUID followingPlayerId = UUID.fromString(tag.getString("FollowingPlayerId"));
+            this.brain.setMemory(MemoryModuleTypes.FOLLOWING_PLAYER.get(), followingPlayerId);
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {
@@ -395,7 +407,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.brain.eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());
         this.brain.eraseMemory(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get());
         this.brain.eraseMemory(MemoryModuleTypes.BUSY.get());
-        
+
         this.brain.setMemory(MemoryModuleTypes.PROFESSION.get(), professionId);
 
         if (!(this.level() instanceof ServerLevel serverLevel)) {
@@ -459,13 +471,12 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         newVillageCapability.addVillagerByUUID(this.getUUID());
-        
-        // Clear all zone-related memories when changing villages
+
         this.brain.eraseMemory(MemoryModuleTypes.HOME_ZONE.get());
         this.brain.eraseMemory(MemoryModuleTypes.WORK_ZONE.get());
         this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
         this.brain.eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
-        
+
         this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
         VillageTale.LOGGER.info("Villager {} assigned to village {}", this.getUUID(), villageId);
     }
@@ -507,6 +518,19 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
         this.brain.eraseMemory(MemoryModuleTypes.VILLAGE.get());
         VillageTale.LOGGER.info("Villager {} village assignment cleared", this.getUUID());
+    }
+
+    public Optional<UUID> getFollowingPlayer() {
+        return this.brain.getMemory(MemoryModuleTypes.FOLLOWING_PLAYER.get());
+    }
+
+    public void setFollowingPlayer(@Nullable UUID playerId) {
+        if (playerId == null) {
+            this.brain.eraseMemory(MemoryModuleTypes.FOLLOWING_PLAYER.get());
+            return;
+        }
+
+        this.brain.setMemory(MemoryModuleTypes.FOLLOWING_PLAYER.get(), playerId);
     }
 
     public LivingEntityFoodData getFoodData() {
@@ -596,7 +620,8 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
                 MemoryModuleTypes.WORK_ZONE.get(),
                 MemoryModuleTypes.HOME_ZONE.get(),
                 MemoryModuleTypes.BUSY.get(),
-                MemoryModuleTypes.GATES_TO_CLOSE.get()
+                MemoryModuleTypes.GATES_TO_CLOSE.get(),
+                MemoryModuleTypes.FOLLOWING_PLAYER.get()
             );
         }
 

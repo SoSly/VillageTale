@@ -35,7 +35,7 @@ import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.item.LedgerItem;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreenPacket;
+import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
 import org.sosly.villagetale.zone.type.TownHall;
 
 public class TownHallBlock extends Block {
@@ -113,8 +113,7 @@ public class TownHallBlock extends Block {
 
         LedgerItem.setVillageUUID(heldItem, village.getVillageId());
 
-        OpenTownHallScreenPacket packet = new OpenTownHallScreenPacket(village.getVillageId(), village.getVillageName());
-        NetworkHandler.CHANNEL.sendTo(packet, serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        OpenTownHallScreen.send(serverPlayer, village.getVillageId(), village.getVillageName());
 
         return InteractionResult.SUCCESS;
     }
@@ -167,7 +166,7 @@ public class TownHallBlock extends Block {
 
     private void onPlaced(ServerLevel level, BlockPos pos, Player player) {
         ChunkPos chunkPos = new ChunkPos(pos);
-        
+
         IVillagesCapability villagesCapability = level.getCapability(Capabilities.VILLAGES_CAPABILITY)
                 .orElseThrow(NullPointerException::new);
         handleVillageSetup(level, pos, chunkPos, player, villagesCapability);

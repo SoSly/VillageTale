@@ -12,29 +12,29 @@ import org.sosly.villagetale.network.ClientPacketHandler;
 
 import java.util.function.Supplier;
 
-public class VillagerProfessionSyncPacket extends BasePacket {
+public class VillagerProfessionSync extends BasePacket {
     private final int entityId;
     private final ResourceLocation professionId;
 
-    public VillagerProfessionSyncPacket(int entityId, ResourceLocation professionId) {
+    public VillagerProfessionSync(int entityId, ResourceLocation professionId) {
         this.entityId = entityId;
         this.professionId = professionId;
     }
 
-    public static void encode(VillagerProfessionSyncPacket msg, FriendlyByteBuf buffer) {
+    public static void encode(VillagerProfessionSync msg, FriendlyByteBuf buffer) {
         buffer.writeVarInt(msg.entityId);
         buffer.writeResourceLocation(msg.professionId);
     }
 
-    public static VillagerProfessionSyncPacket decode(FriendlyByteBuf buffer) {
-        VillagerProfessionSyncPacket msg;
+    public static VillagerProfessionSync decode(FriendlyByteBuf buffer) {
+        VillagerProfessionSync msg;
 
         try {
             int entityId = buffer.readVarInt();
             ResourceLocation professionId = buffer.readResourceLocation();
-            msg = new VillagerProfessionSyncPacket(entityId, professionId);
+            msg = new VillagerProfessionSync(entityId, professionId);
         } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
-            VillageTale.LOGGER.error("Exception while reading VillagerProfessionSyncPacket: {}", err.toString());
+            VillageTale.LOGGER.error("Exception while reading VillagerProfessionSync: {}", err.toString());
             return null;
         }
 
@@ -42,7 +42,7 @@ public class VillagerProfessionSyncPacket extends BasePacket {
         return msg;
     }
 
-    public static void handle(VillagerProfessionSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(VillagerProfessionSync msg, Supplier<NetworkEvent.Context> ctx) {
         NetworkEvent.Context context = ctx.get();
         if (ClientPacketHandler.validateBasics(msg, context)) {
             context.enqueueWork(() -> {

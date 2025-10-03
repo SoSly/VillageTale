@@ -12,7 +12,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.packets.clientbound.VillageBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
 
 public class VillagesCapability implements IVillagesCapability {
 
@@ -73,7 +73,7 @@ public class VillagesCapability implements IVillagesCapability {
             return villageId;
         }
 
-        VillageBoundaryPacket packet = new VillageBoundaryPacket(
+        VillageBoundary packet = new VillageBoundary(
             villageId,
             villageStartingChunk,
             squadius

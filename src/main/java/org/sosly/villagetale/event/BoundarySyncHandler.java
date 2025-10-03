@@ -9,12 +9,11 @@ import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
-import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.packets.clientbound.VillageBoundaryPacket;
-import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class BoundarySyncHandler {
@@ -42,7 +41,7 @@ public class BoundarySyncHandler {
 
         level.getCapability(Capabilities.VILLAGES_CAPABILITY).ifPresent(villagesCapability -> {
             for (VillageInfo villageInfo : villagesCapability.getVillages()) {
-                VillageBoundaryPacket packet = new VillageBoundaryPacket(
+                VillageBoundary packet = new VillageBoundary(
                     villageInfo.getVillageId(),
                     villageInfo.getVillageStartingChunk(),
                     villageInfo.getSquadius()
@@ -65,7 +64,7 @@ public class BoundarySyncHandler {
                 continue;
             }
 
-            ZoneBoundaryPacket packet = zone.getShape().createBoundaryPacket(
+            ZoneBoundary packet = zone.getShape().createBoundaryPacket(
                 zone.getUUID(),
                 villageCapability.getUUID()
             );

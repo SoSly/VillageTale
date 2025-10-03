@@ -112,5 +112,13 @@
   "villagetale.gui.townhall.village_name": "Village Name",
   "villagetale.gui.townhall.village_name_label": "Village Name:",
   "villagetale.gui.townhall.save": "Save",
-  "villagetale.gui.townhall.cancel": "Cancel"
+  "villagetale.gui.townhall.cancel": "Cancel",
+
+  "villagetale.gui.conversion.title": "Recruit Villager",
+  "villagetale.gui.conversion.message": "I'd be happy to join your village for %d %s.",
+  "villagetale.gui.conversion.commit": "Recruit",
+  "villagetale.gui.conversion.cancel": "Cancel",
+
+  "villagetale.conversion.insufficient_funds": "Come back when you have what I need!",
+  "villagetale.conversion.success": "Thank you! I look forward to working with you."
 }

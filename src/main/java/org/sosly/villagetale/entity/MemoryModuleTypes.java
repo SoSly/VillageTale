@@ -82,6 +82,10 @@ public class MemoryModuleTypes {
             MEMORY_MODULE_TYPES.register("home_zone",
                     () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
 
+    public static final RegistryObject<MemoryModuleType<UUID>> FOLLOWING_PLAYER =
+            MEMORY_MODULE_TYPES.register("following_player",
+                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+
     public static final RegistryObject<MemoryModuleType<Boolean>> BUSY =
             MEMORY_MODULE_TYPES.register("busy",
                     () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));

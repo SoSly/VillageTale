@@ -22,6 +22,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.behavior.CloseOpenedGates;
 import org.sosly.villagetale.entity.ai.behavior.EatFood;
+import org.sosly.villagetale.entity.ai.behavior.FollowPlayer;
 import org.sosly.villagetale.entity.ai.behavior.GetFromContainer;
 import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
 import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorage;
@@ -44,6 +45,7 @@ public class VillagerGoalPackages {
             Pair.of(0, CloseOpenedGates.create()),
             Pair.of(0, new LookAtTargetSink(45, 90)),
             Pair.of(0, VillagerPanicTrigger.create()),
+            Pair.of(0, FollowPlayer.create(0.6F)),
             Pair.of(1, new MoveToTargetSink()),
             Pair.of(1, new WakeUp()),
             Pair.of(2, new EatFood()),

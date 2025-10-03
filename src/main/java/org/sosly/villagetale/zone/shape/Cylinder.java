@@ -13,7 +13,7 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
-import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -115,12 +115,12 @@ public class Cylinder implements IZoneShape {
     }
 
     @Override
-    public ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId) {
+    public ZoneBoundary createBoundaryPacket(UUID zoneId, UUID villageId) {
         AABB bounds = new AABB(
             baseCenter.getX() - radius, baseCenter.getY(), baseCenter.getZ() - radius,
             baseCenter.getX() + radius, baseCenter.getY() + height, baseCenter.getZ() + radius
         );
-        return new ZoneBoundaryPacket(zoneId, villageId, getID(), bounds, baseCenter, radius, height, null);
+        return new ZoneBoundary(zoneId, villageId, getID(), bounds, baseCenter, radius, height, null);
     }
 
     public static Builder builder(Level level, IVillageCapability village, int ordinal) {

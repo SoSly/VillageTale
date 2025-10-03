@@ -13,35 +13,35 @@ import org.sosly.villagetale.network.ClientPacketHandler;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class VillageBoundaryPacket extends BasePacket {
+public class VillageBoundary extends BasePacket {
     private final UUID villageId;
     private final ChunkPos centerChunk;
     private final int squadius;
 
-    public VillageBoundaryPacket(UUID villageId, ChunkPos centerChunk, int squadius) {
+    public VillageBoundary(UUID villageId, ChunkPos centerChunk, int squadius) {
         this.villageId = villageId;
         this.centerChunk = centerChunk;
         this.squadius = squadius;
     }
 
-    public static void encode(VillageBoundaryPacket msg, FriendlyByteBuf buffer) {
+    public static void encode(VillageBoundary msg, FriendlyByteBuf buffer) {
         buffer.writeUUID(msg.villageId);
         buffer.writeVarInt(msg.centerChunk.x);
         buffer.writeVarInt(msg.centerChunk.z);
         buffer.writeVarInt(msg.squadius);
     }
 
-    public static VillageBoundaryPacket decode(FriendlyByteBuf buffer) {
-        VillageBoundaryPacket msg;
+    public static VillageBoundary decode(FriendlyByteBuf buffer) {
+        VillageBoundary msg;
 
         try {
             UUID villageId = buffer.readUUID();
             int chunkX = buffer.readVarInt();
             int chunkZ = buffer.readVarInt();
             int squadius = buffer.readVarInt();
-            msg = new VillageBoundaryPacket(villageId, new ChunkPos(chunkX, chunkZ), squadius);
+            msg = new VillageBoundary(villageId, new ChunkPos(chunkX, chunkZ), squadius);
         } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
-            VillageTale.LOGGER.error("Exception while reading VillageBoundaryPacket: {}", err.toString());
+            VillageTale.LOGGER.error("Exception while reading VillageBoundary: {}", err.toString());
             return null;
         }
 
@@ -49,7 +49,7 @@ public class VillageBoundaryPacket extends BasePacket {
         return msg;
     }
 
-    public static void handle(VillageBoundaryPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(VillageBoundary msg, Supplier<NetworkEvent.Context> ctx) {
         NetworkEvent.Context context = ctx.get();
         if (ClientPacketHandler.validateBasics(msg, context)) {
             context.enqueueWork(() -> {

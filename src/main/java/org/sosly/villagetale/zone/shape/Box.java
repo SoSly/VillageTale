@@ -14,7 +14,7 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
-import org.sosly.villagetale.network.packets.clientbound.ZoneBoundaryPacket;
+import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import org.sosly.villagetale.zone.Zone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 
@@ -87,8 +87,8 @@ public class Box implements IZoneShape {
     }
 
     @Override
-    public ZoneBoundaryPacket createBoundaryPacket(UUID zoneId, UUID villageId) {
-        return new ZoneBoundaryPacket(zoneId, villageId, getID(), bounds);
+    public ZoneBoundary createBoundaryPacket(UUID zoneId, UUID villageId) {
+        return new ZoneBoundary(zoneId, villageId, getID(), bounds);
     }
 
     public static Builder builder(Level level, IVillageCapability village, int ordinal) {

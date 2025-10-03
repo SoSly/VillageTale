@@ -1,30 +1,17 @@
 package org.sosly.villagetale.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfoPacket;
+import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfo;
 
 import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
-public class TownHallScreen extends Screen {
-    private static final ResourceLocation LEDGER_TEXTURE = new ResourceLocation(VillageTale.MOD_ID, "textures/gui/ledger.png");
-    private static final int TEXTURE_WIDTH = 256;
-    private static final int TEXTURE_HEIGHT = 256;
-    private static final int GUI_WIDTH = 146;
-    private static final int GUI_HEIGHT = 180;
-    private static final int VERTICAL_OFFSET = 20;
-    private static final int HORIZONTAL_OFFSET = 1;
-
+public class TownHallScreen extends AbstractLedgerScreen {
     private final UUID villageId;
     private final String currentName;
     private EditBox nameField;
@@ -41,8 +28,8 @@ public class TownHallScreen extends Screen {
     protected void init() {
         super.init();
 
-        int leftPos = (this.width - GUI_WIDTH) / 2;
-        int topPos = (this.height - GUI_HEIGHT) / 2;
+        int leftPos = getLeftPos();
+        int topPos = getTopPos();
 
         Component nameMessage = Component.translatable("villagetale.gui.townhall.village_name");
         this.nameField = new NoShadowEditBox(this.font, leftPos + 20, topPos + 40,  GUI_WIDTH - 40, 10, nameMessage);
@@ -72,26 +59,11 @@ public class TownHallScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
-
-        int leftPos = (this.width - GUI_WIDTH) / 2;
-        int topPos = (this.height - GUI_HEIGHT) / 2;
-
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        guiGraphics.blit(LEDGER_TEXTURE, leftPos, topPos, VERTICAL_OFFSET, HORIZONTAL_OFFSET, GUI_WIDTH, GUI_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
+    protected void renderLedgerContent(GuiGraphics guiGraphics, int leftPos, int topPos, int mouseX, int mouseY, float partialTick) {
         guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.townhall.village_name_label"), leftPos + 20, topPos + 28, 0x3F3F3F, false);
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         int underlineY = topPos + 40 + 14;
         guiGraphics.fill(leftPos + 20, underlineY, leftPos + GUI_WIDTH - 20, underlineY + 1, 0xFF3F3F3F);
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 
     private void onSave() {
@@ -101,8 +73,7 @@ public class TownHallScreen extends Screen {
         }
 
         if (!newName.equals(currentName)) {
-            UpdateVillageInfoPacket packet = new UpdateVillageInfoPacket(villageId, newName);
-            NetworkHandler.CHANNEL.sendToServer(packet);
+            UpdateVillageInfo.send(villageId, newName);
         }
 
         this.onClose();
