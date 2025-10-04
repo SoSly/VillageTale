@@ -37,6 +37,10 @@ import org.sosly.villagetale.item.LedgerItem;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
 import org.sosly.villagetale.zone.type.TownHall;
+import org.sosly.villagetale.entity.Villager;
+import net.minecraft.world.phys.AABB;
+
+import java.util.List;
 
 public class TownHallBlock extends Block {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -66,6 +70,14 @@ public class TownHallBlock extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+    }
+
+    private List<Villager> findFollowerVillagers(ServerLevel level, Player player) {
+        AABB searchArea = player.getBoundingBox().inflate(32.0D);
+        return level.getEntitiesOfClass(Villager.class, searchArea, villager ->
+            villager.getFollowingPlayer().orElse(null) != null &&
+            villager.getFollowingPlayer().get().equals(player.getUUID())
+        );
     }
 
     @Override
@@ -108,6 +120,18 @@ public class TownHallBlock extends Block {
 
         if (!villageCapability.hasPermission(player.getUUID(), IVillageCapability.Permission.OWNER)) {
             player.sendSystemMessage(Component.literal("You do not have permission to manage this village"));
+            return InteractionResult.SUCCESS;
+        }
+
+        List<Villager> followers = findFollowerVillagers(serverLevel, player);
+        if (!followers.isEmpty()) {
+            int assignedCount = 0;
+            for (Villager follower : followers) {
+                follower.setVillage(village.getVillageId());
+                follower.setFollowingPlayer(null);
+                assignedCount++;
+            }
+            player.sendSystemMessage(Component.literal("Assigned " + assignedCount + " villager(s) to " + village.getVillageName()));
             return InteractionResult.SUCCESS;
         }
 
