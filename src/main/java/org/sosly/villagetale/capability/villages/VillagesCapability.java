@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
+import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
 
@@ -58,9 +59,8 @@ public class VillagesCapability implements IVillagesCapability {
         ChunkPos villageStartingChunk = new ChunkPos(townHallPos);
         VillageInfo newVillage = new VillageInfo(villageId, townHallPos, villageStartingChunk, villageName, squadius);
 
-        int minDistance = 30;
         for (VillageInfo existingVillage : villages.values()) {
-            if (existingVillage.overlaps(newVillage, minDistance)) {
+            if (existingVillage.overlaps(newVillage, CommonConfig.minVillageDistance)) {
                 return null;
             }
         }

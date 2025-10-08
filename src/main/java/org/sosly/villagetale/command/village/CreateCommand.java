@@ -10,22 +10,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.command.Result;
+import org.sosly.villagetale.config.CommonConfig;
 
 public class CreateCommand {
-    
-    private static final int DEFAULT_SQUADIUS = 3;
-    private static final int MIN_SQUADIUS = 1;
-    private static final int MAX_SQUADIUS = 16;
-    
+
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("create")
                 .then(Commands.argument("name", StringArgumentType.string())
-                        .executes(ctx -> createVillage(ctx, DEFAULT_SQUADIUS))
-                        .then(Commands.argument("squadius", IntegerArgumentType.integer(MIN_SQUADIUS, MAX_SQUADIUS))
-                                .executes(ctx -> createVillage(ctx, IntegerArgumentType.getInteger(ctx, "squadius")))));
+                        .executes(CreateCommand::createVillage));
     }
-    
-    private static int createVillage(CommandContext<CommandSourceStack> ctx, int squadius) {
+
+    private static int createVillage(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack source = ctx.getSource();
         Entity entity = source.getEntity();
 
@@ -40,7 +35,7 @@ public class CreateCommand {
                     source.getLevel(),
                     entity.blockPosition(),
                     villageName,
-                    squadius
+                    CommonConfig.defaultSquadius
             );
             return result.send(source, true);
         } catch (Exception e) {
