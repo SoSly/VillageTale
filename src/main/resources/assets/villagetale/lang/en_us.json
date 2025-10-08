@@ -40,6 +40,7 @@
 
   "villagetale.command.zone.townhall_auto_managed": "The Town Hall's zone is automatically managed and cannot be created manually",
   "villagetale.command.zone.village_capability_not_found": "Village capability not found",
+  "villagetale.command.zone.outside_boundary": "Zone creation failed: Zone extends outside village boundaries",
   "villagetale.command.zone.box_created": "Created box zone: %s",
   "villagetale.command.zone.cylinder_created": "Created cylinder zone: %s",
   "villagetale.command.zone.point_created": "Created point zone: %s",

@@ -36,8 +36,18 @@ import org.sosly.villagetale.zone.type.AbstractZoneType;
 import org.sosly.villagetale.zone.shape.Route;
 import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.TownHall;
+import org.sosly.villagetale.helper.ZoneValidationHelper;
 
 public class ZoneService {
+
+    public static VillageInfo getVillageInfo(ServerLevel level, UUID villageId) {
+        IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
+            return null;
+        }
+
+        return villages.getVillageById(villageId);
+    }
 
     public static IVillageCapability getVillageCapability(ServerLevel level, UUID villageId) {
         IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
@@ -62,6 +72,12 @@ public class ZoneService {
                     String.format("%s.command.zone.townhall_auto_managed", VillageTale.MOD_ID)));
         }
 
+        VillageInfo villageInfo = getVillageInfo(level, villageId);
+        if (villageInfo == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
         IVillageCapability capability = getVillageCapability(level, villageId);
         if (capability == null) {
             return Result.failure(Component.translatable(
@@ -72,6 +88,11 @@ public class ZoneService {
                 Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()),
                 Math.max(pos1.getX(), pos2.getX()) + 1, Math.max(pos1.getY(), pos2.getY()) + 1, Math.max(pos1.getZ(), pos2.getZ()) + 1
         );
+
+        if (!ZoneValidationHelper.isBoxWithinBoundary(villageInfo, bounds)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.outside_boundary", VillageTale.MOD_ID)));
+        }
 
         Zone zone = Box.builder(level, capability, capability.getZones().size())
                 .setBounds(bounds)
@@ -92,6 +113,17 @@ public class ZoneService {
         if (zoneType.equals(TownHall.ID)) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.zone.townhall_auto_managed", VillageTale.MOD_ID)));
+        }
+
+        VillageInfo villageInfo = getVillageInfo(level, villageId);
+        if (villageInfo == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        if (!ZoneValidationHelper.isCylinderWithinBoundary(villageInfo, center, radius)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.outside_boundary", VillageTale.MOD_ID)));
         }
 
         IVillageCapability capability = getVillageCapability(level, villageId);
@@ -121,6 +153,17 @@ public class ZoneService {
         if (zoneType.equals(TownHall.ID)) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.zone.townhall_auto_managed", VillageTale.MOD_ID)));
+        }
+
+        VillageInfo villageInfo = getVillageInfo(level, villageId);
+        if (villageInfo == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        if (!ZoneValidationHelper.isPositionWithinBoundary(villageInfo, pos)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.outside_boundary", VillageTale.MOD_ID)));
         }
 
         IVillageCapability capability = getVillageCapability(level, villageId);
@@ -275,6 +318,17 @@ public class ZoneService {
     }
 
     public static Result addRoutePoint(ServerLevel level, UUID villageId, UUID zoneId, BlockPos pos) {
+        VillageInfo villageInfo = getVillageInfo(level, villageId);
+        if (villageInfo == null) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.village_capability_not_found", VillageTale.MOD_ID)));
+        }
+
+        if (!ZoneValidationHelper.isPositionWithinBoundary(villageInfo, pos)) {
+            return Result.failure(Component.translatable(
+                    String.format("%s.command.zone.outside_boundary", VillageTale.MOD_ID)));
+        }
+
         IVillageCapability capability = getVillageCapability(level, villageId);
         if (capability == null) {
             return Result.failure(Component.translatable(

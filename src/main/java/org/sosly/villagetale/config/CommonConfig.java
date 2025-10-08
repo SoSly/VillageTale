@@ -33,6 +33,10 @@ public class CommonConfig {
             .comment("Cooldown in ticks before a chicken can be plucked again (20 ticks = 1 second)")
             .defineInRange("pluckCooldownTicks", 12000, 1200, 48000);
 
+    private static final ForgeConfigSpec.IntValue DEFAULT_SQUADIUS = builder
+            .comment("Default village squadius (radius in chunks). Village boundary = (2 * squadius + 1)^2 chunks")
+            .defineInRange("defaultSquadius", 3, 1, 16);
+
     static {
         builder.pop();
     }
@@ -47,6 +51,7 @@ public class CommonConfig {
     public static double scanRadius;
     public static int milkCooldownTicks;
     public static int pluckCooldownTicks;
+    public static int defaultSquadius;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -55,5 +60,6 @@ public class CommonConfig {
         scanRadius = SCAN_RADIUS.get();
         milkCooldownTicks = MILK_COOLDOWN_TICKS.get();
         pluckCooldownTicks = PLUCK_COOLDOWN_TICKS.get();
+        defaultSquadius = DEFAULT_SQUADIUS.get();
     }
 }
