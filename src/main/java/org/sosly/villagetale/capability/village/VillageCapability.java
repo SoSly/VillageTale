@@ -16,9 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
-import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
-import net.minecraftforge.network.PacketDistributor;
 
 public class VillageCapability implements IVillageCapability {
 
@@ -81,11 +79,7 @@ public class VillageCapability implements IVillageCapability {
             return;
         }
 
-        ZoneBoundary packet = zone.getShape().createBoundaryPacket(zone.getUUID(), this.id);
-        NetworkHandler.CHANNEL.send(
-            PacketDistributor.DIMENSION.with(() -> chunk.get().getLevel().dimension()),
-            packet
-        );
+        ZoneBoundary.sendToDimension(chunk.get().getLevel().dimension(), zone.getUUID(), this.id, zone.getShape());
     }
 
     @Override

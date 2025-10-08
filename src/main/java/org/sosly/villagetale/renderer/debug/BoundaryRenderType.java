@@ -24,7 +24,7 @@ public class BoundaryRenderType extends RenderType {
             .setOutputState(ITEM_ENTITY_TARGET)
             .setWriteMaskState(COLOR_DEPTH_WRITE)
             .setCullState(NO_CULL)
-            .setDepthTestState(NO_DEPTH_TEST)
+            .setDepthTestState(LEQUAL_DEPTH_TEST)
             .createCompositeState(false)
     );
 

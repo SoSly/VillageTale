@@ -46,11 +46,6 @@ public class BoundaryRenderer {
         Vec3 cameraPos = event.getCamera().getPosition();
         VertexConsumer consumer = bufferSource.getBuffer(BoundaryRenderType.boundaryLines());
 
-        RenderSystem.disableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableCull();
-
         for (VillageBoundaryData village : data.getVillages().values()) {
             BoundaryOutline outline = new BoundaryOutline(village.getAABB(), 0.0f, 0.0f, 1.0f, 0.6f);
             outline.render(poseStack, consumer, cameraPos);
@@ -61,10 +56,6 @@ public class BoundaryRenderer {
         }
 
         bufferSource.endBatch();
-
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
-        RenderSystem.enableDepthTest();
     }
 
     private static void renderZone(ZoneBoundaryData zone, PoseStack poseStack, VertexConsumer consumer, Vec3 cameraPos) {

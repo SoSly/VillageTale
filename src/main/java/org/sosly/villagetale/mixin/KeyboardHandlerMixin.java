@@ -1,8 +1,10 @@
 package org.sosly.villagetale.mixin;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.client.BoundaryDataStorage;
@@ -38,7 +40,16 @@ public abstract class KeyboardHandlerMixin {
 
 
         VillageTale.LOGGER.debug("F3+V detected, toggling overlay");
-        BoundaryDataStorage.getInstance().toggleOverlay();
+        boolean enabled = BoundaryDataStorage.getInstance().toggleOverlay();
+
+        if (this.minecraft.player != null) {
+            Component prefix = Component.translatable("debug.prefix").withStyle(ChatFormatting.YELLOW);
+            String messageKey = enabled ? "debug.villagetale.boundaries.shown" : "debug.villagetale.boundaries.hidden";
+            Component message = Component.translatable(messageKey).withStyle(ChatFormatting.WHITE);
+            Component joined = prefix.copy().append(" ").append(message);
+            this.minecraft.player.displayClientMessage(joined, false);
+        }
+
         this.handledDebugKey = true;
     }
 }

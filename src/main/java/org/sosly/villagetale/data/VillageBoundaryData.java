@@ -1,16 +1,19 @@
 package org.sosly.villagetale.data;
 
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
 import java.util.UUID;
 
 public class VillageBoundaryData {
+    private final Level level;
     private final UUID villageId;
     private final ChunkPos centerChunk;
     private final int squadius;
 
-    public VillageBoundaryData(UUID villageId, ChunkPos centerChunk, int squadius) {
+    public VillageBoundaryData(Level level, UUID villageId, ChunkPos centerChunk, int squadius) {
+        this.level = level;
         this.villageId = villageId;
         this.centerChunk = centerChunk;
         this.squadius = squadius;
@@ -33,6 +36,6 @@ public class VillageBoundaryData {
         int maxX = ((centerChunk.x + squadius + 1) << 4);
         int minZ = (centerChunk.z - squadius) << 4;
         int maxZ = ((centerChunk.z + squadius + 1) << 4);
-        return new AABB(minX, -64, minZ, maxX, 320, maxZ);
+        return new AABB(minX, level.getMinBuildHeight(), minZ, maxX, level.getMaxBuildHeight(), maxZ);
     }
 }

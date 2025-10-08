@@ -5,11 +5,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.client.BoundaryDataStorage;
 import org.sosly.villagetale.data.ZoneBoundaryData;
 import org.sosly.villagetale.network.BasePacket;
@@ -47,7 +49,28 @@ public class ZoneBoundary extends BasePacket {
         this.waypoints = waypoints;
     }
 
-    public static void sendToDimension(ResourceKey<Level> dimension, ZoneBoundary packet) {
+    public static void sendToPlayer(ServerPlayer player, UUID zoneId, UUID villageId, IZoneShape shape) {
+        if (shape == null) {
+            return;
+        }
+        ZoneBoundary packet = shape.createBoundaryPacket(zoneId, villageId);
+        if (packet == null) {
+            return;
+        }
+        NetworkHandler.CHANNEL.send(
+            PacketDistributor.PLAYER.with(() -> player),
+            packet
+        );
+    }
+
+    public static void sendToDimension(ResourceKey<Level> dimension, UUID zoneId, UUID villageId, IZoneShape shape) {
+        if (shape == null) {
+            return;
+        }
+        ZoneBoundary packet = shape.createBoundaryPacket(zoneId, villageId);
+        if (packet == null) {
+            return;
+        }
         NetworkHandler.CHANNEL.send(
             PacketDistributor.DIMENSION.with(() -> dimension),
             packet

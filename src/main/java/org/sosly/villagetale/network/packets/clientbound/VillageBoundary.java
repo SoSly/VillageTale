@@ -67,6 +67,7 @@ public class VillageBoundary extends BasePacket {
                 }
 
                 VillageBoundaryData data = new VillageBoundaryData(
+                    mc.level,
                     msg.villageId,
                     msg.centerChunk,
                     msg.squadius

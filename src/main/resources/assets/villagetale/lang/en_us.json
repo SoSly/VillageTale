@@ -108,6 +108,9 @@
   "key.categories.villagetale": "VillageTale",
   "key.villagetale.toggle_village_boundaries": "Toggle Village Boundaries (F3+V)",
 
+  "debug.villagetale.boundaries.shown": "Village boundaries: shown",
+  "debug.villagetale.boundaries.hidden": "Village boundaries: hidden",
+
   "villagetale.gui.townhall.title": "Town Hall",
   "villagetale.gui.townhall.village_name": "Village Name",
   "villagetale.gui.townhall.village_name_label": "Village Name:",

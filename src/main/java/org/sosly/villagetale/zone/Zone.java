@@ -547,15 +547,10 @@ public class Zone implements IVillageZone {
 
         currentVillage.getChunk().setUnsaved(true);
 
-        if (level == null || level.isClientSide || shape == null) {
+        if (level == null || level.isClientSide) {
             return;
         }
 
-        ZoneBoundary packet = shape.createBoundaryPacket(id, currentVillage.getUUID());
-        if (packet == null) {
-            return;
-        }
-
-        ZoneBoundary.sendToDimension(level.dimension(), packet);
+        ZoneBoundary.sendToDimension(level.dimension(), id, currentVillage.getUUID(), shape);
     }
 }

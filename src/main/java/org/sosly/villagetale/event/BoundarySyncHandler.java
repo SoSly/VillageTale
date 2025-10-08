@@ -5,13 +5,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
+import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 
@@ -39,44 +39,23 @@ public class BoundarySyncHandler {
     private static void syncBoundariesToPlayer(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
 
-        level.getCapability(Capabilities.VILLAGES_CAPABILITY).ifPresent(villagesCapability -> {
-            for (VillageInfo villageInfo : villagesCapability.getVillages()) {
-                VillageBoundary packet = new VillageBoundary(
-                    villageInfo.getVillageId(),
-                    villageInfo.getVillageStartingChunk(),
-                    villageInfo.getSquadius()
-                );
-                NetworkHandler.CHANNEL.send(
-                    PacketDistributor.PLAYER.with(() -> player),
-                    packet
-                );
+        IVillagesCapability villages = level.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villages == null) {
+            return;
+        }
 
-                level.getChunk(villageInfo.getVillageStartingChunk().x, villageInfo.getVillageStartingChunk().z)
-                    .getCapability(Capabilities.VILLAGE_CAPABILITY)
-                    .ifPresent(villageCapability -> syncZonesToPlayer(player, villageCapability));
-            }
-        });
-    }
+        for (VillageInfo villageInfo : villages.getVillages()) {
+            VillageBoundary.send(level, villageInfo.getVillageId(),
+                    villageInfo.getVillageStartingChunk(), villageInfo.getSquadius());
 
-    private static void syncZonesToPlayer(ServerPlayer player, IVillageCapability villageCapability) {
-        for (IVillageZone zone : villageCapability.getZones()) {
-            if (zone.getShape() == null) {
+            IVillageCapability village = VillagesHelper.getVillageCapability(level, villageInfo.getVillageId());
+            if (village == null) {
                 continue;
             }
 
-            ZoneBoundary packet = zone.getShape().createBoundaryPacket(
-                zone.getUUID(),
-                villageCapability.getUUID()
-            );
-
-            if (packet == null) {
-                continue;
+            for (IVillageZone zone : village.getZones()) {
+                ZoneBoundary.sendToPlayer(player, zone.getUUID(), village.getUUID(), zone.getShape());
             }
-
-            NetworkHandler.CHANNEL.send(
-                PacketDistributor.PLAYER.with(() -> player),
-                packet
-            );
         }
     }
 }

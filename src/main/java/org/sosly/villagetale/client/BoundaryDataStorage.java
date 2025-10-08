@@ -91,8 +91,9 @@ public class BoundaryDataStorage {
         this.overlayEnabled = enabled;
     }
 
-    public void toggleOverlay() {
+    public boolean toggleOverlay() {
         this.overlayEnabled = !this.overlayEnabled;
+        return this.overlayEnabled;
     }
 
     public static class DimensionBoundaryData {
