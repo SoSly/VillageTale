@@ -6,6 +6,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 ![Version](https://img.shields.io/github/v/release/SoSly/VillageTale?include_prereleases&color=yellow)
 
+[![VillageTale](src/main/resources/villagetale.png)](https://github.com/SoSly/VillageTale)
+
 Build a village where every life matters. Villagers craft with real materials, develop relationships, start families, and create stories you never planned—from childhood games to final goodbyes.
 
 ## Vision
