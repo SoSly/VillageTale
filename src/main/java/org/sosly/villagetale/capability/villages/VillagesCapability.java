@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.data.VillageInfo;
-import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
 
 public class VillagesCapability implements IVillagesCapability {
@@ -73,16 +72,7 @@ public class VillagesCapability implements IVillagesCapability {
             return villageId;
         }
 
-        VillageBoundary packet = new VillageBoundary(
-            villageId,
-            villageStartingChunk,
-            squadius
-        );
-        NetworkHandler.CHANNEL.send(
-            PacketDistributor.DIMENSION.with(() -> level.dimension()),
-            packet
-        );
-
+        VillageBoundary.send((ServerLevel) level, villageId, villageStartingChunk, squadius);
         return villageId;
     }
 

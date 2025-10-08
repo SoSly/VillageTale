@@ -21,7 +21,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 
 public class HarvestCrop extends Behavior<Villager> {
     private static final int HARVEST_DURATION = 40;
@@ -78,7 +78,7 @@ public class HarvestCrop extends Behavior<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, tool);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, tool);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, tool);
 
         if (villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             return;
@@ -92,7 +92,7 @@ public class HarvestCrop extends Behavior<Villager> {
     protected void stop(@NotNull ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get());
 
         this.pos = null;

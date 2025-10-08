@@ -3,14 +3,18 @@ package org.sosly.villagetale.network.packets.clientbound;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.client.BoundaryDataStorage;
 import org.sosly.villagetale.data.ZoneBoundaryData;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.ClientPacketHandler;
+import org.sosly.villagetale.network.NetworkHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +45,13 @@ public class ZoneBoundary extends BasePacket {
         this.radius = radius;
         this.height = height;
         this.waypoints = waypoints;
+    }
+
+    public static void sendToDimension(ResourceKey<Level> dimension, ZoneBoundary packet) {
+        NetworkHandler.CHANNEL.send(
+            PacketDistributor.DIMENSION.with(() -> dimension),
+            packet
+        );
     }
 
     public static void encode(ZoneBoundary msg, FriendlyByteBuf buffer) {

@@ -28,7 +28,7 @@ import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
 
 import java.util.Optional;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 
 import java.util.UUID;
 
@@ -117,7 +117,7 @@ public class MilkAnimal extends Behavior<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, bucket);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, bucket);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, bucket);
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(targetAnimal.blockPosition(), 0.5f, 2));
     }
@@ -196,7 +196,7 @@ public class MilkAnimal extends Behavior<Villager> {
         milkingTicks = 0;
 
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         villager.getBrain().eraseMemory(MemoryModuleTypes.MILKABLE_ANIMAL.get());

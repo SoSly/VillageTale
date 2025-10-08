@@ -7,9 +7,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.ClientPacketHandler;
+import org.sosly.villagetale.network.NetworkHandler;
 
 import java.util.function.Supplier;
 
@@ -18,10 +21,15 @@ public class VillagerEquipmentSync extends BasePacket {
     private final InteractionHand hand;
     private final ItemStack itemStack;
 
-    public VillagerEquipmentSync(int entityId, InteractionHand hand, ItemStack itemStack) {
+    private VillagerEquipmentSync(int entityId, InteractionHand hand, ItemStack itemStack) {
         this.entityId = entityId;
         this.hand = hand;
         this.itemStack = itemStack.copy();
+    }
+
+    public static void sendToNearbyPlayers(Villager villager, InteractionHand hand, ItemStack itemStack) {
+        VillagerEquipmentSync packet = new VillagerEquipmentSync(villager.getId(), hand, itemStack);
+        NetworkHandler.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> villager), packet);
     }
 
     public static void encode(VillagerEquipmentSync msg, FriendlyByteBuf buffer) {

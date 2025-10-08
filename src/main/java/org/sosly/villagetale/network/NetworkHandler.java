@@ -1,15 +1,9 @@
 package org.sosly.villagetale.network;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.entity.Villager;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
 import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillagerConversionScreen;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
@@ -55,22 +49,5 @@ public class NetworkHandler {
                 ConvertVillager::encode, ConvertVillager::decode, ConvertVillager::handle);
 
         VillageTale.LOGGER.info("VillageTale registered {} network messages", packetId);
-    }
-
-    public static void syncProfessionToPlayer(Villager villager, ServerPlayer player) {
-        ResourceLocation professionId = villager.getProfession().getID();
-        VillagerProfessionSync packet = new VillagerProfessionSync(villager.getId(), professionId);
-        CHANNEL.sendTo(packet, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-    }
-
-    public static void syncProfessionToNearbyPlayers(Villager villager) {
-        ResourceLocation professionId = villager.getProfession().getID();
-        VillagerProfessionSync packet = new VillagerProfessionSync(villager.getId(), professionId);
-        CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> villager), packet);
-    }
-
-    public static void syncEquipmentToNearbyPlayers(Villager villager, InteractionHand hand, ItemStack itemStack) {
-        VillagerEquipmentSync packet = new VillagerEquipmentSync(villager.getId(), hand, itemStack);
-        CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> villager), packet);
     }
 }

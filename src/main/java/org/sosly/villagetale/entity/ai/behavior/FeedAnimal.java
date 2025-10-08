@@ -19,7 +19,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -103,7 +103,7 @@ public class FeedAnimal extends Behavior<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, foodItem.copy());
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, foodItem.copy());
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, foodItem.copy());
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(targetAnimal.blockPosition(), 0.5f, 2));
     }
@@ -180,7 +180,7 @@ public class FeedAnimal extends Behavior<Villager> {
         foodItem = ItemStack.EMPTY;
 
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         villager.getBrain().eraseMemory(MemoryModuleTypes.BREEDABLE_ANIMAL.get());

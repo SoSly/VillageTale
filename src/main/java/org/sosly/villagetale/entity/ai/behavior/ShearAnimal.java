@@ -32,7 +32,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 
 public class ShearAnimal extends Behavior<Villager> {
     private static final int SHEAR_DURATION = 40;
@@ -112,7 +112,7 @@ public class ShearAnimal extends Behavior<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, shears);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, shears);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, shears);
         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET,
             new WalkTarget(targetSheep.blockPosition(), 0.5f, 2));
     }
@@ -200,7 +200,7 @@ public class ShearAnimal extends Behavior<Villager> {
         shearingTicks = 0;
 
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         villager.getBrain().eraseMemory(MemoryModuleTypes.SHEARABLE_ANIMAL.get());

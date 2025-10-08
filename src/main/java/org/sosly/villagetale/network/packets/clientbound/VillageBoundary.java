@@ -2,8 +2,10 @@ package org.sosly.villagetale.network.packets.clientbound;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.client.BoundaryDataStorage;
 import org.sosly.villagetale.data.VillageBoundaryData;
@@ -12,6 +14,7 @@ import org.sosly.villagetale.network.ClientPacketHandler;
 
 import java.util.UUID;
 import java.util.function.Supplier;
+import org.sosly.villagetale.network.NetworkHandler;
 
 public class VillageBoundary extends BasePacket {
     private final UUID villageId;
@@ -47,6 +50,11 @@ public class VillageBoundary extends BasePacket {
 
         msg.messageIsValid = true;
         return msg;
+    }
+
+    public static void send(ServerLevel level, UUID villageId, ChunkPos centerChunk, int squadius) {
+        VillageBoundary packet = new VillageBoundary(villageId, centerChunk, squadius);
+        NetworkHandler.CHANNEL.send(PacketDistributor.DIMENSION.with(level::dimension), packet);
     }
 
     public static void handle(VillageBoundary msg, Supplier<NetworkEvent.Context> ctx) {

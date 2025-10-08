@@ -67,7 +67,7 @@ import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
 import org.sosly.villagetale.entity.ai.navigation.VillagerGroundPathNavigation;
 import org.sosly.villagetale.helper.InventoryHelper;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSync;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.profession.professions.Commoner;
 
@@ -315,7 +315,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
         if (this.level() instanceof ServerLevel serverLevel) {
             this.refreshBrain(serverLevel);
-            NetworkHandler.syncProfessionToNearbyPlayers(this);
+            VillagerProfessionSync.sendToNearbyPlayers(this);
         }
     }
 
@@ -415,7 +415,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         this.refreshBrain(serverLevel);
-        NetworkHandler.syncProfessionToNearbyPlayers(this);
+        VillagerProfessionSync.sendToNearbyPlayers(this);
     }
 
     public Optional<UUID> getVillage() {
@@ -583,7 +583,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     @Override
     public void startSeenByPlayer(ServerPlayer player) {
         super.startSeenByPlayer(player);
-        NetworkHandler.syncProfessionToPlayer(this, player);
+        VillagerProfessionSync.sendToPlayer(this, player);
     }
 
     @Override

@@ -23,7 +23,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.helper.VillagesHelper;
-import org.sosly.villagetale.network.NetworkHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 
 public class PlantSapling extends Behavior<Villager> {
     private static final int PLANTING_DURATION = 30;
@@ -79,7 +79,7 @@ public class PlantSapling extends Behavior<Villager> {
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, sapling);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, sapling);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, sapling);
 
         if (!villager.blockPosition().closerThan(pos, CommonConfig.interactionDistance)) {
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
@@ -91,7 +91,7 @@ public class PlantSapling extends Behavior<Villager> {
     protected void stop(@NotNull ServerLevel level, Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
         villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        NetworkHandler.syncEquipmentToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_REPLANTABLE_SPOT.get());
 
         this.pos = null;

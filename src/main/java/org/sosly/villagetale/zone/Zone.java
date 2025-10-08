@@ -25,9 +25,7 @@ import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
 import org.sosly.villagetale.api.capability.IVillageCapability;
-import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
-import net.minecraftforge.network.PacketDistributor;
 
 public class Zone implements IVillageZone {
     private final Level level;
@@ -558,9 +556,6 @@ public class Zone implements IVillageZone {
             return;
         }
 
-        NetworkHandler.CHANNEL.send(
-            PacketDistributor.DIMENSION.with(() -> level.dimension()),
-            packet
-        );
+        ZoneBoundary.sendToDimension(level.dimension(), packet);
     }
 }
