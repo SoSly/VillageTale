@@ -5,7 +5,9 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
+import org.sosly.villagetale.network.packets.clientbound.OpenVillageInfoScreen;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillagerConversionScreen;
+import org.sosly.villagetale.network.packets.clientbound.SyncVillageCapability;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
 import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSync;
@@ -47,6 +49,12 @@ public class NetworkHandler {
 
         CHANNEL.registerMessage(packetId++, ConvertVillager.class,
                 ConvertVillager::encode, ConvertVillager::decode, ConvertVillager::handle);
+
+        CHANNEL.registerMessage(packetId++, SyncVillageCapability.class,
+                SyncVillageCapability::encode, SyncVillageCapability::decode, SyncVillageCapability::handle);
+
+        CHANNEL.registerMessage(packetId++, OpenVillageInfoScreen.class,
+                OpenVillageInfoScreen::encode, OpenVillageInfoScreen::decode, OpenVillageInfoScreen::handle);
 
         VillageTale.LOGGER.info("VillageTale registered {} network messages", packetId);
     }

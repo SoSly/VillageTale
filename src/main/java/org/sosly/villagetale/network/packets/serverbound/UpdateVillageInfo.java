@@ -104,6 +104,7 @@ public class UpdateVillageInfo extends BasePacket {
 
             boolean success = villagesCapability.updateVillageName(msg.villageId, msg.newName);
             if (success) {
+                villageCapability.setName(msg.newName);
                 player.sendSystemMessage(Component.literal("Village renamed to: " + msg.newName));
             } else {
                 player.sendSystemMessage(Component.literal("Failed to rename village (name may already be in use)"));

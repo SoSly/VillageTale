@@ -22,5 +22,6 @@ public class ClientDataManager {
     public static void clearAll() {
         professionCache.clear();
         BoundaryDataStorage.getInstance().clearAll();
+        VillageDataManager.getInstance().clear();
     }
 }

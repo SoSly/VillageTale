@@ -36,6 +36,7 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.item.LedgerItem;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
+import org.sosly.villagetale.network.packets.clientbound.SyncVillageCapability;
 import org.sosly.villagetale.zone.type.TownHall;
 import org.sosly.villagetale.entity.Villager;
 import net.minecraft.world.phys.AABB;
@@ -137,6 +138,7 @@ public class TownHallBlock extends Block {
 
         LedgerItem.setVillageUUID(heldItem, village.getVillageId());
 
+        SyncVillageCapability.send(serverPlayer, villageCapability, serverLevel.getServer());
         OpenTownHallScreen.send(serverPlayer, village.getVillageId(), village.getVillageName());
 
         return InteractionResult.SUCCESS;
