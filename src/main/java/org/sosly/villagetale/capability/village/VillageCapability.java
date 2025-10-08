@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -17,6 +19,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
+import org.sosly.villagetale.zone.Zone;
 
 public class VillageCapability implements IVillageCapability {
 
@@ -59,6 +62,7 @@ public class VillageCapability implements IVillageCapability {
     @Override
     public void setName(String name) {
         this.name = name;
+        markDirty();
     }
 
     @Override
@@ -161,5 +165,78 @@ public class VillageCapability implements IVillageCapability {
         this.villagers = null;
         this.players = null;
         this.chunk = null;
+    }
+
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        if (id == null) {
+            return tag;
+        }
+
+        tag.putUUID("village", id);
+        tag.putString("name", name);
+
+        ListTag zoneList = new ListTag();
+        for (IVillageZone zone : zones.values()) {
+            zoneList.add(zone.serializeNBT());
+        }
+        tag.put("zones", zoneList);
+
+        ListTag villagerList = new ListTag();
+        for (UUID uuid : villagers) {
+            CompoundTag villagerTag = new CompoundTag();
+            villagerTag.putUUID("villager", uuid);
+            villagerList.add(villagerTag);
+        }
+        tag.put("villagers", villagerList);
+
+        ListTag playerList = new ListTag();
+        players.forEach((key, value) -> {
+            CompoundTag playerTag = new CompoundTag();
+            playerTag.putUUID("player", key);
+            playerTag.putString("permission", value.toString());
+            playerList.add(playerTag);
+        });
+        tag.put("players", playerList);
+
+        if (chunk != null && chunk.get() != null) {
+            chunk.get().setUnsaved(false);
+        }
+        return tag;
+    }
+
+    public void deserializeNBT(CompoundTag tag) {
+        if (!tag.contains("village")) {
+            return;
+        }
+
+        id = tag.getUUID("village");
+        name = tag.getString("name");
+
+        if (tag.contains("zones")) {
+            ListTag zoneList = tag.getList("zones", 10);
+            for (int i = 0; i < zoneList.size(); i++) {
+                IVillageZone zone = new Zone(null);
+                zone.deserializeNBT(this, zoneList.getCompound(i));
+                zones.put(zone.getUUID(), zone);
+            }
+        }
+
+        if (tag.contains("villagers")) {
+            ListTag villagerList = tag.getList("villagers", 10);
+            for (int i = 0; i < villagerList.size(); i++) {
+                UUID uuid = villagerList.getCompound(i).getUUID("villager");
+                villagers.add(uuid);
+            }
+        }
+
+        if (tag.contains("players")) {
+            ListTag playerList = tag.getList("players", 10);
+            for (int i = 0; i < playerList.size(); i++) {
+                UUID uuid = playerList.getCompound(i).getUUID("player");
+                Permission permission = Permission.fromString(playerList.getCompound(i).getString("permission"));
+                players.put(uuid, permission);
+            }
+        }
     }
 }

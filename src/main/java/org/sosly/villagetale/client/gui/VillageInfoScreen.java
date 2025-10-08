@@ -4,10 +4,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
-import org.sosly.villagetale.client.data.ClientVillageData;
 
-import java.util.List;
 import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
@@ -21,7 +20,7 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
 
     @Override
     protected void renderLedgerContent(GuiGraphics guiGraphics, int leftPos, int topPos, int mouseX, int mouseY, float partialTick) {
-        ClientVillageData village = VillageDataManager.getInstance().getVillageData(villageId);
+        IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
         if (village == null) {
             guiGraphics.drawString(this.font, Component.literal("No village data available"), leftPos + 20, topPos + 28, 0x3F3F3F, false);
             return;
@@ -30,14 +29,7 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
         int currentY = topPos + 16;
         int lineHeight = 12;
 
-        guiGraphics.drawString(this.font, Component.literal(village.getVillageName()), leftPos + 20, currentY, 0x3F3F3F, false);
-        currentY += lineHeight;
-
-        String positionText = String.format("At: %d, %d [%d]",
-                village.getStartingChunk().x,
-                village.getStartingChunk().z,
-                village.getSquadius());
-        guiGraphics.drawString(this.font, Component.literal(positionText), leftPos + 20, currentY, 0x3F3F3F, false);
+        guiGraphics.drawString(this.font, Component.literal(village.getName()), leftPos + 20, currentY, 0x3F3F3F, false);
         currentY += lineHeight;
 
         String villagersText = String.format("Villagers: %d", village.getVillagerUUIDs().size());
@@ -51,15 +43,15 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
         guiGraphics.drawString(this.font, Component.literal("Owners:"), leftPos + 20, currentY, 0x3F3F3F, false);
         currentY += lineHeight;
 
-        List<String> owners = village.getOwnerNames();
-        if (owners.isEmpty()) {
+        long ownerCount = village.getPlayerPermissions().entrySet().stream()
+                .filter(entry -> entry.getValue() == IVillageCapability.Permission.OWNER)
+                .count();
+
+        if (ownerCount == 0) {
             guiGraphics.drawString(this.font, Component.literal("- None"), leftPos + 20, currentY, 0x3F3F3F, false);
         } else {
-            for (String ownerName : owners) {
-                String ownerText = "- " + ownerName;
-                guiGraphics.drawString(this.font, Component.literal(ownerText), leftPos + 20, currentY, 0x3F3F3F, false);
-                currentY += lineHeight;
-            }
+            String ownerText = String.format("- %d owner(s)", ownerCount);
+            guiGraphics.drawString(this.font, Component.literal(ownerText), leftPos + 20, currentY, 0x3F3F3F, false);
         }
     }
 }

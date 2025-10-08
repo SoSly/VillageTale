@@ -4,10 +4,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
@@ -35,22 +31,11 @@ public class RecipeKnowledgeProvider implements ICapabilitySerializable<Compound
 
     @Override
     public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-
-        ListTag recipes = new ListTag();
-        for (ResourceLocation recipe : capability.getRecipes()) {
-            recipes.add(StringTag.valueOf(recipe.toString()));
-        }
-        tag.put("recipes", recipes);
-
-        return tag;
+        return capability.serializeNBT();
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        ListTag recipes = nbt.getList("recipes", Tag.TAG_STRING);
-        for (Tag tag : recipes) {
-            capability.addRecipe(new ResourceLocation(tag.getAsString()));
-        }
+        capability.deserializeNBT(nbt);
     }
 }

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -188,5 +191,34 @@ public class VillagesCapability implements IVillagesCapability {
 
         villages.put(village.getVillageId(), village);
         villagesByName.put(village.getVillageName(), village.getVillageId());
+    }
+
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+
+        ListTag villageList = new ListTag();
+        for (VillageInfo village : villages.values()) {
+            villageList.add(village.serializeNBT());
+        }
+        tag.put("villages", villageList);
+
+        return tag;
+    }
+
+    public void deserializeNBT(CompoundTag tag) {
+        if (!tag.contains("villages", Tag.TAG_LIST)) {
+            return;
+        }
+
+        ListTag villageList = tag.getList("villages", Tag.TAG_COMPOUND);
+        for (int i = 0; i < villageList.size(); i++) {
+            CompoundTag villageTag = villageList.getCompound(i);
+            VillageInfo village = VillageInfo.deserializeNBT(villageTag);
+            if (village == null) {
+                continue;
+            }
+
+            loadVillage(village);
+        }
     }
 }
