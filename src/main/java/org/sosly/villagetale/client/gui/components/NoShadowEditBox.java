@@ -1,4 +1,4 @@
-package org.sosly.villagetale.client.gui;
+package org.sosly.villagetale.client.gui.components;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

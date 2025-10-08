@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.sosly.villagetale.client.gui.components.NoShadowEditBox;
 import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfo;
 
 import java.util.UUID;

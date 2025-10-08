@@ -124,5 +124,27 @@
   "villagetale.gui.conversion.cancel": "Cancel",
 
   "villagetale.conversion.insufficient_funds": "Come back when you have what I need!",
-  "villagetale.conversion.success": "Thank you! I look forward to working with you."
+  "villagetale.conversion.success": "Thank you! I look forward to working with you.",
+
+  "villagetale.gui.village_info.title": "Village Info",
+  "villagetale.gui.village_info.no_data": "No village data available",
+  "villagetale.gui.village_info.villagers": "Villagers: %d",
+  "villagetale.gui.village_info.zones": "Zones: %d",
+  "villagetale.gui.village_info.owners": "Owners:",
+  "villagetale.gui.village_info.no_owners": "- None",
+  "villagetale.gui.village_info.owner_count": "- %d owner(s)",
+
+  "villagetale.gui.zone_detail.title": "Zone Details",
+  "villagetale.gui.zone_detail.no_data": "No village data available",
+  "villagetale.gui.zone_detail.no_zones": "No zones available",
+  "villagetale.gui.zone_detail.type": "Type: %s",
+  "villagetale.gui.zone_detail.filters": "Filters:",
+  "villagetale.gui.zone_detail.shape": "Shape: %s",
+  "villagetale.gui.zone_detail.shape_box_start": "Start: %d, %d, %d",
+  "villagetale.gui.zone_detail.shape_box_end": "End: %d, %d, %d",
+  "villagetale.gui.zone_detail.shape_cylinder_start": "Start: %d, %d, %d",
+  "villagetale.gui.zone_detail.shape_cylinder_radius": "Radius: %d",
+  "villagetale.gui.zone_detail.shape_cylinder_height": "Height: %d",
+  "villagetale.gui.zone_detail.shape_point_position": "Position: %d, %d, %d",
+  "villagetale.gui.zone_detail.shape_route_waypoint": "Waypoint %d: %d, %d, %d"
 }
