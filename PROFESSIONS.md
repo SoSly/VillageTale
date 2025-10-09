@@ -80,6 +80,11 @@ A living document exploring which professions belong in VillageTale and why.
 - **Where they work:** Brewery zone
 - **Mod:** Let's Do: Vinery, Let's Do: Brewery, or Brewin' and Chewin'
 
+### Enchanter
+- **What they do:** Creates minor weapon and tool enchantments
+- **Where they work:** Runeforge zone
+- **Mod:** Mana and Artifice
+
 ### Miller
 - **What they do:** Grinds wheat into flour at windmills/watermills
 - **Where they work:** Mill zone

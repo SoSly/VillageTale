@@ -24,17 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Villages must be at least 30 chunks apart
 - Zone system for defining areas within villages
 - Four zone shapes available: box, cylinder, point, or route
-- Many zone types available:
-    farmland, forest, home, kitchen, pen, storage, townhall
+- New zone types: farmland, forest, home, kitchen, pen, storage, townhall
 - Zones can be filtered to only accept specific items or entity types (e.g., wheat-only farms, sheep-only pens)
-
-**Commands**
-- `/vt assign` - Assign homes to villagers
-- `/vt hunger` - Check villager hunger status
-- `/vt exhaust` - Add exhaustion to villagers (for testing)
-- `/vt village create/remove/list/info` - Manage villages
-- `/vt villager <targets> profession [<profession>]` - View or set villager professions
-- `/vt zone create/delete/rename/info/list` - Manage village zones
-- `/vt zone path add/clear` - Build custom path-shaped zones
-- `/vt zone claim/release` - Temporarily claim positions within zones for villagers
-- `/vt zone filter add/remove/clear/list` - Control what items or entity types zones accept (e.g., limit farmland to specific crops, limit pens to specific animals)
