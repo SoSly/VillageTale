@@ -13,4 +13,6 @@ public interface IZoneType {
     CompoundTag serializeNBT();
     void deserializeNBT(CompoundTag nbt);
     void onDatapackReload(JsonObject data);
+    boolean supportsItemFilters();
+    boolean supportsEntityFilters();
 }

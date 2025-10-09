@@ -146,5 +146,11 @@
   "villagetale.gui.zone_detail.shape_cylinder_radius": "Radius: %d",
   "villagetale.gui.zone_detail.shape_cylinder_height": "Height: %d",
   "villagetale.gui.zone_detail.shape_point_position": "Position: %d, %d, %d",
-  "villagetale.gui.zone_detail.shape_route_waypoint": "Waypoint %d: %d, %d, %d"
+  "villagetale.gui.zone_detail.shape_route_waypoint": "Waypoint %d: %d, %d, %d",
+
+  "villagetale.gui.filter.configure_item_filters": "Filter Items",
+  "villagetale.gui.filter.configure_entity_filters": "Filter Entities",
+  "villagetale.gui.filter.clear_all": "Clear All",
+  "villagetale.gui.error.village_not_found": "Village not found",
+  "villagetale.gui.error.zone_not_found": "Zone not found"
 }

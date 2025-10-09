@@ -199,9 +199,6 @@ public class VillageCapability implements IVillageCapability {
         });
         tag.put("players", playerList);
 
-        if (chunk != null && chunk.get() != null) {
-            chunk.get().setUnsaved(false);
-        }
         return tag;
     }
 

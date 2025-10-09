@@ -63,4 +63,16 @@ public class ItemOrTagMatcher {
     public List<TagKey<Item>> getTags() {
         return tags;
     }
+
+    public List<ResourceLocation> getAllItemIds() {
+        List<ResourceLocation> ids = new ArrayList<>();
+        for (Item item : items) {
+            ids.add(BuiltInRegistries.ITEM.getKey(item));
+        }
+        for (TagKey<Item> tag : tags) {
+            BuiltInRegistries.ITEM.getTagOrEmpty(tag)
+                .forEach(holder -> ids.add(BuiltInRegistries.ITEM.getKey(holder.value())));
+        }
+        return ids;
+    }
 }

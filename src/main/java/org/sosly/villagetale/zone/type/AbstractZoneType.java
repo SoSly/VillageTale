@@ -20,6 +20,8 @@ public abstract class AbstractZoneType implements IZoneType {
     private final EntityTypeOrTagMatcher entityTypeMatcher = new EntityTypeOrTagMatcher();
     private final ItemOrTagMatcher itemFilter = new ItemOrTagMatcher();
     private final EntityTypeOrTagMatcher entityFilter = new EntityTypeOrTagMatcher();
+    private boolean supportsItemFilters;
+    private boolean supportsEntityFilters;
 
     public String getClaimType() {
         return claimType;
@@ -38,6 +40,16 @@ public abstract class AbstractZoneType implements IZoneType {
 
     public Set<ResourceLocation> getEntityFilter() {
         return new HashSet<>(entityFilter.getAllEntityTypeIds());
+    }
+
+    @Override
+    public boolean supportsItemFilters() {
+        return supportsItemFilters;
+    }
+
+    @Override
+    public boolean supportsEntityFilters() {
+        return supportsEntityFilters;
     }
 
     @Override
@@ -103,8 +115,14 @@ public abstract class AbstractZoneType implements IZoneType {
         JsonElement values = filter.get("values");
 
         switch (filterType) {
-            case "item" -> itemFilter.loadFromJson(values.getAsJsonArray());
-            case "entity" -> entityFilter.loadFromJson(values.getAsJsonArray());
+            case "item" -> {
+                itemFilter.loadFromJson(values.getAsJsonArray());
+                supportsItemFilters = true;
+            }
+            case "entity" -> {
+                entityFilter.loadFromJson(values.getAsJsonArray());
+                supportsEntityFilters = true;
+            }
         }
     }
 

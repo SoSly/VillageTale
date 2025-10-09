@@ -14,6 +14,8 @@ import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSync;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import org.sosly.villagetale.network.packets.serverbound.ConvertVillager;
 import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfo;
+import org.sosly.villagetale.network.packets.serverbound.UpdateZoneFilters;
+import org.sosly.villagetale.network.packets.serverbound.UpdateZoneName;
 
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -55,6 +57,12 @@ public class NetworkHandler {
 
         CHANNEL.registerMessage(packetId++, OpenVillageInfoScreen.class,
                 OpenVillageInfoScreen::encode, OpenVillageInfoScreen::decode, OpenVillageInfoScreen::handle);
+
+        CHANNEL.registerMessage(packetId++, UpdateZoneName.class,
+                UpdateZoneName::encode, UpdateZoneName::decode, UpdateZoneName::handle);
+
+        CHANNEL.registerMessage(packetId++, UpdateZoneFilters.class,
+                UpdateZoneFilters::encode, UpdateZoneFilters::decode, UpdateZoneFilters::handle);
 
         VillageTale.LOGGER.info("VillageTale registered {} network messages", packetId);
     }

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.capability.Capabilities;
 
@@ -31,7 +32,13 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public CompoundTag serializeNBT() {
-        return capability.serializeNBT();
+        CompoundTag tag = capability.serializeNBT();
+
+        if (capability.getChunk() != null) {
+            capability.getChunk().setUnsaved(false);
+        }
+
+        return tag;
     }
 
     @Override

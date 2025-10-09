@@ -1,9 +1,9 @@
 package org.sosly.villagetale.client.gui;
 
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -11,31 +11,37 @@ import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
 import org.sosly.villagetale.client.gui.components.LedgerBackButton;
+import org.sosly.villagetale.client.gui.components.LedgerIconButton;
 import org.sosly.villagetale.client.gui.components.LedgerPageButton;
+import org.sosly.villagetale.client.gui.components.NoShadowEditBox;
+import org.sosly.villagetale.network.packets.serverbound.UpdateZoneName;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
 import org.sosly.villagetale.zone.shape.Route;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 @OnlyIn(Dist.CLIENT)
 public class ZoneDetailScreen extends AbstractLedgerScreen {
     private static final int TEXT_Y_OFFSET = 16;
     private static final int LINE_HEIGHT = 12;
+    private static final int ICON_SIZE = 12;
 
     private final UUID villageId;
     private int currentZoneIndex;
+    private boolean isEditingName;
     private LedgerPageButton backButton;
     private LedgerPageButton forwardButton;
     private LedgerBackButton returnButton;
+    private LedgerIconButton editNameButton;
+    private LedgerIconButton configureItemFiltersButton;
+    private LedgerIconButton configureEntityFiltersButton;
+    private NoShadowEditBox nameEditBox;
 
     public ZoneDetailScreen(UUID villageId, int startingZoneIndex) {
         super(Component.translatable("villagetale.gui.zone_detail.title"));
         this.villageId = villageId;
         this.currentZoneIndex = startingZoneIndex;
+        this.isEditingName = false;
     }
 
     @Override
@@ -48,6 +54,54 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
         this.backButton = this.addRenderableWidget(new LedgerPageButton(leftPos + CONTENT_LEFT_MARGIN, topPos + 155, false, button -> navigateToPreviousZone()));
         this.returnButton = this.addRenderableWidget(new LedgerBackButton(leftPos + 62, topPos + 153, button -> returnToVillageInfo()));
         this.forwardButton = this.addRenderableWidget(new LedgerPageButton(leftPos + 100, topPos + 155, true, button -> navigateToNextZone()));
+
+        this.editNameButton = this.addRenderableWidget(new LedgerIconButton(
+            leftPos + CONTENT_LEFT_MARGIN + 104,
+            topPos + TEXT_Y_OFFSET - 1,
+            3,
+            223,
+            10,
+            10,
+            button -> toggleNameEditing(),
+            Component.literal("Edit Name")
+        ));
+
+        this.configureItemFiltersButton = this.addRenderableWidget(new LedgerIconButton(
+            leftPos + CONTENT_LEFT_MARGIN + 104,
+            topPos + TEXT_Y_OFFSET + 24,
+            3,
+            223,
+            10,
+            10,
+            button -> openItemFilterConfig(),
+            Component.literal("Configure Item Filters")
+        ));
+
+        this.configureEntityFiltersButton = this.addRenderableWidget(new LedgerIconButton(
+            leftPos + CONTENT_LEFT_MARGIN + 88,
+            topPos + TEXT_Y_OFFSET + 24,
+            3,
+            223,
+            10,
+            10,
+            button -> openEntityFilterConfig(),
+            Component.literal("Configure Entity Filters")
+        ));
+
+        this.nameEditBox = new NoShadowEditBox(
+            this.font,
+            leftPos + CONTENT_LEFT_MARGIN,
+            topPos + TEXT_Y_OFFSET,
+            95,
+            10,
+            Component.literal("Zone Name")
+        );
+        this.nameEditBox.setMaxLength(24);
+        this.nameEditBox.setBordered(false);
+        this.nameEditBox.setTextColor(0x000000);
+        this.nameEditBox.setVisible(false);
+        this.addRenderableWidget(this.nameEditBox);
+
         updateButtonVisibility();
     }
 
@@ -77,40 +131,41 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
         int currentY = topPos + TEXT_Y_OFFSET;
         int textX = leftPos + CONTENT_LEFT_MARGIN;
 
-        guiGraphics.drawString(this.font, Component.literal(zone.getName()), textX, currentY, 0, false);
-        currentY += LINE_HEIGHT + 1;
+        if (!isEditingName) {
+            guiGraphics.drawString(this.font, Component.literal(zone.getName()), textX, currentY, 0, false);
+        }
 
+        currentY += LINE_HEIGHT + 1;
         guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.zone_detail.type", getTypeName(zone)), textX, currentY, 0, false);
         currentY += LINE_HEIGHT;
 
-        List<ItemStack> filters = zone.getFilter();
-        Set<ResourceLocation> entityFilters = zone.getEntityTypeFilter();
-        if (!filters.isEmpty() || !entityFilters.isEmpty()) {
-            guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.zone_detail.filters"), textX, currentY, 0, false);
+        boolean supportsItemFilters = zone.getType() != null && zone.getType().supportsItemFilters();
+        boolean supportsEntityFilters = zone.getType() != null && zone.getType().supportsEntityFilters();
+
+        if (supportsItemFilters) {
+            int itemFilterCount = zone.getFilter().size();
+            String filterText = itemFilterCount > 0
+                ? "Item Filters: " + itemFilterCount
+                : "Item Filters: None";
+            guiGraphics.drawString(this.font, Component.literal(filterText), textX, currentY, 0, false);
             currentY += LINE_HEIGHT;
-            currentY = renderFilters(guiGraphics, textX, currentY, filters, entityFilters);
         }
+
+        if (supportsEntityFilters) {
+            int entityFilterCount = zone.getEntityTypeFilter().size();
+            String filterText = entityFilterCount > 0
+                ? "Entity Filters: " + entityFilterCount
+                : "Entity Filters: None";
+            guiGraphics.drawString(this.font, Component.literal(filterText), textX, currentY, 0, false);
+            currentY += LINE_HEIGHT;
+        }
+
+        currentY += LINE_HEIGHT;
 
         guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.zone_detail.shape", getShapeName(zone)), textX, currentY, 0, false);
         currentY += LINE_HEIGHT;
 
         renderShapeDetails(guiGraphics, textX, currentY, zone);
-    }
-
-    private int renderFilters(GuiGraphics guiGraphics, int textX, int currentY, List<ItemStack> filters, Set<ResourceLocation> entityFilters) {
-        for (ItemStack filter : filters) {
-            String filterText = String.format("- %s", filter.getHoverName().getString());
-            guiGraphics.drawString(this.font, Component.literal(filterText), textX, currentY, 0, false);
-            currentY += LINE_HEIGHT;
-        }
-
-        for (ResourceLocation entityType : entityFilters) {
-            String filterText = String.format("- %s", entityType.toString());
-            guiGraphics.drawString(this.font, Component.literal(filterText), textX, currentY, 0, false);
-            currentY += LINE_HEIGHT;
-        }
-
-        return currentY;
     }
 
     private void renderShapeDetails(GuiGraphics guiGraphics, int textX, int currentY, IVillageZone zone) {
@@ -185,8 +240,16 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
             return;
         }
 
+        IVillageZone zone = zones.get(currentZoneIndex);
+
         this.forwardButton.visible = currentZoneIndex < zones.size() - 1;
         this.backButton.visible = currentZoneIndex > 0;
+
+        boolean supportsItemFilters = zone.getType() != null && zone.getType().supportsItemFilters();
+        boolean supportsEntityFilters = zone.getType() != null && zone.getType().supportsEntityFilters();
+
+        this.configureItemFiltersButton.visible = supportsItemFilters;
+        this.configureEntityFiltersButton.visible = supportsEntityFilters;
     }
 
     private void navigateToPreviousZone() {
@@ -212,6 +275,78 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
     private void returnToVillageInfo() {
         if (this.minecraft != null) {
             this.minecraft.setScreen(new VillageInfoScreen(villageId));
+        }
+    }
+
+    private void toggleNameEditing() {
+        IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
+        if (village == null) {
+            return;
+        }
+
+        List<IVillageZone> zones = village.getZones();
+        if (zones.isEmpty() || currentZoneIndex < 0 || currentZoneIndex >= zones.size()) {
+            return;
+        }
+
+        IVillageZone zone = zones.get(currentZoneIndex);
+
+        if (!isEditingName) {
+            this.nameEditBox.setValue(zone.getName());
+            this.nameEditBox.setVisible(true);
+            this.nameEditBox.setFocused(true);
+            this.nameEditBox.moveCursorToEnd();
+            this.isEditingName = true;
+        } else {
+            String newName = this.nameEditBox.getValue().trim();
+            if (!newName.isEmpty() && !newName.equals(zone.getName())) {
+                UpdateZoneName.send(villageId, zone.getUUID(), newName);
+            }
+            this.nameEditBox.setVisible(false);
+            this.nameEditBox.setFocused(false);
+            this.isEditingName = false;
+        }
+    }
+
+    private void openItemFilterConfig() {
+        IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
+        if (village == null) {
+            return;
+        }
+
+        List<IVillageZone> zones = village.getZones();
+        if (zones.isEmpty() || currentZoneIndex < 0 || currentZoneIndex >= zones.size()) {
+            return;
+        }
+
+        IVillageZone zone = zones.get(currentZoneIndex);
+        if (zone.getType() == null || !zone.getType().supportsItemFilters()) {
+            return;
+        }
+
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(new FilterConfigurationScreen(villageId, zone.getUUID(), FilterConfigurationScreen.FilterType.ITEM, currentZoneIndex));
+        }
+    }
+
+    private void openEntityFilterConfig() {
+        IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
+        if (village == null) {
+            return;
+        }
+
+        List<IVillageZone> zones = village.getZones();
+        if (zones.isEmpty() || currentZoneIndex < 0 || currentZoneIndex >= zones.size()) {
+            return;
+        }
+
+        IVillageZone zone = zones.get(currentZoneIndex);
+        if (zone.getType() == null || !zone.getType().supportsEntityFilters()) {
+            return;
+        }
+
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(new FilterConfigurationScreen(villageId, zone.getUUID(), FilterConfigurationScreen.FilterType.ENTITY, currentZoneIndex));
         }
     }
 }
