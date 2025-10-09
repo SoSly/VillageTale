@@ -78,7 +78,7 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
         ));
 
         this.configureEntityFiltersButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 88,
+            leftPos + CONTENT_LEFT_MARGIN + 104,
             topPos + TEXT_Y_OFFSET + 24,
             3,
             223,
@@ -274,7 +274,7 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
 
     private void returnToVillageInfo() {
         if (this.minecraft != null) {
-            this.minecraft.setScreen(new VillageInfoScreen(villageId));
+            this.minecraft.setScreen(new ZoneListScreen(villageId));
         }
     }
 

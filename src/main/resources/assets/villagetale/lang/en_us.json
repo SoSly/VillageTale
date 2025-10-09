@@ -148,9 +148,14 @@
   "villagetale.gui.zone_detail.shape_point_position": "Position: %d, %d, %d",
   "villagetale.gui.zone_detail.shape_route_waypoint": "Waypoint %d: %d, %d, %d",
 
-  "villagetale.gui.filter.configure_item_filters": "Filter Items",
-  "villagetale.gui.filter.configure_entity_filters": "Filter Entities",
+  "villagetale.gui.filter.configure_item_filters": "Allowed Items",
+  "villagetale.gui.filter.configure_entity_filters": "Allowed Entities",
   "villagetale.gui.filter.clear_all": "Clear All",
   "villagetale.gui.error.village_not_found": "Village not found",
-  "villagetale.gui.error.zone_not_found": "Zone not found"
+  "villagetale.gui.error.zone_not_found": "Zone not found",
+
+  "villagetale.gui.zone_list.title": "Zones",
+  "villagetale.gui.zone_list.no_zones": "No zones in this village",
+  "villagetale.gui.zone_list.confirm_delete": "Delete zone '%s'?",
+  "villagetale.gui.zone_list.delete": "Delete Zone"
 }

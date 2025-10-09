@@ -1,7 +1,11 @@
 package org.sosly.villagetale.client.gui;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -15,14 +19,9 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
 import org.sosly.villagetale.client.gui.components.CompactCheckbox;
 import org.sosly.villagetale.client.gui.components.LedgerBackButton;
+import org.sosly.villagetale.client.gui.components.LedgerIconButton;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneFilters;
 import org.sosly.villagetale.zone.type.AbstractZoneType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
 public class FilterConfigurationScreen extends AbstractLedgerScreen {
@@ -36,7 +35,7 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
     private final int returnToZoneIndex;
     private FilterList filterList;
     private LedgerBackButton backButton;
-    private Button clearAllButton;
+    private LedgerIconButton clearAllButton;
     private Set<ResourceLocation> selectedFilters;
 
     public enum FilterType {
@@ -119,10 +118,16 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
         this.filterList.setLeftPos(leftPos + CONTENT_LEFT_MARGIN);
         this.addWidget(this.filterList);
 
-        this.clearAllButton = this.addRenderableWidget(Button.builder(
-            Component.translatable("villagetale.gui.filter.clear_all"),
-            button -> clearAllFilters()
-        ).bounds(leftPos + CONTENT_LEFT_MARGIN + 70, topPos + 15, 50, 12).build());
+        this.clearAllButton = this.addRenderableWidget(new LedgerIconButton(
+            leftPos + CONTENT_LEFT_MARGIN + 105,
+            topPos + 16,
+            26,
+            223,
+            10,
+            10,
+            button -> clearAllFilters(),
+            Component.translatable("villagetale.gui.filter.clear_all")
+        ));
 
         this.backButton = this.addRenderableWidget(new LedgerBackButton(
             leftPos + 62,

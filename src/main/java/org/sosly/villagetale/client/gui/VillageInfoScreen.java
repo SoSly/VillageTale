@@ -88,13 +88,8 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
     }
 
     private void openZoneDetailScreen() {
-        IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
-        if (village == null || village.getZones().isEmpty()) {
-            return;
-        }
-
         if (this.minecraft != null) {
-            this.minecraft.setScreen(new ZoneDetailScreen(villageId, 0));
+            this.minecraft.setScreen(new ZoneListScreen(villageId));
         }
     }
 }
