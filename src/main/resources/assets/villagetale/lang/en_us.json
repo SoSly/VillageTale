@@ -157,5 +157,11 @@
   "villagetale.gui.zone_list.title": "Zones",
   "villagetale.gui.zone_list.no_zones": "No zones in this village",
   "villagetale.gui.zone_list.confirm_delete": "Delete zone '%s'?",
-  "villagetale.gui.zone_list.delete": "Delete Zone"
+  "villagetale.gui.zone_list.delete": "Delete Zone",
+
+  "villagetale.gui.add_zone.title": "Add Zone",
+  "villagetale.gui.add_zone.box": "Box",
+  "villagetale.gui.add_zone.cylinder": "Cylinder",
+  "villagetale.gui.add_zone.point": "Point",
+  "villagetale.gui.add_zone.route": "Route"
 }

@@ -7,6 +7,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
+import org.sosly.villagetale.client.gui.components.LedgerIconButton;
 
 import java.util.UUID;
 
@@ -16,10 +17,30 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
     private int zonesTextX;
     private int zonesTextY;
     private int zonesTextWidth;
+    private LedgerIconButton addZoneButton;
 
     public VillageInfoScreen(UUID villageId) {
         super(Component.translatable("villagetale.gui.village_info.title"));
         this.villageId = villageId;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        int leftPos = getLeftPos();
+        int topPos = getTopPos();
+
+        this.addZoneButton = this.addRenderableWidget(new LedgerIconButton(
+            leftPos + CONTENT_LEFT_MARGIN + 56,
+            topPos + 39,
+            49,
+            223,
+            9,
+            10,
+            button -> openAddZoneScreen(),
+            Component.translatable("villagetale.gui.add_zone.title")
+        ));
     }
 
     @Override
@@ -90,6 +111,12 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
     private void openZoneDetailScreen() {
         if (this.minecraft != null) {
             this.minecraft.setScreen(new ZoneListScreen(villageId));
+        }
+    }
+
+    private void openAddZoneScreen() {
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(new AddZoneScreen(villageId, this));
         }
     }
 }

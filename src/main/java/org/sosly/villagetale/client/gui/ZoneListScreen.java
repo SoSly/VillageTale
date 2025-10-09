@@ -25,6 +25,7 @@ public class ZoneListScreen extends AbstractLedgerScreen {
     private final UUID villageId;
     private ZoneList zoneList;
     private LedgerBackButton backButton;
+    private LedgerIconButton addZoneButton;
 
     public ZoneListScreen(UUID villageId) {
         super(Component.translatable("villagetale.gui.zone_list.title"));
@@ -58,6 +59,17 @@ public class ZoneListScreen extends AbstractLedgerScreen {
             leftPos + 62,
             topPos + 153,
             button -> returnToVillageInfo()
+        ));
+
+        this.addZoneButton = this.addRenderableWidget(new LedgerIconButton(
+            leftPos + CONTENT_LEFT_MARGIN + 40,
+            topPos + 15,
+            49,
+            223,
+            9,
+            10,
+            button -> openAddZoneScreen(),
+            Component.translatable("villagetale.gui.add_zone.title")
         ));
     }
 
@@ -114,6 +126,12 @@ public class ZoneListScreen extends AbstractLedgerScreen {
             Component.empty()
         );
         this.minecraft.setScreen(confirmScreen);
+    }
+
+    private void openAddZoneScreen() {
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(new AddZoneScreen(villageId, this));
+        }
     }
 
     private class ZoneList extends ObjectSelectionList<ZoneList.Entry> {
