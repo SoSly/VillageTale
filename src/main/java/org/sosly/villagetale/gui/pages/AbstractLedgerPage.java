@@ -50,5 +50,6 @@ public abstract class AbstractLedgerPage implements ILedgerPage {
         elements.forEach((widget) -> {
             screen.pRemoveWidget((GuiEventListener & Renderable & NarratableEntry) widget);
         });
+        elements.clear();
     }
 }
