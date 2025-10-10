@@ -135,7 +135,7 @@ A happy village is a productive village:
 
 ## Roadmap
 
-See our [project board](https://github.com/orgs/SoSly/projects/8) for planned milestones and future ideas.
+See our [project board](https://github.com/orgs/SoSly/projects/8) and [roadmap](ROADMAP.md) for planned milestones and future ideas.
 
 ## License
 
