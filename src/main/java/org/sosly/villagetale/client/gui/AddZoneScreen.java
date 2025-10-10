@@ -102,6 +102,12 @@ public class AddZoneScreen extends AbstractLedgerScreen {
     }
 
     private void createRouteZone() {
+        ZoneCreationManager.getInstance().startRouteCreation(villageId);
+
+        if (this.minecraft != null && this.minecraft.player != null) {
+            this.minecraft.player.playNotifySound(SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.MASTER, 0.5f, 1.0f);
+            this.minecraft.setScreen(null);
+        }
     }
 
     private void returnToPreviousScreen() {

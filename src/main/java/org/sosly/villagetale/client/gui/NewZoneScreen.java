@@ -18,6 +18,7 @@ import org.sosly.villagetale.zone.ZoneRegistry;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
+import org.sosly.villagetale.zone.shape.Route;
 import org.sosly.villagetale.zone.type.TownHall;
 
 @OnlyIn(Dist.CLIENT)
@@ -147,6 +148,11 @@ public class NewZoneScreen extends AbstractLedgerScreen {
 
         if (shape instanceof Point point) {
             renderPointInfo(guiGraphics, point, leftPos, currentY);
+            return;
+        }
+
+        if (shape instanceof Route route) {
+            renderRouteInfo(guiGraphics, route, leftPos, currentY);
         }
     }
 
@@ -184,6 +190,19 @@ public class NewZoneScreen extends AbstractLedgerScreen {
         int z = point.getPos().getZ();
 
         guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_point_pos", x, y, z), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        return currentY;
+    }
+
+    private int renderRouteInfo(GuiGraphics guiGraphics, Route route, int leftPos, int currentY) {
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_route_waypoints", route.getPath().size()), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        currentY += 10;
+
+        for (int i = 0; i < route.getPath().size(); i++) {
+            net.minecraft.core.BlockPos waypoint = route.getPath().get(i);
+            guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_route_waypoint", i + 1, waypoint.getX(), waypoint.getY(), waypoint.getZ()), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+            currentY += 10;
+        }
+
         return currentY;
     }
 

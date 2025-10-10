@@ -1,5 +1,7 @@
 package org.sosly.villagetale.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -13,6 +15,7 @@ import org.sosly.villagetale.network.packets.serverbound.SetZoneCreationMode;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
+import org.sosly.villagetale.zone.shape.Route;
 
 @OnlyIn(Dist.CLIENT)
 public class ZoneCreationManager {
@@ -21,6 +24,7 @@ public class ZoneCreationManager {
     private CreationMode mode = CreationMode.INACTIVE;
     private UUID villageId;
     private BlockPos startPos;
+    private List<BlockPos> routeWaypoints = new ArrayList<>();
 
     private ZoneCreationManager() {
     }
@@ -53,11 +57,20 @@ public class ZoneCreationManager {
         updatePlayerPersistentData(true);
     }
 
+    public void startRouteCreation(UUID villageId) {
+        this.mode = CreationMode.ROUTE_WAYPOINTS;
+        this.villageId = villageId;
+        this.startPos = null;
+        this.routeWaypoints.clear();
+        updatePlayerPersistentData(true);
+    }
+
     public boolean handleClick(BlockPos pos) {
         return switch (mode) {
             case BOX_FIRST_CORNER, BOX_SECOND_CORNER -> handleBoxClick(pos);
             case POINT -> handlePointClick(pos);
             case CYLINDER_CENTER, CYLINDER_DIMENSIONS -> handleCylinderClick(pos);
+            case ROUTE_WAYPOINTS -> handleRouteClick(pos);
             case INACTIVE -> false;
         };
     }
@@ -136,10 +149,37 @@ public class ZoneCreationManager {
         return false;
     }
 
+    private boolean handleRouteClick(BlockPos pos) {
+        routeWaypoints.add(pos);
+        return true;
+    }
+
+    public void finalizeRoute() {
+        if (mode != CreationMode.ROUTE_WAYPOINTS) {
+            return;
+        }
+
+        if (routeWaypoints.isEmpty()) {
+            cancel();
+            return;
+        }
+
+        Route shape = new Route();
+        for (BlockPos waypoint : routeWaypoints) {
+            shape.addPoint(waypoint);
+        }
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc != null) {
+            mc.setScreen(new NewZoneScreen(villageId, shape));
+        }
+    }
+
     public void cancel() {
         this.mode = CreationMode.INACTIVE;
         this.villageId = null;
         this.startPos = null;
+        this.routeWaypoints.clear();
         updatePlayerPersistentData(false);
     }
 
@@ -164,6 +204,7 @@ public class ZoneCreationManager {
             case BOX_SECOND_CORNER -> getBoxPreview(cursorPos);
             case POINT -> getPointPreview(cursorPos);
             case CYLINDER_DIMENSIONS -> getCylinderPreview(cursorPos);
+            case ROUTE_WAYPOINTS -> getRoutePreview(cursorPos);
             default -> null;
         };
     }
@@ -211,12 +252,25 @@ public class ZoneCreationManager {
         return new Cylinder(startPos, radius, height);
     }
 
+    private IZoneShape getRoutePreview(Vec3 cursorPos) {
+        Route route = new Route();
+        for (BlockPos waypoint : routeWaypoints) {
+            route.addPoint(waypoint);
+        }
+
+        BlockPos cursor = BlockPos.containing(cursorPos);
+        route.addPoint(cursor);
+
+        return route;
+    }
+
     public enum CreationMode {
         INACTIVE,
         BOX_FIRST_CORNER,
         BOX_SECOND_CORNER,
         POINT,
         CYLINDER_CENTER,
-        CYLINDER_DIMENSIONS
+        CYLINDER_DIMENSIONS,
+        ROUTE_WAYPOINTS
     }
 }

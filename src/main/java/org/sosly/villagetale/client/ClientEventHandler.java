@@ -118,6 +118,13 @@ public class ClientEventHandler {
             return;
         }
 
+        if (player.isCrouching() && manager.getMode() == ZoneCreationManager.CreationMode.ROUTE_WAYPOINTS) {
+            manager.finalizeRoute();
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            return;
+        }
+
         BlockPos pos = event.getPos();
 
         if (manager.handleClick(pos)) {

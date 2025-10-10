@@ -175,6 +175,8 @@
   "villagetale.gui.new_zone.shape_cylinder_radius": "Radius: %d",
   "villagetale.gui.new_zone.shape_cylinder_height": "Height: %d",
   "villagetale.gui.new_zone.shape_point_pos": "Position: (%d, %d, %d)",
+  "villagetale.gui.new_zone.shape_route_waypoints": "Waypoints: %d",
+  "villagetale.gui.new_zone.shape_route_waypoint": "  %d: (%d, %d, %d)",
   "villagetale.gui.new_zone.save": "Save",
   "villagetale.gui.new_zone.cancel": "Cancel"
 }
