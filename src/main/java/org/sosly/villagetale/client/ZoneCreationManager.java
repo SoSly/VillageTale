@@ -136,7 +136,9 @@ public class ZoneCreationManager {
                 height = 1;
             }
 
-            Cylinder shape = new Cylinder(startPos, radius, height);
+            int minY = Math.min(startPos.getY(), pos.getY());
+            BlockPos baseCenter = new BlockPos(startPos.getX(), minY, startPos.getZ());
+            Cylinder shape = new Cylinder(baseCenter, radius, height);
 
             Minecraft mc = Minecraft.getInstance();
             if (mc != null) {
@@ -249,7 +251,9 @@ public class ZoneCreationManager {
             height = 1;
         }
 
-        return new Cylinder(startPos, radius, height);
+        int minY = Math.min(startPos.getY(), cursor.getY());
+        BlockPos baseCenter = new BlockPos(startPos.getX(), minY, startPos.getZ());
+        return new Cylinder(baseCenter, radius, height);
     }
 
     private IZoneShape getRoutePreview(Vec3 cursorPos) {
