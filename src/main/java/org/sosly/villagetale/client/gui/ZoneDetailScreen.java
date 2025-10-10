@@ -10,9 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
-import org.sosly.villagetale.client.gui.components.LedgerBackButton;
 import org.sosly.villagetale.client.gui.components.LedgerIconButton;
-import org.sosly.villagetale.client.gui.components.LedgerPageButton;
 import org.sosly.villagetale.client.gui.components.NoShadowEditBox;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneName;
 import org.sosly.villagetale.zone.shape.Box;
@@ -25,13 +23,14 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
     private static final int TEXT_Y_OFFSET = 16;
     private static final int LINE_HEIGHT = 12;
     private static final int ICON_SIZE = 12;
+    private static final int EDIT_ICON_SIZE = 10;
 
     private final UUID villageId;
     private int currentZoneIndex;
     private boolean isEditingName;
-    private LedgerPageButton backButton;
-    private LedgerPageButton forwardButton;
-    private LedgerBackButton returnButton;
+    private LedgerIconButton previousButton;
+    private LedgerIconButton nextButton;
+    private LedgerIconButton returnButton;
     private LedgerIconButton editNameButton;
     private LedgerIconButton configureItemFiltersButton;
     private LedgerIconButton configureEntityFiltersButton;
@@ -51,39 +50,27 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
         int leftPos = getLeftPos();
         int topPos = getTopPos();
 
-        this.backButton = this.addRenderableWidget(new LedgerPageButton(leftPos + CONTENT_LEFT_MARGIN, topPos + 155, false, button -> navigateToPreviousZone()));
-        this.returnButton = this.addRenderableWidget(new LedgerBackButton(leftPos + 62, topPos + 153, button -> returnToVillageInfo()));
-        this.forwardButton = this.addRenderableWidget(new LedgerPageButton(leftPos + 100, topPos + 155, true, button -> navigateToNextZone()));
+        this.previousButton = this.addRenderableWidget(LedgerIconButton.PagePrev(leftPos + CONTENT_LEFT_MARGIN, topPos + 155, button -> navigateToPreviousZone(), Component.translatable("villagetale.gui.previous")));
+        this.returnButton = this.addRenderableWidget(LedgerIconButton.Back(leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - 14) / 2, topPos + 153, button -> returnToVillageInfo(), Component.translatable("villagetale.gui.back")));
+        this.nextButton = this.addRenderableWidget(LedgerIconButton.PageNext(leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - 23, topPos + 155, button -> navigateToNextZone(), Component.translatable("villagetale.gui.next")));
 
-        this.editNameButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 104,
+        this.editNameButton = this.addRenderableWidget(LedgerIconButton.Edit(
+            leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - EDIT_ICON_SIZE,
             topPos + TEXT_Y_OFFSET - 1,
-            3,
-            223,
-            10,
-            10,
             button -> toggleNameEditing(),
             Component.literal("Edit Name")
         ));
 
-        this.configureItemFiltersButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 104,
+        this.configureItemFiltersButton = this.addRenderableWidget(LedgerIconButton.Edit(
+            leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - EDIT_ICON_SIZE,
             topPos + TEXT_Y_OFFSET + 24,
-            3,
-            223,
-            10,
-            10,
             button -> openItemFilterConfig(),
             Component.literal("Configure Item Filters")
         ));
 
-        this.configureEntityFiltersButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 104,
+        this.configureEntityFiltersButton = this.addRenderableWidget(LedgerIconButton.Edit(
+            leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - EDIT_ICON_SIZE,
             topPos + TEXT_Y_OFFSET + 24,
-            3,
-            223,
-            10,
-            10,
             button -> openEntityFilterConfig(),
             Component.literal("Configure Entity Filters")
         ));
@@ -242,8 +229,8 @@ public class ZoneDetailScreen extends AbstractLedgerScreen {
 
         IVillageZone zone = zones.get(currentZoneIndex);
 
-        this.forwardButton.visible = currentZoneIndex < zones.size() - 1;
-        this.backButton.visible = currentZoneIndex > 0;
+        this.nextButton.visible = currentZoneIndex < zones.size() - 1;
+        this.previousButton.visible = currentZoneIndex > 0;
 
         boolean supportsItemFilters = zone.getType() != null && zone.getType().supportsItemFilters();
         boolean supportsEntityFilters = zone.getType() != null && zone.getType().supportsEntityFilters();

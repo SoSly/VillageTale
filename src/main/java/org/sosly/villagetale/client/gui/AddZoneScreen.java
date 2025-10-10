@@ -3,14 +3,13 @@ package org.sosly.villagetale.client.gui;
 import java.util.UUID;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.client.ZoneCreationManager;
-import org.sosly.villagetale.client.gui.components.LedgerBackButton;
+import org.sosly.villagetale.client.gui.components.LedgerIconButton;
 
 @OnlyIn(Dist.CLIENT)
 public class AddZoneScreen extends AbstractLedgerScreen {
@@ -21,8 +20,6 @@ public class AddZoneScreen extends AbstractLedgerScreen {
 
     private final UUID villageId;
     private final AbstractLedgerScreen previousScreen;
-    private LedgerBackButton backButton;
-
     public AddZoneScreen(UUID villageId, AbstractLedgerScreen previousScreen) {
         super(Component.translatable("villagetale.gui.add_zone.title"));
         this.villageId = villageId;
@@ -36,7 +33,7 @@ public class AddZoneScreen extends AbstractLedgerScreen {
         int leftPos = getLeftPos();
         int topPos = getTopPos();
 
-        int buttonX = leftPos + (GUI_WIDTH - BUTTON_WIDTH) / 2;
+        int buttonX = leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - BUTTON_WIDTH) / 2;
         int currentY = topPos + BUTTONS_Y_START;
 
         this.addRenderableWidget(Button.builder(
@@ -62,10 +59,11 @@ public class AddZoneScreen extends AbstractLedgerScreen {
             button -> createRouteZone()
         ).bounds(buttonX, currentY, BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
-        this.backButton = this.addRenderableWidget(new LedgerBackButton(
-            leftPos + 62,
+        this.addRenderableWidget(LedgerIconButton.Back(
+            leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - 14) / 2,
             topPos + 153,
-            button -> returnToPreviousScreen()
+            button -> returnToPreviousScreen(),
+            Component.translatable("villagetale.gui.back")
         ));
     }
 

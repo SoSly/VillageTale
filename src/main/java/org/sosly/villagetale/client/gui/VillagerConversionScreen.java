@@ -37,7 +37,7 @@ public class VillagerConversionScreen extends AbstractLedgerScreen {
                         Component.translatable("villagetale.gui.conversion.commit"),
                         button -> this.onPurchase()
                 )
-                .bounds(leftPos + 25, topPos + GUI_HEIGHT - 40, 40, 14)
+                .bounds(leftPos + CONTENT_LEFT_MARGIN, topPos + GUI_HEIGHT - 40, 40, 14)
                 .build();
         this.addRenderableWidget(commit);
 
@@ -45,7 +45,7 @@ public class VillagerConversionScreen extends AbstractLedgerScreen {
                         Component.translatable("villagetale.gui.conversion.cancel"),
                         button -> this.onClose()
                 )
-                .bounds(leftPos + GUI_WIDTH - 65, topPos + GUI_HEIGHT - 40, 40, 14)
+                .bounds(leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - 40, topPos + GUI_HEIGHT - 40, 40, 14)
                 .build();
         this.addRenderableWidget(cancel);
     }
@@ -55,12 +55,12 @@ public class VillagerConversionScreen extends AbstractLedgerScreen {
         Component itemName = Items.EMERALD.getDescription();
         Component message = Component.translatable("villagetale.gui.conversion.message", EMERALD_COST, itemName);
 
-        int maxWidth = GUI_WIDTH - 40;
+        int maxWidth = CONTENT_WIDTH;
         var wrappedLines = this.font.split(message, maxWidth);
 
         int y = topPos + 28;
         for (var line : wrappedLines) {
-            guiGraphics.drawString(this.font, line, leftPos + 20, y, 0x3F3F3F, false);
+            guiGraphics.drawString(this.font, line, leftPos + CONTENT_LEFT_MARGIN, y, 0x3F3F3F, false);
             y += this.font.lineHeight + 2;
         }
     }

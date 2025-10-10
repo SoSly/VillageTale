@@ -23,6 +23,10 @@ import org.sosly.villagetale.zone.type.TownHall;
 
 @OnlyIn(Dist.CLIENT)
 public class NewZoneScreen extends AbstractLedgerScreen {
+    private static final int TYPE_NAV_BUTTON_SIZE = 11;
+    private static final int ACTION_BUTTON_SIZE = 9;
+    private static final int ACTION_BUTTON_SPACING = 9;
+
     private final UUID villageId;
     private final IZoneShape shape;
     private final List<ResourceLocation> zoneTypes;
@@ -58,7 +62,7 @@ public class NewZoneScreen extends AbstractLedgerScreen {
             this.font,
             leftPos + CONTENT_LEFT_MARGIN,
             topPos + 16,
-            95,
+            CONTENT_WIDTH - TYPE_NAV_BUTTON_SIZE,
             10,
             Component.translatable("villagetale.gui.new_zone.default_name")
         );
@@ -68,46 +72,33 @@ public class NewZoneScreen extends AbstractLedgerScreen {
         this.nameEditBox.setValue(Component.translatable("villagetale.gui.new_zone.default_name").getString());
         this.addRenderableWidget(this.nameEditBox);
 
-        this.typeLeftButton = this.addRenderableWidget(new LedgerIconButton(
+        this.typeLeftButton = this.addRenderableWidget(LedgerIconButton.ArrowLeft(
             leftPos + CONTENT_LEFT_MARGIN + 30,
             topPos + 27,
-            3,
-            235,
-            11,
-            11,
             button -> cycleTypePrevious(),
             Component.translatable("villagetale.gui.new_zone.type")
         ));
 
-        this.typeRightButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 100,
+        this.typeRightButton = this.addRenderableWidget(LedgerIconButton.ArrowRight(
+            leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - TYPE_NAV_BUTTON_SIZE - 5,
             topPos + 27,
-            25,
-            235,
-            11,
-            11,
             button -> cycleTypeNext(),
             Component.translatable("villagetale.gui.new_zone.type")
         ));
 
-        this.saveButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + 50,
+        int actionButtonsWidth = ACTION_BUTTON_SIZE * 2 + ACTION_BUTTON_SPACING;
+        int actionButtonsStartX = leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - actionButtonsWidth) / 2;
+
+        this.saveButton = this.addRenderableWidget(LedgerIconButton.Commit(
+            actionButtonsStartX,
             topPos + 153,
-            49,
-            233,
-            9,
-            10,
             button -> saveZone(),
             Component.translatable("villagetale.gui.new_zone.save")
         ));
 
-        this.cancelButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + 85,
+        this.cancelButton = this.addRenderableWidget(LedgerIconButton.Cancel(
+            actionButtonsStartX + ACTION_BUTTON_SIZE + ACTION_BUTTON_SPACING,
             topPos + 153,
-            49,
-            243,
-            9,
-            10,
             button -> returnToAddZone(),
             Component.translatable("villagetale.gui.new_zone.cancel")
         ));

@@ -18,7 +18,6 @@ import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
 import org.sosly.villagetale.client.gui.components.CompactCheckbox;
-import org.sosly.villagetale.client.gui.components.LedgerBackButton;
 import org.sosly.villagetale.client.gui.components.LedgerIconButton;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneFilters;
 import org.sosly.villagetale.zone.type.AbstractZoneType;
@@ -28,13 +27,14 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
     private static final int LIST_TOP = 36;
     private static final int LIST_BOTTOM = 145;
     private static final int TRASH_ICON_SIZE = 16;
+    private static final int CLEAR_BUTTON_SIZE = 10;
 
     private final UUID villageId;
     private final UUID zoneId;
     private final FilterType filterType;
     private final int returnToZoneIndex;
     private FilterList filterList;
-    private LedgerBackButton backButton;
+    private LedgerIconButton backButton;
     private LedgerIconButton clearAllButton;
     private Set<ResourceLocation> selectedFilters;
 
@@ -118,21 +118,18 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
         this.filterList.setLeftPos(leftPos + CONTENT_LEFT_MARGIN);
         this.addWidget(this.filterList);
 
-        this.clearAllButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 105,
+        this.clearAllButton = this.addRenderableWidget(LedgerIconButton.Delete(
+            leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - CLEAR_BUTTON_SIZE,
             topPos + 16,
-            26,
-            223,
-            10,
-            10,
             button -> clearAllFilters(),
             Component.translatable("villagetale.gui.filter.clear_all")
         ));
 
-        this.backButton = this.addRenderableWidget(new LedgerBackButton(
-            leftPos + 62,
+        this.backButton = this.addRenderableWidget(LedgerIconButton.Back(
+            leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - 14) / 2,
             topPos + 153,
-            button -> returnToZoneDetail()
+            button -> returnToZoneDetail(),
+            Component.translatable("villagetale.gui.back")
         ));
     }
 

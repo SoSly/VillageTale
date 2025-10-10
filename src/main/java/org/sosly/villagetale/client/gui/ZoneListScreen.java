@@ -12,7 +12,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
-import org.sosly.villagetale.client.gui.components.LedgerBackButton;
 import org.sosly.villagetale.client.gui.components.LedgerIconButton;
 import org.sosly.villagetale.network.packets.serverbound.DeleteZone;
 
@@ -21,10 +20,12 @@ public class ZoneListScreen extends AbstractLedgerScreen {
     private static final int LIST_TOP = 28;
     private static final int LIST_BOTTOM = 148;
     private static final int LINE_HEIGHT = 12;
+    private static final int ADD_ZONE_BUTTON_SIZE = 9;
+    private static final int DELETE_BUTTON_SIZE = 10;
 
     private final UUID villageId;
     private ZoneList zoneList;
-    private LedgerBackButton backButton;
+    private LedgerIconButton backButton;
     private LedgerIconButton addZoneButton;
 
     public ZoneListScreen(UUID villageId) {
@@ -55,19 +56,16 @@ public class ZoneListScreen extends AbstractLedgerScreen {
             this.addWidget(this.zoneList);
         }
 
-        this.backButton = this.addRenderableWidget(new LedgerBackButton(
-            leftPos + 62,
+        this.backButton = this.addRenderableWidget(LedgerIconButton.Back(
+            leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - 14) / 2,
             topPos + 153,
-            button -> returnToVillageInfo()
+            button -> returnToVillageInfo(),
+            Component.translatable("villagetale.gui.back")
         ));
 
-        this.addZoneButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 40,
+        this.addZoneButton = this.addRenderableWidget(LedgerIconButton.New(
+            leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - ADD_ZONE_BUTTON_SIZE) / 2,
             topPos + 15,
-            49,
-            223,
-            9,
-            10,
             button -> openAddZoneScreen(),
             Component.translatable("villagetale.gui.add_zone.title")
         ));
@@ -200,18 +198,14 @@ public class ZoneListScreen extends AbstractLedgerScreen {
 
                 if (!isTownHall) {
                     if (this.deleteButton == null) {
-                        this.deleteButton = new LedgerIconButton(
-                            left + 105,
+                        this.deleteButton = LedgerIconButton.Delete(
+                            left + CONTENT_WIDTH - DELETE_BUTTON_SIZE,
                             top,
-                            26,
-                            223,
-                            10,
-                            10,
                             button -> confirmDeleteZone(zone),
                             Component.translatable("villagetale.gui.zone_list.delete")
                         );
                     } else {
-                        this.deleteButton.setX(left + 105);
+                        this.deleteButton.setX(left + CONTENT_WIDTH - DELETE_BUTTON_SIZE);
                         this.deleteButton.setY(top);
                     }
                     this.deleteButton.render(guiGraphics, mouseX, mouseY, partialTick);

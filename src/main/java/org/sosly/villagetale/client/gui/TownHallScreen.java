@@ -33,7 +33,7 @@ public class TownHallScreen extends AbstractLedgerScreen {
         int topPos = getTopPos();
 
         Component nameMessage = Component.translatable("villagetale.gui.townhall.village_name");
-        this.nameField = new NoShadowEditBox(this.font, leftPos + 20, topPos + 40,  GUI_WIDTH - 40, 10, nameMessage);
+        this.nameField = new NoShadowEditBox(this.font, leftPos + CONTENT_LEFT_MARGIN, topPos + 40, CONTENT_WIDTH, 10, nameMessage);
         this.nameField.setMaxLength(64);
         this.nameField.setValue(currentName);
         this.nameField.setBordered(false);
@@ -44,7 +44,7 @@ public class TownHallScreen extends AbstractLedgerScreen {
             Component.translatable("villagetale.gui.townhall.save"),
             button -> this.onSave()
         )
-        .bounds(leftPos + 25, topPos + GUI_HEIGHT - 40, 40, 14)
+        .bounds(leftPos + CONTENT_LEFT_MARGIN, topPos + GUI_HEIGHT - 40, 40, 14)
         .build();
         this.addRenderableWidget(this.saveButton);
 
@@ -52,7 +52,7 @@ public class TownHallScreen extends AbstractLedgerScreen {
             Component.translatable("villagetale.gui.townhall.cancel"),
             button -> this.onClose()
         )
-        .bounds(leftPos + GUI_WIDTH - 65, topPos + GUI_HEIGHT - 40, 40, 14)
+        .bounds(leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - 40, topPos + GUI_HEIGHT - 40, 40, 14)
         .build();
         this.addRenderableWidget(this.cancelButton);
 
@@ -61,10 +61,10 @@ public class TownHallScreen extends AbstractLedgerScreen {
 
     @Override
     protected void renderLedgerContent(GuiGraphics guiGraphics, int leftPos, int topPos, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.townhall.village_name_label"), leftPos + 20, topPos + 28, 0x3F3F3F, false);
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.townhall.village_name_label"), leftPos + CONTENT_LEFT_MARGIN, topPos + 28, 0x3F3F3F, false);
 
         int underlineY = topPos + 40 + 14;
-        guiGraphics.fill(leftPos + 20, underlineY, leftPos + GUI_WIDTH - 20, underlineY + 1, 0xFF3F3F3F);
+        guiGraphics.fill(leftPos + CONTENT_LEFT_MARGIN, underlineY, leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH, underlineY + 1, 0xFF3F3F3F);
     }
 
     private void onSave() {

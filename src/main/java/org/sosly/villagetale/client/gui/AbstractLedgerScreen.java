@@ -12,14 +12,16 @@ import org.sosly.villagetale.VillageTale;
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractLedgerScreen extends Screen {
     public static final ResourceLocation LEDGER_TEXTURE = new ResourceLocation(VillageTale.MOD_ID, "textures/gui/ledger.png");
-    protected static final int TEXTURE_WIDTH = 256;
-    protected static final int TEXTURE_HEIGHT = 256;
-    protected static final int GUI_WIDTH = 146;
+    public static final int TEXTURE_WIDTH = 384;
+    public static final int TEXTURE_HEIGHT = 384;
+    protected static final int GUI_WIDTH = 293;
     protected static final int GUI_HEIGHT = 180;
-    protected static final int VERTICAL_OFFSET = 20;
-    protected static final int HORIZONTAL_OFFSET = 1;
-    protected static final int CONTENT_LEFT_MARGIN = 15;
+    protected static final int VERTICAL_OFFSET = 0;
+    protected static final int HORIZONTAL_OFFSET = 0;
+    protected static final int CONTENT_LEFT_MARGIN = 20;
+    protected static final int CONTENT_RIGHT_MARGIN = 20;
     protected static final int CONTENT_WIDTH = 116;
+    protected static final int GUTTER = 21;
     protected static final int INDENT_WIDTH = 10;
 
     protected AbstractLedgerScreen(Component title) {

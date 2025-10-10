@@ -13,6 +13,8 @@ import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
 public class VillageInfoScreen extends AbstractLedgerScreen {
+    private static final int ADD_ZONE_BUTTON_SIZE = 9;
+
     private final UUID villageId;
     private int zonesTextX;
     private int zonesTextY;
@@ -31,13 +33,9 @@ public class VillageInfoScreen extends AbstractLedgerScreen {
         int leftPos = getLeftPos();
         int topPos = getTopPos();
 
-        this.addZoneButton = this.addRenderableWidget(new LedgerIconButton(
-            leftPos + CONTENT_LEFT_MARGIN + 56,
+        this.addZoneButton = this.addRenderableWidget(LedgerIconButton.New(
+            leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - ADD_ZONE_BUTTON_SIZE) / 2,
             topPos + 39,
-            49,
-            223,
-            9,
-            10,
             button -> openAddZoneScreen(),
             Component.translatable("villagetale.gui.add_zone.title")
         ));
