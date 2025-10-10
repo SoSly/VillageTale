@@ -23,7 +23,6 @@ public class ServerEventHandler {
         }
 
         if (ZoneCreationHelper.getInstance().isInCreationMode(event.getEntity().getUUID())) {
-            System.out.println("[ServerEventHandler] Cancelling interaction during zone creation mode");
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.CONSUME);
         }

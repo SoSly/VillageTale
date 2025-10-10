@@ -189,7 +189,6 @@ public class ZoneCreationManager {
         Minecraft mc = Minecraft.getInstance();
         if (mc != null && mc.getConnection() != null) {
             SetZoneCreationMode.send(isActive);
-            System.out.println("[ZoneCreationManager] Sent zone creation mode packet: " + isActive);
         }
     }
 
