@@ -24,9 +24,8 @@ public class LedgerIconButton extends Button {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-//        guiGraphics.fill(this.getX(), this.getY(), this.getX() + iconSize, this.getY() + iconSize, 0xFFFF0000);
         guiGraphics.blit(AbstractLedgerScreen.LEDGER_TEXTURE, this.getX(), this.getY(),
-                this.isHoveredOrFocused() ? iconU + hoverShift : iconU,
+                this.isHovered() ? iconU + hoverShift : iconU,
                 iconV, iconSize, iconSize);
     }
 }

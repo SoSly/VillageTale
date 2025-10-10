@@ -23,5 +23,6 @@ public class ClientDataManager {
         professionCache.clear();
         BoundaryDataStorage.getInstance().clearAll();
         VillageDataManager.getInstance().clear();
+        ZoneCreationManager.getInstance().cancel();
     }
 }

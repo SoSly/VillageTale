@@ -14,7 +14,9 @@ import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSync;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import org.sosly.villagetale.network.packets.serverbound.ConvertVillager;
+import org.sosly.villagetale.network.packets.serverbound.CreateZone;
 import org.sosly.villagetale.network.packets.serverbound.DeleteZone;
+import org.sosly.villagetale.network.packets.serverbound.SetZoneCreationMode;
 import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfo;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneFilters;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneName;
@@ -71,6 +73,12 @@ public class NetworkHandler {
 
         CHANNEL.registerMessage(packetId++, RemoveZoneBoundary.class,
                 RemoveZoneBoundary::encode, RemoveZoneBoundary::decode, RemoveZoneBoundary::handle);
+
+        CHANNEL.registerMessage(packetId++, SetZoneCreationMode.class,
+                SetZoneCreationMode::encode, SetZoneCreationMode::decode, SetZoneCreationMode::handle);
+
+        CHANNEL.registerMessage(packetId++, CreateZone.class,
+                CreateZone::encode, CreateZone::decode, CreateZone::handle);
 
         VillageTale.LOGGER.info("VillageTale registered {} network messages", packetId);
     }

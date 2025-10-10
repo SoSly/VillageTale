@@ -163,5 +163,14 @@
   "villagetale.gui.add_zone.box": "Box",
   "villagetale.gui.add_zone.cylinder": "Cylinder",
   "villagetale.gui.add_zone.point": "Point",
-  "villagetale.gui.add_zone.route": "Route"
+  "villagetale.gui.add_zone.route": "Route",
+
+  "villagetale.gui.new_zone.title": "New Zone",
+  "villagetale.gui.new_zone.default_name": "New Zone",
+  "villagetale.gui.new_zone.type": "Type:",
+  "villagetale.gui.new_zone.shape": "Shape: %s",
+  "villagetale.gui.new_zone.shape_box_from": "From: (%d, %d, %d)",
+  "villagetale.gui.new_zone.shape_box_to": "To: (%d, %d, %d)",
+  "villagetale.gui.new_zone.save": "Save",
+  "villagetale.gui.new_zone.cancel": "Cancel"
 }

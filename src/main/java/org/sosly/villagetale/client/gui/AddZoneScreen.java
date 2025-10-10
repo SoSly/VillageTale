@@ -3,9 +3,13 @@ package org.sosly.villagetale.client.gui;
 import java.util.UUID;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.sosly.villagetale.client.ZoneCreationManager;
 import org.sosly.villagetale.client.gui.components.LedgerBackButton;
 
 @OnlyIn(Dist.CLIENT)
@@ -71,6 +75,12 @@ public class AddZoneScreen extends AbstractLedgerScreen {
     }
 
     private void createBoxZone() {
+        ZoneCreationManager.getInstance().startBoxCreation(villageId);
+
+        if (this.minecraft != null && this.minecraft.player != null) {
+            this.minecraft.player.playNotifySound(SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.MASTER, 0.5f, 1.0f);
+            this.minecraft.setScreen(null);
+        }
     }
 
     private void createCylinderZone() {
