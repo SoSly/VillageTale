@@ -68,6 +68,10 @@ public class VillagerEquipmentSync extends BasePacket {
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemInHand(msg.hand, msg.itemStack);
                 }
+            }).whenComplete((r, e) -> {
+                if (e != null) {
+                    throw new RuntimeException("Failed to handle VillagerEquipmentSync", e);
+                }
             });
         }
     }

@@ -1,4 +1,4 @@
-package org.sosly.villagetale.client.gui.components;
+package org.sosly.villagetale.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;

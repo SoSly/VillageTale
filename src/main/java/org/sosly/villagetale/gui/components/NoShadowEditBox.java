@@ -1,4 +1,4 @@
-package org.sosly.villagetale.client.gui.components;
+package org.sosly.villagetale.gui.components;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -32,6 +32,12 @@ public class NoShadowEditBox extends EditBox {
     public NoShadowEditBox(Font pFont, int pX, int pY, int pWidth, int pHeight, Component pMessage) {
         super(pFont, pX, pY, pWidth, pHeight, pMessage);
         this.font = pFont;
+
+
+        this.setMaxLength(24);
+        this.setBordered(false);
+        this.setTextColor(0x0000000);
+        this.setValue(pMessage.toString());
     }
 
     @Override

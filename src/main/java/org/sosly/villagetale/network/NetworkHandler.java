@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillageInfoScreen;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillagerConversionScreen;
 import org.sosly.villagetale.network.packets.clientbound.RemoveZoneBoundary;
@@ -46,9 +45,6 @@ public class NetworkHandler {
 
         CHANNEL.registerMessage(packetId++, UpdateVillageInfo.class,
                 UpdateVillageInfo::encode, UpdateVillageInfo::decode, UpdateVillageInfo::handle);
-
-        CHANNEL.registerMessage(packetId++, OpenTownHallScreen.class,
-                OpenTownHallScreen::encode, OpenTownHallScreen::decode, OpenTownHallScreen::handle);
 
         CHANNEL.registerMessage(packetId++, OpenVillagerConversionScreen.class,
                 OpenVillagerConversionScreen::encode, OpenVillagerConversionScreen::decode, OpenVillagerConversionScreen::handle);

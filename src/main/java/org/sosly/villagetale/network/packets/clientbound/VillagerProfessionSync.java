@@ -72,6 +72,10 @@ public class VillagerProfessionSync extends BasePacket {
                 if (entity != null) {
                     ClientDataManager.cacheProfession(msg.entityId, msg.professionId);
                 }
+            }).whenComplete((r, e) -> {
+                if (e != null) {
+                    throw new RuntimeException("Failed to handle VillagerProfessionSync", e);
+                }
             });
         }
     }

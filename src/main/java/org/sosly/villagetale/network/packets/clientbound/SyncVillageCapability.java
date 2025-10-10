@@ -64,6 +64,10 @@ public class SyncVillageCapability extends BasePacket {
                 new org.sosly.villagetale.capability.village.VillageCapability();
             capability.deserializeNBT(msg.villageData);
             VillageDataManager.getInstance().updateVillageData(capability.getUUID(), capability);
+        }).whenComplete((r, e) -> {
+            if (e != null) {
+                throw new RuntimeException("Failed to handle SyncVillageCapability", e);
+            }
         });
     }
 }

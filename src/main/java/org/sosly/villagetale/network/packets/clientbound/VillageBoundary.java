@@ -73,6 +73,10 @@ public class VillageBoundary extends BasePacket {
                     msg.squadius
                 );
                 BoundaryDataStorage.getInstance().addVillage(mc.level.dimension(), data);
+            }).whenComplete((r, e) -> {
+                if (e != null) {
+                    throw new RuntimeException("Failed to handle VillageBoundary", e);
+                }
             });
         }
     }

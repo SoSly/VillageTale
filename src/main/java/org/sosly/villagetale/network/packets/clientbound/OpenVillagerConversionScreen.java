@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.client.gui.VillagerConversionScreen;
+import org.sosly.villagetale.gui.VillagerConversionScreen;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.ClientPacketHandler;
 import org.sosly.villagetale.network.NetworkHandler;
@@ -53,6 +53,10 @@ public class OpenVillagerConversionScreen extends BasePacket {
         context.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             mc.setScreen(new VillagerConversionScreen(msg.villagerEntityId));
+        }).whenComplete((r, e) -> {
+            if (e != null) {
+                throw new RuntimeException("Failed to handle OpenVillagerConversionScreen", e);
+            }
         });
     }
 

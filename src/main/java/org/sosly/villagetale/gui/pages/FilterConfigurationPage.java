@@ -1,10 +1,11 @@
-package org.sosly.villagetale.client.gui;
+package org.sosly.villagetale.gui.pages;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -12,54 +13,44 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.client.VillageDataManager;
-import org.sosly.villagetale.client.gui.components.CompactCheckbox;
-import org.sosly.villagetale.client.gui.components.LedgerIconButton;
+import org.sosly.villagetale.gui.LedgerScreen;
+import org.sosly.villagetale.gui.components.CompactCheckbox;
+import org.sosly.villagetale.gui.components.LedgerIconButton;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneFilters;
 import org.sosly.villagetale.zone.type.AbstractZoneType;
 
-@OnlyIn(Dist.CLIENT)
-public class FilterConfigurationScreen extends AbstractLedgerScreen {
+public class FilterConfigurationPage extends AbstractLedgerPage {
     private static final int LIST_TOP = 36;
     private static final int LIST_BOTTOM = 145;
-    private static final int TRASH_ICON_SIZE = 16;
     private static final int CLEAR_BUTTON_SIZE = 10;
-
-    private final UUID villageId;
-    private final UUID zoneId;
-    private final FilterType filterType;
-    private final int returnToZoneIndex;
-    private FilterList filterList;
-    private LedgerIconButton backButton;
-    private LedgerIconButton clearAllButton;
-    private Set<ResourceLocation> selectedFilters;
 
     public enum FilterType {
         ITEM,
         ENTITY
     }
 
-    public FilterConfigurationScreen(UUID villageId, UUID zoneId, FilterType filterType, int returnToZoneIndex) {
-        super(Component.translatable(filterType == FilterType.ITEM
-                ? "villagetale.gui.filter.configure_item_filters"
-                : "villagetale.gui.filter.configure_entity_filters"));
-        this.villageId = villageId;
+    private final UUID zoneId;
+    private final FilterType filterType;
+    private final int zoneIndex;
+    private FilterList filterList;
+    private LedgerIconButton clearAllButton;
+    private LedgerIconButton backButton;
+    private Set<ResourceLocation> selectedFilters;
+
+    public FilterConfigurationPage(LedgerScreen screen, UUID villageId, UUID zoneId, FilterType filterType, int zoneIndex) {
+        super(screen, villageId);
         this.zoneId = zoneId;
         this.filterType = filterType;
-        this.returnToZoneIndex = returnToZoneIndex;
+        this.zoneIndex = zoneIndex;
         this.selectedFilters = new HashSet<>();
     }
 
     @Override
-    protected void init() {
-        super.init();
-
-        int leftPos = getLeftPos();
-        int topPos = getTopPos();
+    public void attach(int uStart, int vStart) {
+        super.attach(uStart, vStart);
 
         IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
         if (village == null) {
@@ -107,37 +98,53 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
         }
 
         this.filterList = new FilterList(
-            this.minecraft,
-            CONTENT_WIDTH,
+            screen.getMinecraft(),
+            LedgerScreen.CONTENT_WIDTH,
             LIST_BOTTOM - LIST_TOP,
-            topPos + LIST_TOP,
-            topPos + LIST_BOTTOM,
+            vStart + LIST_TOP,
+            vStart + LIST_BOTTOM,
             12,
             entries
         );
-        this.filterList.setLeftPos(leftPos + CONTENT_LEFT_MARGIN);
-        this.addWidget(this.filterList);
+        this.filterList.setLeftPos(uStart);
+        addWidget(this.filterList);
 
-        this.clearAllButton = this.addRenderableWidget(LedgerIconButton.Delete(
-            leftPos + CONTENT_LEFT_MARGIN + CONTENT_WIDTH - CLEAR_BUTTON_SIZE,
-            topPos + 16,
+        this.clearAllButton = LedgerIconButton.Delete(
+            uStart + LedgerScreen.CONTENT_WIDTH - CLEAR_BUTTON_SIZE,
+            vStart + 16,
             button -> clearAllFilters(),
             Component.translatable("villagetale.gui.filter.clear_all")
-        ));
+        );
+        addRenderableWidget(this.clearAllButton);
 
-        this.backButton = this.addRenderableWidget(LedgerIconButton.Back(
-            leftPos + CONTENT_LEFT_MARGIN + (CONTENT_WIDTH - 14) / 2,
-            topPos + 153,
-            button -> returnToZoneDetail(),
+        this.backButton = LedgerIconButton.Back(
+            uStart + (LedgerScreen.CONTENT_WIDTH - 14) / 2,
+            vStart + 153,
+            button -> closeFilters(),
             Component.translatable("villagetale.gui.back")
-        ));
+        );
+        addRenderableWidget(this.backButton);
     }
 
     @Override
-    protected void renderLedgerContent(GuiGraphics guiGraphics, int leftPos, int topPos, int mouseX, int mouseY, float partialTick) {
+    public void detach() {
+        super.detach();
+        this.filterList = null;
+        this.clearAllButton = null;
+        this.backButton = null;
+        this.selectedFilters.clear();
+    }
+
+    private void closeFilters() {
+        screen.setLeftPage(new ZoneInfoPage(screen, villageId, zoneIndex));
+        screen.setRightPage(new ZoneVillagersPage(screen, villageId, zoneIndex));
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         IVillageCapability village = VillageDataManager.getInstance().getVillageData(villageId);
         if (village == null) {
-            guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.error.village_not_found"), leftPos + CONTENT_LEFT_MARGIN, topPos + 28, 0x3F3F3F, false);
+            guiGraphics.drawString(font, Component.translatable("villagetale.gui.error.village_not_found"), uStart, vStart + 28, 0x3F3F3F, false);
             return;
         }
 
@@ -147,15 +154,14 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
             .orElse(null);
 
         if (zone == null) {
-            guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.error.zone_not_found"), leftPos + CONTENT_LEFT_MARGIN, topPos + 28, 0x3F3F3F, false);
+            guiGraphics.drawString(font, Component.translatable("villagetale.gui.error.zone_not_found"), uStart, vStart + 28, 0x3F3F3F, false);
             return;
         }
 
         Component title = Component.translatable(filterType == FilterType.ITEM
             ? "villagetale.gui.filter.configure_item_filters"
             : "villagetale.gui.filter.configure_entity_filters");
-        guiGraphics.drawString(this.font, Component.literal(zone.getName()), leftPos + CONTENT_LEFT_MARGIN, topPos + 16, 0x3F3F3F, false);
-        guiGraphics.drawString(this.font, title, leftPos + CONTENT_LEFT_MARGIN, topPos + 28, 0, false);
+        guiGraphics.drawString(font, title, uStart, vStart + 16, 0, false);
 
         if (this.filterList != null) {
             this.filterList.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -170,12 +176,6 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
         }
     }
 
-    private void returnToZoneDetail() {
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(new ZoneDetailScreen(villageId, returnToZoneIndex));
-        }
-    }
-
     private void sendFilterUpdate() {
         UpdateZoneFilters.FilterType type = filterType == FilterType.ITEM
             ? UpdateZoneFilters.FilterType.ITEM
@@ -183,20 +183,12 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
         UpdateZoneFilters.send(villageId, zoneId, type, new ArrayList<>(selectedFilters));
     }
 
-    private class FilterEntry {
-        private final ResourceLocation id;
-        private final String displayName;
-
-        public FilterEntry(ResourceLocation id, String displayName) {
-            this.id = id;
-            this.displayName = displayName;
-        }
-    }
+    private record FilterEntry(ResourceLocation id, String displayName) {}
 
     private class FilterList extends ObjectSelectionList<FilterList.Entry> {
         private final List<FilterEntry> filterEntries;
 
-        public FilterList(net.minecraft.client.Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<FilterEntry> entries) {
+        public FilterList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<FilterEntry> entries) {
             super(minecraft, width, height, y, bottom, itemHeight);
             this.filterEntries = entries;
             this.setRenderBackground(false);
@@ -209,7 +201,7 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
 
         @Override
         public int getRowWidth() {
-            return CONTENT_WIDTH;
+            return LedgerScreen.CONTENT_WIDTH;
         }
 
         @Override
@@ -230,7 +222,7 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
                 this.checkbox = new CompactCheckbox(
                     0,
                     0,
-                    CONTENT_WIDTH - 10,
+                    LedgerScreen.CONTENT_WIDTH - 10,
                     Component.literal(filterEntry.displayName),
                     selectedFilters.contains(filterEntry.id)
                 ) {
@@ -274,7 +266,7 @@ public class FilterConfigurationScreen extends AbstractLedgerScreen {
                     this.checkbox = new CompactCheckbox(
                         this.checkbox.getX(),
                         this.checkbox.getY(),
-                        CONTENT_WIDTH - 10,
+                        LedgerScreen.CONTENT_WIDTH - 10,
                         Component.literal(filterEntry.displayName),
                         shouldBeSelected
                     ) {

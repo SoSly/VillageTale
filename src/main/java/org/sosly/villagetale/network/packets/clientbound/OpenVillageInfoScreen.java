@@ -1,18 +1,20 @@
 package org.sosly.villagetale.network.packets.clientbound;
 
+import java.util.UUID;
+import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.client.gui.VillageInfoScreen;
+import org.sosly.villagetale.gui.LedgerScreen;
+import org.sosly.villagetale.gui.pages.VillageInfoPage;
+import org.sosly.villagetale.gui.pages.ZoneListPage;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.ClientPacketHandler;
 import org.sosly.villagetale.network.NetworkHandler;
-
-import java.util.UUID;
-import java.util.function.Supplier;
 
 public class OpenVillageInfoScreen extends BasePacket {
     private final UUID villageId;
@@ -53,7 +55,14 @@ public class OpenVillageInfoScreen extends BasePacket {
 
         context.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
-            mc.setScreen(new VillageInfoScreen(msg.villageId));
+            LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.village_info.title"));
+            screen.setLeftPage(new VillageInfoPage(screen, msg.villageId));
+            screen.setRightPage(new ZoneListPage(screen, msg.villageId));
+            mc.setScreen(screen);
+        }).whenComplete((r, e) -> {
+            if (e != null) {
+                throw new RuntimeException("Failed to handle OpenVillageInfoScreen", e);
+            }
         });
     }
 

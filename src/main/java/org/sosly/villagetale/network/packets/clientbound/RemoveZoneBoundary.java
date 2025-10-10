@@ -57,6 +57,10 @@ public class RemoveZoneBoundary extends BasePacket {
                 }
 
                 BoundaryDataStorage.getInstance().removeZone(mc.level.dimension(), msg.zoneId);
+            }).whenComplete((r, e) -> {
+                if (e != null) {
+                    throw new RuntimeException("Failed to handle RemoveZoneBoundary", e);
+                }
             });
         }
     }

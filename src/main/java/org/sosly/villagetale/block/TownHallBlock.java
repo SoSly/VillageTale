@@ -34,9 +34,6 @@ import net.minecraft.world.level.ChunkPos;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.item.LedgerItem;
-import org.sosly.villagetale.network.NetworkHandler;
-import org.sosly.villagetale.network.packets.clientbound.OpenTownHallScreen;
-import org.sosly.villagetale.network.packets.clientbound.SyncVillageCapability;
 import org.sosly.villagetale.zone.type.TownHall;
 import org.sosly.villagetale.entity.Villager;
 import net.minecraft.world.phys.AABB;
@@ -133,13 +130,10 @@ public class TownHallBlock extends Block {
                 assignedCount++;
             }
             player.sendSystemMessage(Component.literal("Assigned " + assignedCount + " villager(s) to " + village.getVillageName()));
-            return InteractionResult.SUCCESS;
         }
 
         LedgerItem.setVillageUUID(heldItem, village.getVillageId());
-
-        SyncVillageCapability.send(serverPlayer, villageCapability, serverLevel.getServer());
-        OpenTownHallScreen.send(serverPlayer, village.getVillageId(), village.getVillageName());
+        player.sendSystemMessage(Component.literal("Ledger bound to " + village.getVillageName()));
 
         return InteractionResult.SUCCESS;
     }

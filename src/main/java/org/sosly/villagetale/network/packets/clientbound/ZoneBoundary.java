@@ -167,6 +167,10 @@ public class ZoneBoundary extends BasePacket {
                     msg.waypoints
                 );
                 BoundaryDataStorage.getInstance().addZone(mc.level.dimension(), data);
+            }).whenComplete((r, e) -> {
+                if (e != null) {
+                    throw new RuntimeException("Failed to handle ZoneBoundary", e);
+                }
             });
         }
     }

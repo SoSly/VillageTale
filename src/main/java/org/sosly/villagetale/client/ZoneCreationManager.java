@@ -10,7 +10,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.api.IZoneShape;
-import org.sosly.villagetale.client.gui.NewZoneScreen;
+import org.sosly.villagetale.gui.LedgerScreen;
+import org.sosly.villagetale.gui.pages.VillageInfoPage;
+import org.sosly.villagetale.gui.pages.NewZonePage;
 import org.sosly.villagetale.network.packets.serverbound.SetZoneCreationMode;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
@@ -96,7 +98,10 @@ public class ZoneCreationManager {
 
             Minecraft mc = Minecraft.getInstance();
             if (mc != null) {
-                mc.setScreen(new NewZoneScreen(villageId, shape));
+                LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+                screen.setLeftPage(new VillageInfoPage(screen, villageId));
+                screen.setRightPage(new NewZonePage(screen, villageId, shape));
+                mc.setScreen(screen);
             }
 
             return true;
@@ -110,7 +115,10 @@ public class ZoneCreationManager {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc != null) {
-            mc.setScreen(new NewZoneScreen(villageId, shape));
+            LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+            screen.setLeftPage(new VillageInfoPage(screen, villageId));
+            screen.setRightPage(new NewZonePage(screen, villageId, shape));
+            mc.setScreen(screen);
         }
 
         return true;
@@ -142,7 +150,10 @@ public class ZoneCreationManager {
 
             Minecraft mc = Minecraft.getInstance();
             if (mc != null) {
-                mc.setScreen(new NewZoneScreen(villageId, shape));
+                LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+                screen.setLeftPage(new VillageInfoPage(screen, villageId));
+                screen.setRightPage(new NewZonePage(screen, villageId, shape));
+                mc.setScreen(screen);
             }
 
             return true;
@@ -173,7 +184,10 @@ public class ZoneCreationManager {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc != null) {
-            mc.setScreen(new NewZoneScreen(villageId, shape));
+            LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+            screen.setLeftPage(new VillageInfoPage(screen, villageId));
+            screen.setRightPage(new NewZonePage(screen, villageId, shape));
+            mc.setScreen(screen);
         }
     }
 

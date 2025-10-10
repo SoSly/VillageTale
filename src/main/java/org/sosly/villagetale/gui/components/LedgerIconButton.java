@@ -1,24 +1,24 @@
-package org.sosly.villagetale.client.gui.components;
+package org.sosly.villagetale.gui.components;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.sosly.villagetale.client.gui.AbstractLedgerScreen;
+import org.sosly.villagetale.gui.LedgerScreen;
 
 @OnlyIn(Dist.CLIENT)
 public class LedgerIconButton extends Button {
-    private static final ButtonSpec ARROW_LEFT = new ButtonSpec(0, 282, 6, 11, 11);
-    private static final ButtonSpec ARROW_RIGHT = new ButtonSpec(22, 282, 6, 11, 11);
-    private static final ButtonSpec BACK = new ButtonSpec(0, 247, 14, 10, 15);
-    private static final ButtonSpec CANCEL = new ButtonSpec(0, 235, 9, 9, 10);
-    private static final ButtonSpec COMMIT = new ButtonSpec(0, 225, 9, 9, 10);
-    private static final ButtonSpec DELETE = new ButtonSpec(0, 271, 7, 10, 9);
-    private static final ButtonSpec EDIT = new ButtonSpec(0, 260, 10, 10, 10);
-    private static final ButtonSpec NEW = new ButtonSpec(0, 215, 9, 9, 10);
-    private static final ButtonSpec PAGE_NEXT = new ButtonSpec(0, 181, 18, 10, 19);
-    private static final ButtonSpec PAGE_PREV = new ButtonSpec(0, 200, 18, 10, 19);
+    public static final ButtonSpec ARROW_LEFT = new ButtonSpec(0, 282, 6, 11, 11);
+    public static final ButtonSpec ARROW_RIGHT = new ButtonSpec(22, 282, 6, 11, 11);
+    public static final ButtonSpec BACK = new ButtonSpec(0, 247, 14, 10, 15);
+    public static final ButtonSpec CANCEL = new ButtonSpec(0, 235, 9, 9, 10);
+    public static final ButtonSpec COMMIT = new ButtonSpec(0, 225, 9, 9, 10);
+    public static final ButtonSpec DELETE = new ButtonSpec(0, 271, 7, 10, 9);
+    public static final ButtonSpec EDIT = new ButtonSpec(0, 260, 10, 10, 10);
+    public static final ButtonSpec NEW = new ButtonSpec(0, 215, 9, 9, 10);
+    public static final ButtonSpec PAGE_NEXT = new ButtonSpec(0, 181, 18, 10, 19);
+    public static final ButtonSpec PAGE_PREV = new ButtonSpec(0, 200, 18, 10, 19);
 
     private final int iconU;
     private final int iconV;
@@ -77,10 +77,10 @@ public class LedgerIconButton extends Button {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.blit(AbstractLedgerScreen.LEDGER_TEXTURE, this.getX(), this.getY(),
+        guiGraphics.blit(LedgerScreen.LEDGER_TEXTURE, this.getX(), this.getY(),
                 this.isHovered() ? iconU + hoverShift : iconU,
-                iconV, iconUWidth, iconUHeight, AbstractLedgerScreen.TEXTURE_WIDTH, AbstractLedgerScreen.TEXTURE_HEIGHT);
+                iconV, iconUWidth, iconUHeight, LedgerScreen.TEXTURE_WIDTH, LedgerScreen.TEXTURE_HEIGHT);
     }
 
-    private record ButtonSpec(int u, int v, int width, int height, int hoverShift) {}
+    public record ButtonSpec(int u, int v, int width, int height, int hoverShift) {}
 }
