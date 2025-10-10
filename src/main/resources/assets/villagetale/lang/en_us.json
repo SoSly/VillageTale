@@ -171,6 +171,10 @@
   "villagetale.gui.new_zone.shape": "Shape: %s",
   "villagetale.gui.new_zone.shape_box_from": "From: (%d, %d, %d)",
   "villagetale.gui.new_zone.shape_box_to": "To: (%d, %d, %d)",
+  "villagetale.gui.new_zone.shape_cylinder_center": "Center: (%d, %d, %d)",
+  "villagetale.gui.new_zone.shape_cylinder_radius": "Radius: %d",
+  "villagetale.gui.new_zone.shape_cylinder_height": "Height: %d",
+  "villagetale.gui.new_zone.shape_point_pos": "Position: (%d, %d, %d)",
   "villagetale.gui.new_zone.save": "Save",
   "villagetale.gui.new_zone.cancel": "Cancel"
 }

@@ -16,6 +16,8 @@ import org.sosly.villagetale.client.gui.components.NoShadowEditBox;
 import org.sosly.villagetale.network.packets.serverbound.CreateZone;
 import org.sosly.villagetale.zone.ZoneRegistry;
 import org.sosly.villagetale.zone.shape.Box;
+import org.sosly.villagetale.zone.shape.Cylinder;
+import org.sosly.villagetale.zone.shape.Point;
 import org.sosly.villagetale.zone.type.TownHall;
 
 @OnlyIn(Dist.CLIENT)
@@ -129,19 +131,60 @@ public class NewZoneScreen extends AbstractLedgerScreen {
         guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape", shapeType), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
         currentY += 10;
 
-        if (shape instanceof Box box) {
-            AABB bounds = box.getBounds();
-            int minX = (int) bounds.minX;
-            int minY = (int) bounds.minY;
-            int minZ = (int) bounds.minZ;
-            int maxX = (int) bounds.maxX - 1;
-            int maxY = (int) bounds.maxY - 1;
-            int maxZ = (int) bounds.maxZ - 1;
+        renderShapeInfo(guiGraphics, shape, leftPos, currentY);
+    }
 
-            guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_box_from", minX, minY, minZ), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
-            currentY += 10;
-            guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_box_to", maxX, maxY, maxZ), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+    private void renderShapeInfo(GuiGraphics guiGraphics, IZoneShape shape, int leftPos, int currentY) {
+        if (shape instanceof Box box) {
+            renderBoxInfo(guiGraphics, box, leftPos, currentY);
+            return;
         }
+
+        if (shape instanceof Cylinder cylinder) {
+            renderCylinderInfo(guiGraphics, cylinder, leftPos, currentY);
+            return;
+        }
+
+        if (shape instanceof Point point) {
+            renderPointInfo(guiGraphics, point, leftPos, currentY);
+        }
+    }
+
+    private int renderBoxInfo(GuiGraphics guiGraphics, Box box, int leftPos, int currentY) {
+        AABB bounds = box.getBounds();
+        int minX = (int) bounds.minX;
+        int minY = (int) bounds.minY;
+        int minZ = (int) bounds.minZ;
+        int maxX = (int) bounds.maxX - 1;
+        int maxY = (int) bounds.maxY - 1;
+        int maxZ = (int) bounds.maxZ - 1;
+
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_box_from", minX, minY, minZ), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        currentY += 10;
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_box_to", maxX, maxY, maxZ), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        return currentY;
+    }
+
+    private int renderCylinderInfo(GuiGraphics guiGraphics, Cylinder cylinder, int leftPos, int currentY) {
+        int x = cylinder.getBaseCenter().getX();
+        int y = cylinder.getBaseCenter().getY();
+        int z = cylinder.getBaseCenter().getZ();
+
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_cylinder_center", x, y, z), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        currentY += 10;
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_cylinder_radius", cylinder.getRadius()), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        currentY += 10;
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_cylinder_height", cylinder.getHeight()), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        return currentY;
+    }
+
+    private int renderPointInfo(GuiGraphics guiGraphics, Point point, int leftPos, int currentY) {
+        int x = point.getPos().getX();
+        int y = point.getPos().getY();
+        int z = point.getPos().getZ();
+
+        guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_point_pos", x, y, z), leftPos + CONTENT_LEFT_MARGIN, currentY, 0x3F3F3F, false);
+        return currentY;
     }
 
     @Override

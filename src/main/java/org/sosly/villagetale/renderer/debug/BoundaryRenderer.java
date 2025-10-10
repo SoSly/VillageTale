@@ -13,9 +13,14 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.client.BoundaryDataStorage;
+import org.sosly.villagetale.client.ZoneCreationManager;
 import org.sosly.villagetale.data.VillageBoundaryData;
 import org.sosly.villagetale.data.ZoneBoundaryData;
+import org.sosly.villagetale.zone.shape.Box;
+import org.sosly.villagetale.zone.shape.Cylinder;
+import org.sosly.villagetale.zone.shape.Point;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, value = Dist.CLIENT)
@@ -26,18 +31,15 @@ public class BoundaryRenderer {
             return;
         }
 
-        BoundaryDataStorage storage = BoundaryDataStorage.getInstance();
-        if (!storage.isOverlayEnabled()) {
-            return;
-        }
-
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             return;
         }
 
-        BoundaryDataStorage.DimensionBoundaryData data = storage.getDimensionData(mc.level.dimension());
-        if (data == null) {
+        BoundaryDataStorage storage = BoundaryDataStorage.getInstance();
+        ZoneCreationManager creationManager = ZoneCreationManager.getInstance();
+
+        if (!storage.isOverlayEnabled() && !creationManager.isActive()) {
             return;
         }
 
@@ -46,53 +48,82 @@ public class BoundaryRenderer {
         Vec3 cameraPos = event.getCamera().getPosition();
         VertexConsumer consumer = bufferSource.getBuffer(BoundaryRenderType.boundaryLines());
 
-        for (VillageBoundaryData village : data.getVillages().values()) {
-            BoundaryOutline outline = new BoundaryOutline(village.getAABB(), 0.0f, 0.0f, 1.0f, 0.6f);
-            outline.render(poseStack, consumer, cameraPos);
+        if (storage.isOverlayEnabled()) {
+            BoundaryDataStorage.DimensionBoundaryData data = storage.getDimensionData(mc.level.dimension());
+            if (data != null) {
+                for (VillageBoundaryData village : data.getVillages().values()) {
+                    BoundaryOutline outline = new BoundaryOutline(village.getAABB(), 0.0f, 0.0f, 1.0f, 0.6f);
+                    outline.render(poseStack, consumer, cameraPos);
+                }
+
+                for (ZoneBoundaryData zone : data.getZones().values()) {
+                    IZoneShape shape = zone.toShape();
+                    if (shape != null) {
+                        renderShape(shape, poseStack, consumer, cameraPos, 0.4f, 0.8f, 0.4f, 0.6f);
+                    }
+                }
+            }
         }
 
-        for (ZoneBoundaryData zone : data.getZones().values()) {
-            renderZone(zone, poseStack, consumer, cameraPos);
+        if (creationManager.isActive()) {
+            Vec3 cursorPos = getCursorPosition(mc);
+            if (cursorPos != null) {
+                IZoneShape previewShape = creationManager.getPreviewShape(cursorPos);
+                if (previewShape != null) {
+                    renderShape(previewShape, poseStack, consumer, cameraPos, 0.9f, 0.7f, 0.2f, 0.6f);
+                }
+            }
         }
 
         bufferSource.endBatch();
     }
 
-    private static void renderZone(ZoneBoundaryData zone, PoseStack poseStack, VertexConsumer consumer, Vec3 cameraPos) {
-        ResourceLocation shapeType = zone.getShapeType();
-        float red = 0.4f, green = 0.8f, blue = 0.4f, alpha = 0.6f;
+    private static Vec3 getCursorPosition(Minecraft mc) {
+        if (mc.hitResult == null) {
+            return null;
+        }
 
-        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "box"))) {
-            BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), red, green, blue, alpha);
+        if (mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+            net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) mc.hitResult;
+            return Vec3.atCenterOf(blockHit.getBlockPos());
+        }
+
+        if (mc.player == null) {
+            return null;
+        }
+
+        return mc.player.position();
+    }
+
+    private static void renderShape(IZoneShape shape, PoseStack poseStack, VertexConsumer consumer, Vec3 cameraPos, float red, float green, float blue, float alpha) {
+        if (shape instanceof Box box) {
+            BoundaryOutline outline = new BoundaryOutline(box.getBounds(), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
             return;
         }
 
-        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "cylinder"))) {
-            if (zone.getCenter() == null) {
-                return;
-            }
-
+        if (shape instanceof Cylinder cylinder) {
             CylinderOutline outline = new CylinderOutline(
-                zone.getCenter(), zone.getRadius(), zone.getHeight(),
+                cylinder.getBaseCenter(),
+                cylinder.getRadius(),
+                cylinder.getHeight(),
                 red, green, blue, alpha
             );
             outline.render(poseStack, consumer, cameraPos);
             return;
         }
 
-        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "point"))) {
-            BoundaryOutline outline = new BoundaryOutline(zone.getBounds(), red, green, blue, alpha);
+        if (shape instanceof Point point) {
+            BoundaryOutline outline = new BoundaryOutline(new net.minecraft.world.phys.AABB(point.getPos()), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
             return;
         }
 
-        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "route"))) {
-            if (zone.getWaypoints() == null || zone.getWaypoints().isEmpty()) {
+        if (shape instanceof org.sosly.villagetale.zone.shape.Route route) {
+            if (route.getPath() == null || route.getPath().isEmpty()) {
                 return;
             }
-
-            RouteOutline outline = new RouteOutline(zone.getWaypoints(), red, green, blue, alpha);
+            RouteOutline outline = new RouteOutline(route.getPath(), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
         }
     }

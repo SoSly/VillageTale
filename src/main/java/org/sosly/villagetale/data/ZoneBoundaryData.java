@@ -3,6 +3,12 @@ package org.sosly.villagetale.data;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
+import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.api.IZoneShape;
+import org.sosly.villagetale.zone.shape.Box;
+import org.sosly.villagetale.zone.shape.Cylinder;
+import org.sosly.villagetale.zone.shape.Point;
+import org.sosly.villagetale.zone.shape.Route;
 
 import java.util.List;
 import java.util.UUID;
@@ -63,5 +69,35 @@ public class ZoneBoundaryData {
 
     public List<BlockPos> getWaypoints() {
         return waypoints;
+    }
+
+    public IZoneShape toShape() {
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "box"))) {
+            return new Box(bounds);
+        }
+
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "cylinder"))) {
+            if (center == null) {
+                return null;
+            }
+            return new Cylinder(center, radius, height);
+        }
+
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "point"))) {
+            return new Point(BlockPos.containing(bounds.minX, bounds.minY, bounds.minZ));
+        }
+
+        if (shapeType.equals(new ResourceLocation(VillageTale.MOD_ID, "route"))) {
+            if (waypoints == null) {
+                return null;
+            }
+            Route route = new Route();
+            for (BlockPos waypoint : waypoints) {
+                route.addPoint(waypoint);
+            }
+            return route;
+        }
+
+        return null;
     }
 }

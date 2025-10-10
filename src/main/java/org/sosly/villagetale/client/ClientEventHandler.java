@@ -139,15 +139,14 @@ public class ClientEventHandler {
 
         player.playNotifySound(SoundEvents.AMETHYST_BLOCK_PLACE, SoundSource.BLOCKS, 0.5f, 1.2f);
 
-            for (int i = 0; i < 8; i++) {
-                mc.level.addParticle(
-                    ParticleTypes.END_ROD,
-                    pos.getX() + 0.5 + (Math.random() - 0.5) * 0.3,
-                    pos.getY() + 0.5 + (Math.random() - 0.5) * 0.3,
-                    pos.getZ() + 0.5 + (Math.random() - 0.5) * 0.3,
-                    0, 0.05, 0
-                );
-            }
+        for (int i = 0; i < 8; i++) {
+            mc.level.addParticle(
+                ParticleTypes.END_ROD,
+                pos.getX() + 0.5 + (Math.random() - 0.5) * 0.3,
+                pos.getY() + 0.5 + (Math.random() - 0.5) * 0.3,
+                pos.getZ() + 0.5 + (Math.random() - 0.5) * 0.3,
+                0, 0.05, 0
+            );
         }
     }
 }
