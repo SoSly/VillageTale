@@ -3,8 +3,10 @@
 [![Build & Test](https://github.com/SoSly/VillageTale/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/SoSly/VillageTale/actions/workflows/build-and-test.yaml)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green)
 [![NeoForge](https://img.shields.io/badge/NeoForge-47.1.100-orange)](https://neoforged.net/)
+[![Forge](https://img.shields.io/badge/Forge-47.4.10-lightgray)](https://files.minecraftforge.net/net/minecraftforge/forge/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 ![Version](https://img.shields.io/github/v/release/SoSly/VillageTale?include_prereleases&color=yellow)
+![Discord](https://img.shields.io/discord/1426270854786060320)
 
 [![VillageTale](src/main/resources/villagetale.png)](https://github.com/SoSly/VillageTale)
 
