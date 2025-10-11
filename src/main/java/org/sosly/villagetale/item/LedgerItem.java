@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -171,8 +172,12 @@ public class LedgerItem extends Item {
         float health = villager.getHealth();
         int hunger = villager.getFoodData().getFoodLevel();
 
+        List<ResourceLocation> knownRecipes = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
+            .map(knowledge -> new ArrayList<>(knowledge.known()))
+            .orElse(new ArrayList<>());
+
         SyncVillageCapability.send(serverPlayer, villageCapability, serverLevel.getServer());
-        OpenVillagerManagementScreen.send(serverPlayer, target.getId(), villager.getVillage().get(), homeZoneId, workZoneId, inventory, health, hunger);
+        OpenVillagerManagementScreen.send(serverPlayer, target.getId(), villager.getVillage().get(), homeZoneId, workZoneId, inventory, health, hunger, knownRecipes);
         return InteractionResult.CONSUME;
     }
 

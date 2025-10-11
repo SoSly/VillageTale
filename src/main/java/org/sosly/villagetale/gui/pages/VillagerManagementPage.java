@@ -2,6 +2,7 @@ package org.sosly.villagetale.gui.pages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -39,6 +40,8 @@ public class VillagerManagementPage extends AbstractLedgerPage {
     private int currentWorkZoneIndex;
     private LedgerIconButton workZoneLeftButton;
     private LedgerIconButton workZoneRightButton;
+
+    private LedgerIconButton recipeEditButton;
 
     private int selectionStartWidth = 3;
     private int maxLineLength = 19;
@@ -110,6 +113,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         this.homeZoneRightButton = null;
         this.workZoneLeftButton = null;
         this.workZoneRightButton = null;
+        this.recipeEditButton = null;
     }
 
     private void initButtons() {
@@ -174,6 +178,18 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         );
         this.homeZoneRightButton.visible = !homeZones.isEmpty();
         addRenderableWidget(this.homeZoneRightButton);
+
+        currentY += LINE_HEIGHT;
+        currentY += LINE_HEIGHT;
+
+        this.recipeEditButton = LedgerIconButton.Edit(
+            uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.EDIT.width(),
+            currentY - 1,
+            button -> openRecipeConfig(),
+            Component.literal("Edit Recipes")
+        );
+        updateRecipeButtonVisibility();
+        addRenderableWidget(this.recipeEditButton);
     }
 
     @Override
@@ -231,6 +247,21 @@ public class VillagerManagementPage extends AbstractLedgerPage {
             }
             int zoneNameX = uStart + LedgerIconButton.ARROW_LEFT.width() + selectionStartWidth;
             guiGraphics.drawString(font, Component.literal(zoneName), zoneNameX, currentY, 0, false);
+        }
+        currentY += LINE_HEIGHT;
+
+        IProfession profession = currentProfessionIndex >= 0 && currentProfessionIndex < professions.size()
+            ? ProfessionRegistry.INSTANCE.getProfession(professions.get(currentProfessionIndex)).orElse(null)
+            : null;
+
+        if (profession != null && !profession.getLearnableItems().isEmpty()) {
+            guiGraphics.drawString(font, Component.translatable("villagetale.gui.villager_management.recipes"), uStart, currentY, 0, false);
+            currentY += LINE_HEIGHT;
+
+            Set<ResourceLocation> recipes = ClientDataManager.getCachedRecipes(villagerEntityId);
+            int recipeCount = recipes != null ? recipes.size() : 0;
+            String recipeText = "Recipes: " + recipeCount;
+            guiGraphics.drawString(font, Component.literal(recipeText), uStart, currentY, 0, false);
         }
     }
 
@@ -328,7 +359,21 @@ public class VillagerManagementPage extends AbstractLedgerPage {
             this.workZoneRightButton.visible = !workZones.isEmpty();
         }
 
+        updateRecipeButtonVisibility();
+
         UpdateVillagerAssignment.send(villagerEntityId, newProfession, homeZoneId, null, true);
+    }
+
+    private void updateRecipeButtonVisibility() {
+        if (this.recipeEditButton == null) {
+            return;
+        }
+
+        IProfession profession = currentProfessionIndex >= 0 && currentProfessionIndex < professions.size()
+            ? ProfessionRegistry.INSTANCE.getProfession(professions.get(currentProfessionIndex)).orElse(null)
+            : null;
+
+        this.recipeEditButton.visible = profession != null && !profession.getLearnableItems().isEmpty();
     }
 
     private void cycleHomeZonePrevious() {
@@ -405,5 +450,9 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         UUID workZoneId = workZones.get(currentWorkZoneIndex).getUUID();
 
         UpdateVillagerAssignment.send(villagerEntityId, profession, homeZoneId, workZoneId, false);
+    }
+
+    private void openRecipeConfig() {
+        screen.setRightPage(new RecipeConfigurationPage(screen, villageId, villagerEntityId));
     }
 }

@@ -185,5 +185,10 @@
   "villagetale.gui.villager_management.profession": "Profession:",
   "villagetale.gui.villager_management.home_zone": "Home Zone:",
   "villagetale.gui.villager_management.work_zone": "Work Zone:",
-  "villagetale.gui.villager_management.inventory": "Inventory:"
+  "villagetale.gui.villager_management.recipes": "Recipes:",
+  "villagetale.gui.villager_management.inventory": "Inventory:",
+
+  "villagetale.gui.recipe.configure_recipes": "Villager Recipes",
+
+  "villagetale.gui.back": "Back"
 }

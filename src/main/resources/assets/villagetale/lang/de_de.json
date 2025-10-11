@@ -185,5 +185,10 @@
   "villagetale.gui.villager_management.profession": "Beruf:",
   "villagetale.gui.villager_management.home_zone": "Wohnzone:",
   "villagetale.gui.villager_management.work_zone": "Arbeitszone:",
-  "villagetale.gui.villager_management.inventory": "Inventar:"
+  "villagetale.gui.villager_management.recipes": "Rezepte:",
+  "villagetale.gui.villager_management.inventory": "Inventar:",
+
+  "villagetale.gui.recipe.configure_recipes": "Dörfler-Rezepte",
+
+  "villagetale.gui.back": "Zurück"
 }

@@ -1,17 +1,20 @@
 package org.sosly.villagetale.network.packets.clientbound;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.client.ClientDataManager;
 import org.sosly.villagetale.gui.LedgerScreen;
 import org.sosly.villagetale.gui.pages.VillagerManagementPage;
 import org.sosly.villagetale.gui.pages.VillagerStatsPage;
@@ -27,8 +30,9 @@ public class OpenVillagerManagementScreen extends BasePacket {
     private final List<ItemStack> inventory;
     private final float health;
     private final int hunger;
+    private final List<ResourceLocation> knownRecipes;
 
-    private OpenVillagerManagementScreen(int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger) {
+    private OpenVillagerManagementScreen(int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger, List<ResourceLocation> knownRecipes) {
         this.villagerEntityId = villagerEntityId;
         this.villageId = villageId;
         this.homeZoneId = homeZoneId;
@@ -36,10 +40,11 @@ public class OpenVillagerManagementScreen extends BasePacket {
         this.inventory = inventory;
         this.health = health;
         this.hunger = hunger;
+        this.knownRecipes = knownRecipes;
     }
 
-    public static void send(ServerPlayer player, int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger) {
-        OpenVillagerManagementScreen packet = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger);
+    public static void send(ServerPlayer player, int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger, List<ResourceLocation> knownRecipes) {
+        OpenVillagerManagementScreen packet = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger, knownRecipes);
         NetworkHandler.CHANNEL.sendTo(packet, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
@@ -60,6 +65,10 @@ public class OpenVillagerManagementScreen extends BasePacket {
         }
         buffer.writeFloat(msg.health);
         buffer.writeInt(msg.hunger);
+        buffer.writeInt(msg.knownRecipes.size());
+        for (ResourceLocation recipe : msg.knownRecipes) {
+            buffer.writeResourceLocation(recipe);
+        }
     }
 
     public static OpenVillagerManagementScreen decode(FriendlyByteBuf buffer) {
@@ -77,7 +86,12 @@ public class OpenVillagerManagementScreen extends BasePacket {
             }
             float health = buffer.readFloat();
             int hunger = buffer.readInt();
-            msg = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger);
+            int recipeCount = buffer.readInt();
+            List<ResourceLocation> knownRecipes = new ArrayList<>();
+            for (int i = 0; i < recipeCount; i++) {
+                knownRecipes.add(buffer.readResourceLocation());
+            }
+            msg = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger, knownRecipes);
         } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
             VillageTale.LOGGER.error("Exception while reading OpenVillagerManagementScreen: {}", err.toString());
             return null;
@@ -94,6 +108,7 @@ public class OpenVillagerManagementScreen extends BasePacket {
         }
 
         context.enqueueWork(() -> {
+            ClientDataManager.cacheRecipes(msg.villagerEntityId, new HashSet<>(msg.knownRecipes));
             Minecraft mc = Minecraft.getInstance();
             LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.villager_management.title"));
             screen.setLeftPage(new VillagerManagementPage(screen, msg.villagerEntityId, msg.villageId, msg.homeZoneId, msg.workZoneId));
