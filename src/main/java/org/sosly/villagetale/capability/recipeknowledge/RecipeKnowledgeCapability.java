@@ -47,6 +47,11 @@ public class RecipeKnowledgeCapability implements IRecipeKnowledgeCapability {
         return recipes.add(recipeId);
     }
 
+    @Override
+    public boolean forget(ResourceLocation recipeId) {
+        return recipes.remove(recipeId);
+    }
+
     public void addRecipe(ResourceLocation recipeId) {
         recipes.add(recipeId);
     }

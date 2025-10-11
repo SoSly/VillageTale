@@ -195,21 +195,14 @@ public class RecipeCommand {
         
         if (!knowledge.knows(level, recipeId)) {
             return Result.failure(Component.translatable(
-                    String.format("%s.command.villager.recipes.doesnt_know", VillageTale.MOD_ID), 
+                    String.format("%s.command.villager.recipes.doesnt_know", VillageTale.MOD_ID),
                     villager.getDisplayName().getString(), recipeId));
         }
-        
-        knowledge.known().stream()
-                .filter(id -> id.equals(recipeId))
-                .findFirst()
-                .ifPresent(id -> {
-                    if (knowledge instanceof org.sosly.villagetale.capability.recipeknowledge.RecipeKnowledgeCapability impl) {
-                        impl.getRecipes().remove(id);
-                    }
-                });
-        
+
+        knowledge.forget(recipeId);
+
         return Result.success(Component.translatable(
-                String.format("%s.command.villager.recipes.forgotten", VillageTale.MOD_ID), 
+                String.format("%s.command.villager.recipes.forgotten", VillageTale.MOD_ID),
                 villager.getDisplayName().getString(), recipeId));
     }
 }

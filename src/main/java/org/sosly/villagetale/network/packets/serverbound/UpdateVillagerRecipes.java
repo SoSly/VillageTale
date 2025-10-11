@@ -14,7 +14,6 @@ import net.minecraftforge.network.NetworkEvent;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IRecipeKnowledgeCapability;
 import org.sosly.villagetale.capability.Capabilities;
-import org.sosly.villagetale.capability.recipeknowledge.RecipeKnowledgeCapability;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.NetworkHandler;
@@ -89,11 +88,6 @@ public class UpdateVillagerRecipes extends BasePacket {
                 return;
             }
 
-            if (!(knowledge instanceof RecipeKnowledgeCapability recipeKnowledge)) {
-                player.sendSystemMessage(Component.literal("Failed to update recipes: invalid capability type"));
-                return;
-            }
-
             Set<ResourceLocation> validatedRecipes = new HashSet<>();
             for (ResourceLocation recipeId : msg.recipes) {
                 Optional<?> recipe = level.getRecipeManager().byKey(recipeId);
@@ -113,8 +107,18 @@ public class UpdateVillagerRecipes extends BasePacket {
                 }
             }
 
-            recipeKnowledge.getRecipes().clear();
-            recipeKnowledge.getRecipes().addAll(validatedRecipes);
+            Set<ResourceLocation> currentRecipes = knowledge.known();
+            for (ResourceLocation recipeId : currentRecipes) {
+                if (!validatedRecipes.contains(recipeId)) {
+                    knowledge.forget(recipeId);
+                }
+            }
+
+            for (ResourceLocation recipeId : validatedRecipes) {
+                if (!currentRecipes.contains(recipeId)) {
+                    knowledge.learn(level, recipeId);
+                }
+            }
         });
     }
 }

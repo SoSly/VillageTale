@@ -8,4 +8,5 @@ public interface IRecipeKnowledgeCapability {
     public ImmutableSet<ResourceLocation> known();
     public boolean knows(ServerLevel level, ResourceLocation recipeId);
     public boolean learn(ServerLevel level, ResourceLocation recipeId);
+    public boolean forget(ResourceLocation recipeId);
 }
