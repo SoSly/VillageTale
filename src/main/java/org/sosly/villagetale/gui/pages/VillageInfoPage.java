@@ -8,6 +8,7 @@ import org.sosly.villagetale.client.VillageDataManager;
 import org.sosly.villagetale.gui.LedgerScreen;
 import org.sosly.villagetale.gui.components.LedgerIconButton;
 import org.sosly.villagetale.gui.components.NoShadowEditBox;
+import org.sosly.villagetale.helper.I18nHelper;
 import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfo;
 
 public class VillageInfoPage extends AbstractLedgerPage {
@@ -89,7 +90,7 @@ public class VillageInfoPage extends AbstractLedgerPage {
             .filter(entry -> entry.getValue() == IVillageCapability.Permission.OWNER)
             .count();
 
-        Component owners = ownerCount > 0 ? Component.translatable("villagetale.gui.village_info.owner_count", ownerCount) : Component.translatable("villagetale.gui.village_info.no_owners");
+        Component owners = ownerCount > 0 ? I18nHelper.translate("villagetale.gui.village_info.owner_count", ownerCount) : Component.translatable("villagetale.gui.village_info.no_owners");
         guiGraphics.drawString(font, owners, uStart, currentY, 0x3F3F3F, false);
     }
 

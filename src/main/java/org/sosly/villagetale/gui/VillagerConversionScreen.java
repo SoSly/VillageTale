@@ -8,6 +8,7 @@ import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.event.VillagerInteractionHandler;
+import org.sosly.villagetale.helper.I18nHelper;
 import org.sosly.villagetale.network.packets.serverbound.ConvertVillager;
 
 @OnlyIn(Dist.CLIENT)
@@ -61,7 +62,7 @@ public class VillagerConversionScreen extends Screen {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         Component itemName = Items.EMERALD.getDescription();
-        Component message = Component.translatable("villagetale.gui.conversion.message", EMERALD_COST, itemName);
+        Component message = I18nHelper.translate("villagetale.gui.conversion.message", EMERALD_COST, itemName.getString());
 
         int maxWidth = GUI_WIDTH - (CONTENT_PADDING * 2);
         var wrappedLines = this.font.split(message, maxWidth);

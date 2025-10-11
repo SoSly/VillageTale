@@ -120,7 +120,7 @@
   "villagetale.gui.townhall.cancel": "Cancel",
 
   "villagetale.gui.conversion.title": "Recruit Villager",
-  "villagetale.gui.conversion.message": "I'd be happy to join your village for %d %s.",
+  "villagetale.gui.conversion.message": "I'd be happy to join your village for {0, number} {0, plural, one {{1}} other {{1}s}}.",
   "villagetale.gui.conversion.commit": "Recruit",
   "villagetale.gui.conversion.cancel": "Cancel",
 
@@ -133,7 +133,7 @@
   "villagetale.gui.village_info.zones": "Zones: %d",
   "villagetale.gui.village_info.owners": "Owners:",
   "villagetale.gui.village_info.no_owners": "- None",
-  "villagetale.gui.village_info.owner_count": "- %d owner(s)",
+  "villagetale.gui.village_info.owner_count": "- {0, plural, one {# owner} other {# owners}}",
 
   "villagetale.gui.zone_detail.title": "Zone Details",
   "villagetale.gui.zone_detail.no_data": "No village data available",
