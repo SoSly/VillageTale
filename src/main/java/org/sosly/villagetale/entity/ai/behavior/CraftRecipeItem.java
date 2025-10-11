@@ -207,8 +207,9 @@ public class CraftRecipeItem extends Behavior<Villager> {
             ItemStack toPlace = ingredientStack.copy();
             toPlace.setCount(1);
 
-            if (ContainerHelper.placeItemInSlot(level, workstation, slot, toPlace)) {
-                ingredientStack.shrink(1);
+            int placed = ContainerHelper.placeItemInSlot(level, workstation, slot, toPlace);
+            if (placed > 0) {
+                ingredientStack.shrink(placed);
             }
         }
 
@@ -226,6 +227,9 @@ public class CraftRecipeItem extends Behavior<Villager> {
     private void handleInteractionCrafting(ServerLevel level, Villager villager) {
         SimpleContainer inventory = villager.getInventory();
 
+        FakePlayer fakePlayer = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "[VillageTale]"));
+        fakePlayer.setPos(villager.getX(), villager.getY(), villager.getZ());
+
         for (Ingredient ingredient : recipe.getIngredients()) {
             if (ingredient.isEmpty()) {
                 continue;
@@ -236,8 +240,6 @@ public class CraftRecipeItem extends Behavior<Villager> {
                 continue;
             }
 
-            FakePlayer fakePlayer = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "[VillageTale]"));
-            fakePlayer.setPos(villager.getX(), villager.getY(), villager.getZ());
             fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, ingredientStack.copy());
 
             BlockState state = level.getBlockState(workstation);
@@ -251,7 +253,6 @@ public class CraftRecipeItem extends Behavior<Villager> {
                 )));
 
             ingredientStack.shrink(1);
-            break;
         }
 
         workplace.release(workstation);
@@ -296,9 +297,10 @@ public class CraftRecipeItem extends Behavior<Villager> {
                     ItemStack fuelStack = stack.copy();
                     fuelStack.setCount(toPlace);
 
-                    if (ContainerHelper.placeItemInSlot(level, workstation, fuelSlot, fuelStack)) {
-                        stack.shrink(toPlace);
-                        placed += toPlace;
+                    int actuallyPlaced = ContainerHelper.placeItemInSlot(level, workstation, fuelSlot, fuelStack);
+                    if (actuallyPlaced > 0) {
+                        stack.shrink(actuallyPlaced);
+                        placed += actuallyPlaced;
                     }
                 }
             }

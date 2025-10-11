@@ -271,38 +271,39 @@ public class ContainerHelper {
         return remaining;
     }
 
-    public static boolean placeItemInSlot(ServerLevel level, BlockPos containerPos, int slot, ItemStack item) {
+    public static int placeItemInSlot(ServerLevel level, BlockPos containerPos, int slot, ItemStack item) {
         Container container = getContainer(level, containerPos);
         if (container == null) {
-            return false;
+            return 0;
         }
 
         if (slot < 0 || slot >= container.getContainerSize()) {
-            return false;
+            return 0;
         }
 
         ItemStack existingStack = container.getItem(slot);
         if (!existingStack.isEmpty()) {
             if (!ItemStack.isSameItemSameTags(existingStack, item)) {
-                return false;
+                return 0;
             }
 
             int spaceAvailable = existingStack.getMaxStackSize() - existingStack.getCount();
             if (spaceAvailable <= 0) {
-                return false;
+                return 0;
             }
 
             int toAdd = Math.min(item.getCount(), spaceAvailable);
             existingStack.grow(toAdd);
             container.setChanged();
-            return true;
+            return toAdd;
         }
 
-        ItemStack toPlace = item.copy();
-        toPlace.setCount(Math.min(item.getCount(), item.getMaxStackSize()));
-        container.setItem(slot, toPlace);
+        int toPlace = Math.min(item.getCount(), item.getMaxStackSize());
+        ItemStack placedStack = item.copy();
+        placedStack.setCount(toPlace);
+        container.setItem(slot, placedStack);
         container.setChanged();
-        return true;
+        return toPlace;
     }
 
     public static ItemStack extractFromSlot(ServerLevel level, BlockPos containerPos, int slot) {
