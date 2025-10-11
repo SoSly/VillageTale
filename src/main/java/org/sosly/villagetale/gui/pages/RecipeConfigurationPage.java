@@ -2,17 +2,17 @@ package org.sosly.villagetale.gui.pages;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.crafting.Recipe;
 import org.sosly.villagetale.api.IProfession;
 import org.sosly.villagetale.client.ClientDataManager;
 import org.sosly.villagetale.entity.Villager;
@@ -23,7 +23,7 @@ import org.sosly.villagetale.network.packets.serverbound.UpdateVillagerRecipes;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 
 public class RecipeConfigurationPage extends AbstractLedgerPage {
-    private static final int LIST_TOP = 36;
+    private static final int LIST_TOP = 24;
     private static final int LIST_BOTTOM = 145;
 
     private final int villagerEntityId;
@@ -61,19 +61,29 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
             return;
         }
 
-        List<RecipeEntry> entries = new ArrayList<>();
+        Map<String, List<RecipeEntry>> recipesByType = new LinkedHashMap<>();
         Minecraft mc = screen.getMinecraft();
         if (mc != null && mc.level != null) {
             mc.level.getRecipeManager().getRecipes().forEach(recipe -> {
                 if (profession.getLearnableItems().matches(recipe.getResultItem(mc.level.registryAccess()))) {
                     ResourceLocation recipeId = recipe.getId();
-                    String displayName = recipe.getResultItem(mc.level.registryAccess()).getDisplayName().getString();
-                    entries.add(new RecipeEntry(recipeId, displayName));
+                    Component displayName = recipe.getResultItem(mc.level.registryAccess()).getHoverName();
+                    String recipeType = recipe.getType().toString();
+                    String friendlyTypeName = getRecipeTypeName(recipeType);
+
+                    recipesByType.computeIfAbsent(friendlyTypeName, k -> new ArrayList<>())
+                        .add(new RecipeEntry(recipeId, displayName, friendlyTypeName));
                 }
             });
         }
 
-        entries.sort((a, b) -> a.displayName.compareTo(b.displayName));
+        List<String> sortedTypes = new ArrayList<>(recipesByType.keySet());
+        sortedTypes.sort(String::compareTo);
+
+        for (String typeName : sortedTypes) {
+            List<RecipeEntry> recipes = recipesByType.get(typeName);
+            recipes.sort((a, b) -> a.displayName.getString().compareTo(b.displayName.getString()));
+        }
 
         this.recipeList = new RecipeList(
             screen.getMinecraft(),
@@ -82,7 +92,8 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
             vStart + LIST_TOP,
             vStart + LIST_BOTTOM,
             12,
-            entries
+            recipesByType,
+            sortedTypes
         );
         this.recipeList.setLeftPos(uStart);
         addWidget(this.recipeList);
@@ -140,19 +151,72 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
         return null;
     }
 
-    private record RecipeEntry(ResourceLocation id, String displayName) {}
+    private static String getRecipeTypeName(String recipeTypeString) {
+        String cleanType = recipeTypeString;
+        if (cleanType.startsWith("RecipeType[")) {
+            cleanType = cleanType.substring(11, cleanType.length() - 1);
+        }
+
+        if (!cleanType.contains(":")) {
+            return capitalizeWords(cleanType.replace("_", " "));
+        }
+
+        String namespace = cleanType.substring(0, cleanType.indexOf(":"));
+        String path = cleanType.substring(cleanType.indexOf(":") + 1);
+
+        String formattedNamespace = capitalizeWords(namespace);
+        String formattedPath = capitalizeWords(path.replace("_", " "));
+
+        return formattedNamespace + ": " + formattedPath;
+    }
+
+    private static String capitalizeWords(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        String[] words = input.split(" ");
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                result.append(" ");
+            }
+            String word = words[i];
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) {
+                    result.append(word.substring(1).toLowerCase());
+                }
+            }
+        }
+
+        return result.toString();
+    }
+
+    private record RecipeEntry(ResourceLocation id, Component displayName, String recipeType) {}
 
     private class RecipeList extends ObjectSelectionList<RecipeList.Entry> {
-        private final List<RecipeEntry> recipeEntries;
 
-        public RecipeList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<RecipeEntry> entries) {
+        public RecipeList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight,
+                          Map<String, List<RecipeEntry>> recipesByType, List<String> sortedTypes) {
             super(minecraft, width, height, y, bottom, itemHeight);
-            this.recipeEntries = entries;
             this.setRenderBackground(false);
             this.setRenderTopAndBottom(false);
             this.setRenderSelection(false);
-            for (RecipeEntry entry : entries) {
-                this.addEntry(new Entry(entry));
+
+            for (int i = 0; i < sortedTypes.size(); i++) {
+                String typeName = sortedTypes.get(i);
+                this.addEntry(new Entry(typeName));
+
+                List<RecipeEntry> recipes = recipesByType.get(typeName);
+                for (RecipeEntry recipe : recipes) {
+                    this.addEntry(new Entry(recipe));
+                }
+
+                if (i < sortedTypes.size() - 1) {
+                    this.addEntry(new Entry());
+                }
             }
         }
 
@@ -168,15 +232,19 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
 
         public class Entry extends ObjectSelectionList.Entry<Entry> {
             private final RecipeEntry recipeEntry;
+            private final String headerText;
+            private final boolean isSpacer;
             private CompactCheckbox checkbox;
 
             public Entry(RecipeEntry recipeEntry) {
                 this.recipeEntry = recipeEntry;
+                this.headerText = null;
+                this.isSpacer = false;
                 this.checkbox = new CompactCheckbox(
                     0,
                     0,
                     LedgerScreen.CONTENT_WIDTH - 10,
-                    Component.literal(recipeEntry.displayName),
+                    recipeEntry.displayName,
                     selectedRecipes.contains(recipeEntry.id)
                 ) {
                     @Override
@@ -187,21 +255,54 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
                 };
             }
 
+            public Entry(String headerText) {
+                this.recipeEntry = null;
+                this.headerText = headerText;
+                this.isSpacer = false;
+                this.checkbox = null;
+            }
+
+            private Entry() {
+                this.recipeEntry = null;
+                this.headerText = null;
+                this.isSpacer = true;
+                this.checkbox = null;
+            }
+
             @Override
             public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
-                this.checkbox.setX(left);
-                this.checkbox.setY(top);
-                this.checkbox.render(guiGraphics, mouseX, mouseY, partialTick);
+                if (isSpacer) {
+                    return;
+                }
+                if (headerText != null) {
+                    guiGraphics.drawString(font, headerText, left, top, 0x3F3F3F, false);
+                } else if (checkbox != null) {
+                    this.checkbox.setX(left);
+                    this.checkbox.setY(top);
+                    this.checkbox.render(guiGraphics, mouseX, mouseY, partialTick);
+                }
             }
 
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                return this.checkbox.mouseClicked(mouseX, mouseY, button);
+                if (isSpacer) {
+                    return false;
+                }
+                if (checkbox != null) {
+                    return this.checkbox.mouseClicked(mouseX, mouseY, button);
+                }
+                return false;
             }
 
             @Override
             public Component getNarration() {
-                return Component.literal(recipeEntry.displayName);
+                if (isSpacer) {
+                    return Component.empty();
+                }
+                if (headerText != null) {
+                    return Component.literal(headerText);
+                }
+                return recipeEntry.displayName;
             }
 
             private void onCheckboxChanged(boolean checked) {
