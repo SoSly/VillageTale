@@ -107,10 +107,17 @@ This document outlines the development roadmap from Alpha 1 through the 1.0 rele
 
 ### New Features
 
+**Dialogue & Interaction System:**
+- Direct conversation UI for talking to villagers (separate from Ledger)
+- Villagers reveal quests through conversation
+- Access villager inventory by asking them directly
+- Ledger tracks known quests but discovery happens through interaction
+
 **Quest System:**
 - Personal requests from villagers (beds, housing, job changes)
 - Village projects (taverns, decorations, infrastructure improvements)
 - Dynamic quests based on villager needs and happiness
+- Quests discovered through dialogue, tracked in Ledger
 
 **Commerce:**
 - Traveling Merchants visit Town Hall with quests from distant villages
