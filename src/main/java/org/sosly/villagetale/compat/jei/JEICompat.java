@@ -122,4 +122,19 @@ public class JEICompat implements ICompat, IModPlugin, IRecipeManager {
     public Optional<ResourceLocation> getCraftingSound(Recipe<?> recipe) {
         return fallbackRecipeManager.getCraftingSound(recipe);
     }
+
+    @Override
+    public boolean doesBlockRequireFuel(Block block) {
+        return fallbackRecipeManager.doesBlockRequireFuel(block);
+    }
+
+    @Override
+    public Optional<Integer> getFuelSlotForBlock(Block block) {
+        return fallbackRecipeManager.getFuelSlotForBlock(block);
+    }
+
+    @Override
+    public Optional<ItemOrTagMatcher> getFuelItemsForBlock(Block block) {
+        return fallbackRecipeManager.getFuelItemsForBlock(block);
+    }
 }

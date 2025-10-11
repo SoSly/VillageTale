@@ -104,9 +104,9 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<Boolean>> WORKSTATION_OUTPUT_READY =
             MEMORY_MODULE_TYPES.register("workstation_output_ready",
                     () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
-    public static final RegistryObject<MemoryModuleType<Boolean>> WORKSTATION_NEEDS_FUEL =
+    public static final RegistryObject<MemoryModuleType<BlockPos>> WORKSTATION_NEEDS_FUEL =
             MEMORY_MODULE_TYPES.register("workstation_needs_fuel",
-                    () -> new MemoryModuleType<>(Optional.of(Codec.BOOL)));
+                    () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
 
     // Farmer Memories
     public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_TILLABLE_SOIL =

@@ -142,4 +142,43 @@ public class RecipeManager implements IRecipeManager {
 
         return new int[0];
     }
+
+    @Override
+    public boolean doesBlockRequireFuel(Block block) {
+        Map<String, RecipeTypeInfo> recipeTypeInfo = RecipeBlocksDataLoader.getRecipeTypeInfo();
+
+        for (RecipeTypeInfo info : recipeTypeInfo.values()) {
+            if (info.getBlocks().contains(block)) {
+                return info.requiresFuel();
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public Optional<Integer> getFuelSlotForBlock(Block block) {
+        Map<String, RecipeTypeInfo> recipeTypeInfo = RecipeBlocksDataLoader.getRecipeTypeInfo();
+
+        for (RecipeTypeInfo info : recipeTypeInfo.values()) {
+            if (info.getBlocks().contains(block)) {
+                return info.getFuelSlot();
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ItemOrTagMatcher> getFuelItemsForBlock(Block block) {
+        Map<String, RecipeTypeInfo> recipeTypeInfo = RecipeBlocksDataLoader.getRecipeTypeInfo();
+
+        for (RecipeTypeInfo info : recipeTypeInfo.values()) {
+            if (info.getBlocks().contains(block)) {
+                return info.getFuel();
+            }
+        }
+
+        return Optional.empty();
+    }
 }

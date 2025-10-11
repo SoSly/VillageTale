@@ -16,6 +16,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.behavior.CraftRecipeItem;
+import org.sosly.villagetale.entity.ai.behavior.RefuelWorkstation;
 import org.sosly.villagetale.entity.ai.behavior.TakeFromWorkstation;
 
 public class Cook extends AbstractProfession {
@@ -48,17 +49,19 @@ public class Cook extends AbstractProfession {
     @Override
     public ImmutableList<SensorType<? extends Sensor<? super Villager>>> getSensors() {
         return ImmutableList.of(
+            SensorTypes.DOES_WORKSTATION_NEED_FUEL.get(),
+            SensorTypes.HAS_FUEL.get(),
             SensorTypes.HAS_WORK_ZONE.get(),
-            SensorTypes.WHAT_SHOULD_BE_CRAFTED.get(),
-            SensorTypes.WHERE_SHOULD_I_CRAFT.get(),
             SensorTypes.HAS_WORKSTATION_OUTPUT.get(),
-            SensorTypes.DOES_WORKSTATION_NEED_FUEL.get()
+            SensorTypes.WHAT_SHOULD_BE_CRAFTED.get(),
+            SensorTypes.WHERE_SHOULD_I_CRAFT.get()
         );
     }
 
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
+                Pair.of(8, new RefuelWorkstation()),
                 Pair.of(9, new TakeFromWorkstation()),
                 Pair.of(10, new CraftRecipeItem())
         );

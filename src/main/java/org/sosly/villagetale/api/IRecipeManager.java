@@ -18,4 +18,8 @@ public interface IRecipeManager {
     int[] getOutputSlotsForBlock(Block block);
     boolean shouldWaitForDrops(Recipe<?> recipe);
     Optional<ResourceLocation> getCraftingSound(Recipe<?> recipe);
+
+    boolean doesBlockRequireFuel(Block block);
+    Optional<Integer> getFuelSlotForBlock(Block block);
+    Optional<ItemOrTagMatcher> getFuelItemsForBlock(Block block);
 }

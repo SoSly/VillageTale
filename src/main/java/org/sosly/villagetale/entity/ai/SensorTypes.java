@@ -9,6 +9,7 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.entity.ai.sensor.DoesWorkstationNeedFuel;
 import org.sosly.villagetale.entity.ai.sensor.HasBed;
 import org.sosly.villagetale.entity.ai.sensor.HasFood;
+import org.sosly.villagetale.entity.ai.sensor.HasFuel;
 import org.sosly.villagetale.entity.ai.sensor.HasItemsToDeposit;
 import org.sosly.villagetale.entity.ai.sensor.HasResources;
 import org.sosly.villagetale.entity.ai.sensor.HasTool;
@@ -74,6 +75,8 @@ public class SensorTypes {
     public static final RegistryObject<SensorType<DoesWorkstationNeedFuel>> DOES_WORKSTATION_NEED_FUEL =
             SENSOR_TYPES.register("does_workstation_need_fuel", () -> new SensorType<>(DoesWorkstationNeedFuel::new));
 
+    public static final RegistryObject<SensorType<HasFuel>> HAS_FUEL =
+            SENSOR_TYPES.register("has_fuel", () -> new SensorType<>(HasFuel::new));
 
     public static void register(IEventBus eventBus) {
         SENSOR_TYPES.register(eventBus);

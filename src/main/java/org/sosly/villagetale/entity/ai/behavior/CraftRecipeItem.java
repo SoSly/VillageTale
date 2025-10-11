@@ -213,13 +213,6 @@ public class CraftRecipeItem extends Behavior<Villager> {
             }
         }
 
-        if (villager.getBrain().hasMemoryValue(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get())) {
-            int fuelSlot = recipeManager.getFuelSlot(recipe).orElse(-1);
-            if (fuelSlot >= 0) {
-                placeFuelInSlot(level, villager, fuelSlot, 3);
-            }
-        }
-
         workplace.release(workstation);
         this.claimed = false;
     }
@@ -278,33 +271,6 @@ public class CraftRecipeItem extends Behavior<Villager> {
             }
         }
         return ItemStack.EMPTY;
-    }
-
-    private void placeFuelInSlot(ServerLevel level, Villager villager, int fuelSlot, int maxFuelToPlace) {
-        IRecipeManager recipeManager = CompatRegistry.getRecipeManager();
-        SimpleContainer inventory = villager.getInventory();
-
-        recipeManager.getFuelItems(recipe).ifPresent(fuelMatcher -> {
-            int placed = 0;
-            for (int i = 0; i < inventory.getContainerSize() && placed < maxFuelToPlace; i++) {
-                ItemStack stack = inventory.getItem(i);
-                if (stack.isEmpty()) {
-                    continue;
-                }
-
-                if (fuelMatcher.matches(stack)) {
-                    int toPlace = Math.min(stack.getCount(), maxFuelToPlace - placed);
-                    ItemStack fuelStack = stack.copy();
-                    fuelStack.setCount(toPlace);
-
-                    int actuallyPlaced = ContainerHelper.placeItemInSlot(level, workstation, fuelSlot, fuelStack);
-                    if (actuallyPlaced > 0) {
-                        stack.shrink(actuallyPlaced);
-                        placed += actuallyPlaced;
-                    }
-                }
-            }
-        });
     }
 
     private boolean hasAllIngredients(SimpleContainer inventory) {
