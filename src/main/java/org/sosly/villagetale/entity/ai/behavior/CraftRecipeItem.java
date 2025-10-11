@@ -6,8 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraftforge.common.util.FakePlayer;
@@ -100,11 +101,8 @@ public class CraftRecipeItem extends Behavior<Villager> {
     @Override
     protected void stop(@NotNull ServerLevel level, @NotNull Villager villager, long gameTime) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.BUSY.get());
-
-        if (this.craftingMethod != CraftingMethod.CONTAINER) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get());
-            villager.getBrain().eraseMemory(MemoryModuleTypes.CURRENT_RECIPE.get());
-        }
+        villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get());
+        villager.getBrain().eraseMemory(MemoryModuleTypes.CURRENT_RECIPE.get());
 
         if (this.claimed && this.workplace != null && this.workstation != null) {
             this.workplace.release(this.workstation);
@@ -142,25 +140,34 @@ public class CraftRecipeItem extends Behavior<Villager> {
     }
 
     private void handleFakeCrafting(ServerLevel level, Villager villager) {
-        if (craftingTicks++ < CRAFTING_DURATION) {
-            if (craftingTicks % 10 == 0) {
-                villager.getLookControl().setLookAt(
-                    workstation.getX() + 0.5,
-                    workstation.getY() + 0.5,
-                    workstation.getZ() + 0.5
-                );
-                villager.swing(InteractionHand.MAIN_HAND);
-
-                IRecipeManager recipeManager = CompatRegistry.getRecipeManager();
-                ResourceLocation soundLocation = recipeManager.getCraftingSound(recipe).orElse(null);
-                if (soundLocation != null) {
-                    level.playSound(null, workstation, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                }
-            }
+        if (craftingTicks++ >= CRAFTING_DURATION) {
+            craftItemFake(level, villager);
             return;
         }
 
-        craftItemFake(level, villager);
+        if (craftingTicks % 10 != 0) {
+            return;
+        }
+
+        villager.getLookControl().setLookAt(
+            workstation.getX() + 0.5,
+            workstation.getY() + 0.5,
+            workstation.getZ() + 0.5
+        );
+        villager.swing(InteractionHand.MAIN_HAND);
+
+        ResourceLocation soundLocation = CompatRegistry.getRecipeManager().getCraftingSound(recipe).orElse(null);
+        if (soundLocation == null) {
+            return;
+        }
+
+        SoundEvent soundEvent = ForgeRegistries.SOUND_EVENTS.getValue(soundLocation);
+        if (soundEvent == null) {
+            return;
+        }
+
+        float pitch = 1.0F + (level.random.nextFloat() - 0.5F) * 0.4F;
+        level.playSound(null, workstation, soundEvent, SoundSource.BLOCKS, 0.8F, pitch);
     }
 
     private void handleContainerCrafting(ServerLevel level, Villager villager) {

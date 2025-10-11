@@ -18,42 +18,44 @@ import org.sosly.villagetale.helper.VillagerHelper;
 public class DoesWorkstationNeedFuel extends Sensor<Villager> {
     @Override
     protected void doTick(@NotNull ServerLevel level, @NotNull Villager villager) {
+        MemoryModuleType<Boolean> needsFuel = MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get();
+
         BlockPos workstation = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get()).orElse(null);
         if (workstation == null) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get());
+            villager.getBrain().eraseMemory(needsFuel);
             return;
         }
 
         Recipe<?> recipe = VillagerHelper.getCurrentRecipe(level, villager);
         if (recipe == null) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get());
+            villager.getBrain().eraseMemory(needsFuel);
             return;
         }
 
         CraftingMethod method = CompatRegistry.getRecipeManager().getCraftingMethod(recipe);
         if (method != CraftingMethod.CONTAINER) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get());
+            villager.getBrain().eraseMemory(needsFuel);
             return;
         }
 
         if (!CompatRegistry.getRecipeManager().requiresFuel(recipe)) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get());
+            villager.getBrain().eraseMemory(needsFuel);
             return;
         }
 
         int fuelSlot = CompatRegistry.getRecipeManager().getFuelSlot(recipe).orElse(-1);
         if (fuelSlot < 0) {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get());
+            villager.getBrain().eraseMemory(needsFuel);
             return;
         }
 
         boolean fuelSlotEmpty = !ContainerHelper.hasItemInSlot(level, workstation, fuelSlot);
-
-        if (fuelSlotEmpty) {
-            villager.getBrain().setMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get(), true);
-        } else {
-            villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get());
+        if (!fuelSlotEmpty) {
+            villager.getBrain().eraseMemory(needsFuel);
+            return;
         }
+
+        villager.getBrain().setMemory(needsFuel, true);
     }
 
     @Override

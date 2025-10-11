@@ -129,4 +129,17 @@ public class RecipeManager implements IRecipeManager {
 
         return recipeTypeInfo.get(recipeTypeId).getCraftingSound();
     }
+
+    @Override
+    public int[] getOutputSlotsForBlock(Block block) {
+        Map<String, RecipeTypeInfo> recipeTypeInfo = RecipeBlocksDataLoader.getRecipeTypeInfo();
+
+        for (RecipeTypeInfo info : recipeTypeInfo.values()) {
+            if (info.getBlocks().contains(block)) {
+                return info.getOutputSlots();
+            }
+        }
+
+        return new int[0];
+    }
 }

@@ -5,7 +5,6 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import org.sosly.villagetale.VillageTale;
 
 @GameTestHolder(VillageTale.MOD_ID)
 @PrefixGameTestTemplate(false)

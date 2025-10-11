@@ -29,7 +29,8 @@ public class PickUpItems extends Behavior<Villager> {
 
     public PickUpItems() {
         super(ImmutableMap.of(
-            MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT
+            MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
+            MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), BEHAVIOR_DURATION);
     }
 

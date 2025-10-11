@@ -109,6 +109,11 @@ public class JEICompat implements ICompat, IModPlugin, IRecipeManager {
     }
 
     @Override
+    public int[] getOutputSlotsForBlock(Block block) {
+        return fallbackRecipeManager.getOutputSlotsForBlock(block);
+    }
+
+    @Override
     public boolean shouldWaitForDrops(Recipe<?> recipe) {
         return fallbackRecipeManager.shouldWaitForDrops(recipe);
     }

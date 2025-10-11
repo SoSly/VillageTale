@@ -12,8 +12,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
@@ -27,7 +27,6 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
 import org.sosly.villagetale.helper.InventoryHelper;
-import org.sosly.villagetale.helper.VillagerHelper;
 
 public class TakeFromWorkstation extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 100;
@@ -44,7 +43,6 @@ public class TakeFromWorkstation extends Behavior<Villager> {
         super(ImmutableMap.of(
             MemoryModuleTypes.WORKSTATION_OUTPUT_READY.get(), MemoryStatus.VALUE_PRESENT,
             MemoryModuleTypes.NEAREST_WORKSTATION.get(), MemoryStatus.VALUE_PRESENT,
-            MemoryModuleTypes.CURRENT_RECIPE.get(), MemoryStatus.VALUE_PRESENT,
             MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), BEHAVIOR_DURATION);
     }
@@ -53,11 +51,6 @@ public class TakeFromWorkstation extends Behavior<Villager> {
     protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
         BlockPos workstation = villager.getBrain().getMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get()).orElse(null);
         if (workstation == null) {
-            return false;
-        }
-
-        Recipe<?> recipe = VillagerHelper.getCurrentRecipe(level, villager);
-        if (recipe == null) {
             return false;
         }
 
@@ -170,12 +163,8 @@ public class TakeFromWorkstation extends Behavior<Villager> {
     }
 
     private void extractItems(ServerLevel level, Villager villager) {
-        Recipe<?> recipe = VillagerHelper.getCurrentRecipe(level, villager);
-        if (recipe == null) {
-            return;
-        }
-
-        int[] outputSlots = CompatRegistry.getRecipeManager().getOutputSlots(recipe);
+        Block block = level.getBlockState(this.targetWorkstation).getBlock();
+        int[] outputSlots = CompatRegistry.getRecipeManager().getOutputSlotsForBlock(block);
         if (outputSlots.length == 0) {
             return;
         }
@@ -244,7 +233,6 @@ public class TakeFromWorkstation extends Behavior<Villager> {
     private void clearMemories(Villager villager) {
         villager.getBrain().eraseMemory(MemoryModuleTypes.WORKSTATION_OUTPUT_READY.get());
         villager.getBrain().eraseMemory(MemoryModuleTypes.NEAREST_WORKSTATION.get());
-        villager.getBrain().eraseMemory(MemoryModuleTypes.CURRENT_RECIPE.get());
     }
 
     private void resetState() {

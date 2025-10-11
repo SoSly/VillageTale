@@ -59,8 +59,8 @@ public class Cook extends AbstractProfession {
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-            Pair.of(10, new CraftRecipeItem()),
-            Pair.of(9, new TakeFromWorkstation())
+                Pair.of(9, new TakeFromWorkstation()),
+                Pair.of(10, new CraftRecipeItem())
         );
     }
 }

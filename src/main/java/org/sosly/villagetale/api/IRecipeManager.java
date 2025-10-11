@@ -15,6 +15,7 @@ public interface IRecipeManager {
     int[] getInputSlots(Recipe<?> recipe);
     Optional<Integer> getFuelSlot(Recipe<?> recipe);
     int[] getOutputSlots(Recipe<?> recipe);
+    int[] getOutputSlotsForBlock(Block block);
     boolean shouldWaitForDrops(Recipe<?> recipe);
     Optional<ResourceLocation> getCraftingSound(Recipe<?> recipe);
 }
