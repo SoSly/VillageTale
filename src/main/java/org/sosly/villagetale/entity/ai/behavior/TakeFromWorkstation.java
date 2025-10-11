@@ -20,7 +20,7 @@ import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -164,7 +164,7 @@ public class TakeFromWorkstation extends Behavior<Villager> {
 
     private void extractItems(ServerLevel level, Villager villager) {
         Block block = level.getBlockState(this.targetWorkstation).getBlock();
-        int[] outputSlots = CompatRegistry.getRecipeManager().getOutputSlotsForBlock(block);
+        int[] outputSlots = RecipeManager.getInstance().getOutputSlotsForBlock(block);
         if (outputSlots.length == 0) {
             return;
         }

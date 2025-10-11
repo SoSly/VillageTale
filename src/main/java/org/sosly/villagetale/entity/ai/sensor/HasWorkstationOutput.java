@@ -9,7 +9,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
@@ -34,7 +34,7 @@ public class HasWorkstationOutput extends Sensor<Villager> {
 
         for (BlockPos workstation : workstations) {
             Block block = level.getBlockState(workstation).getBlock();
-            int[] outputSlots = CompatRegistry.getRecipeManager().getOutputSlotsForBlock(block);
+            int[] outputSlots = RecipeManager.getInstance().getOutputSlotsForBlock(block);
 
             if (outputSlots.length == 0) {
                 continue;

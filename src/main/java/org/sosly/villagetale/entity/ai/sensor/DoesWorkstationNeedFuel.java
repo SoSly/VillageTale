@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
@@ -34,7 +34,7 @@ public class DoesWorkstationNeedFuel extends Sensor<Villager> {
             return;
         }
 
-        IRecipeManager recipeManager = CompatRegistry.getRecipeManager();
+        IRecipeManager recipeManager = RecipeManager.getInstance();
 
         for (BlockPos workstation : claims.keySet()) {
             Block block = level.getBlockState(workstation).getBlock();

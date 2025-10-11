@@ -9,7 +9,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import org.sosly.villagetale.api.IWantedItem;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -31,7 +31,7 @@ public class HasFuel extends Sensor<Villager> {
         }
 
         Block block = level.getBlockState(workstation).getBlock();
-        ItemOrTagMatcher fuelMatcher = CompatRegistry.getRecipeManager().getFuelItemsForBlock(block).orElse(null);
+        ItemOrTagMatcher fuelMatcher = RecipeManager.getInstance().getFuelItemsForBlock(block).orElse(null);
         if (fuelMatcher == null) {
             return;
         }

@@ -27,7 +27,7 @@ import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ContainerHelper;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 
 public class RefuelWorkstation extends Behavior<Villager> {
     private static final int BEHAVIOR_DURATION = 100;
@@ -56,7 +56,7 @@ public class RefuelWorkstation extends Behavior<Villager> {
         }
 
         Block block = level.getBlockState(workstation).getBlock();
-        IRecipeManager recipeManager = CompatRegistry.getRecipeManager();
+        IRecipeManager recipeManager = RecipeManager.getInstance();
 
         ItemOrTagMatcher fuelMatcher = recipeManager.getFuelItemsForBlock(block).orElse(null);
         if (fuelMatcher == null) {
@@ -177,7 +177,7 @@ public class RefuelWorkstation extends Behavior<Villager> {
 
     private void placeFuel(ServerLevel level, Villager villager) {
         Block block = level.getBlockState(this.targetWorkstation).getBlock();
-        IRecipeManager recipeManager = CompatRegistry.getRecipeManager();
+        IRecipeManager recipeManager = RecipeManager.getInstance();
 
         int fuelSlot = recipeManager.getFuelSlotForBlock(block).orElse(-1);
         if (fuelSlot < 0) {

@@ -25,7 +25,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.CraftingMethod;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -79,7 +79,7 @@ public class CraftRecipeItem extends Behavior<Villager> {
         this.recipe = recipe;
         this.workstation = pos;
         this.workplace = zone;
-        this.craftingMethod = CompatRegistry.getRecipeManager().getCraftingMethod(recipe);
+        this.craftingMethod = RecipeManager.getInstance().getCraftingMethod(recipe);
         return true;
     }
 
@@ -158,7 +158,7 @@ public class CraftRecipeItem extends Behavior<Villager> {
         );
         villager.swing(InteractionHand.MAIN_HAND);
 
-        ResourceLocation soundLocation = CompatRegistry.getRecipeManager().getCraftingSound(recipe).orElse(null);
+        ResourceLocation soundLocation = RecipeManager.getInstance().getCraftingSound(recipe).orElse(null);
         if (soundLocation == null) {
             return;
         }
@@ -173,7 +173,7 @@ public class CraftRecipeItem extends Behavior<Villager> {
     }
 
     private void handleContainerCrafting(ServerLevel level, Villager villager) {
-        IRecipeManager recipeManager = CompatRegistry.getRecipeManager();
+        IRecipeManager recipeManager = RecipeManager.getInstance();
         SimpleContainer inventory = villager.getInventory();
 
         int[] inputSlots = recipeManager.getInputSlots(recipe);

@@ -12,7 +12,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
-import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.RecipeManager;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.VillagerHelper;
@@ -25,7 +25,7 @@ public class WhereShouldICraft extends Sensor<Villager> {
             return;
         }
 
-        Block craftingStation = CompatRegistry.getRecipeManager()
+        Block craftingStation = RecipeManager.getInstance()
                 .getCraftingBlock(recipe).orElse(null);
         if (craftingStation == null) {
             return;

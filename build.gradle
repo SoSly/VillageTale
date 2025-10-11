@@ -117,8 +117,7 @@ dependencies {
 
     // these mods are included only for the purpose of testing
     runtimeOnly fg.deobf("curse.maven:betteradvancements-${advancements_projectId}:${advancements_fileId}")
-    compileOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
-//    runtimeOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
+    runtimeOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
 }
 
 
@@ -193,10 +192,6 @@ if (System.getenv("CURSEFORGE_TOKEN")) {
             mainArtifact(jar) {
                 displayName = "${mod_name} ${version}"
             }
-
-            relations {
-                requiredDependency 'jei'
-            }
         }
     }
 }
@@ -215,10 +210,6 @@ if (System.getenv("MODRINTH_TOKEN")) {
         changelog = file("CHANGELOG.md").exists() ? file("CHANGELOG.md").text : "See GitHub for changes"
 
         versionType = mod_version.contains('alpha') ? 'alpha' : mod_version.contains('beta') ? 'beta' : 'release'
-
-        dependencies {
-            required.project 'jei'
-        }
     }
 }
 

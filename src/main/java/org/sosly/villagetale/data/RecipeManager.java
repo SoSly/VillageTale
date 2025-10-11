@@ -11,6 +11,12 @@ import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.data.loaders.RecipeBlocksDataLoader;
 
 public class RecipeManager implements IRecipeManager {
+    private static final RecipeManager INSTANCE = new RecipeManager();
+
+    public static RecipeManager getInstance() {
+        return INSTANCE;
+    }
+
     private String getRecipeTypeId(Recipe<?> recipe) {
         ResourceLocation recipeTypeLocation = ForgeRegistries.RECIPE_TYPES.getKey(recipe.getType());
         return recipeTypeLocation != null ? recipeTypeLocation.toString() : recipe.getType().toString();

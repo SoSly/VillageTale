@@ -6,18 +6,10 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import net.minecraftforge.fml.ModList;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IRecipeManager;
-import org.sosly.villagetale.compat.jei.JEICompat;
-import org.sosly.villagetale.data.RecipeManager;
 
 public class CompatRegistry {
     private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
     private static final Map<String, ICompat> loadedCompats = new HashMap<>();
-    private static final RecipeManager FALLBACK_RECIPE_MANAGER = new RecipeManager();
-
-    static {
-        compatFactories.put(CompatModIDs.JEI, () -> JEICompat::new);
-    }
 
     public static void registerCompats() {
         for (Map.Entry<String, Supplier<Callable<ICompat>>> entry : compatFactories.entrySet()) {
@@ -33,16 +25,5 @@ public class CompatRegistry {
                 VillageTale.LOGGER.error("Error instantiating compatibility:", e);
             }
         }
-    }
-
-    public static IRecipeManager getRecipeManager() {
-        if (ModList.get().isLoaded(CompatModIDs.JEI)) {
-            ICompat compat = loadedCompats.get(CompatModIDs.JEI);
-            if (compat instanceof IRecipeManager recipeManager) {
-                return recipeManager;
-            }
-        }
-
-        return FALLBACK_RECIPE_MANAGER;
     }
 }
