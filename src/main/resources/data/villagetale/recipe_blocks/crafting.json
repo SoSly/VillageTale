@@ -1,0 +1,6 @@
+{
+  "recipe_type": "minecraft:crafting",
+  "blocks": [
+    "minecraft:crafting_table"
+  ]
+}

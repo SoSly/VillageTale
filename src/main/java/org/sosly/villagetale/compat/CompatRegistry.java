@@ -8,10 +8,12 @@ import net.minecraftforge.fml.ModList;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.compat.jei.JEICompat;
+import org.sosly.villagetale.data.RecipeManager;
 
 public class CompatRegistry {
     private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
     private static final Map<String, ICompat> loadedCompats = new HashMap<>();
+    private static final RecipeManager FALLBACK_RECIPE_MANAGER = new RecipeManager();
 
     static {
         compatFactories.put(CompatModIDs.JEI, () -> JEICompat::new);
@@ -41,6 +43,6 @@ public class CompatRegistry {
             }
         }
 
-        return null;
+        return FALLBACK_RECIPE_MANAGER;
     }
 }

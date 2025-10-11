@@ -7,10 +7,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
+import org.sosly.villagetale.compat.CompatRegistry;
+import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public enum ItemMatcher {
@@ -93,13 +96,23 @@ public enum ItemMatcher {
             int ingredientCount = (int) recipe.getIngredients().stream()
                     .filter(ingredient -> !ingredient.isEmpty())
                     .count();
-            
+
             int minimum = Math.max(0, ingredientCount - 1);
             int target = Math.max(ingredientCount * 3, 9);
-            
-            return List.of(new WantedItem((item) -> recipe.getIngredients()
+
+            List<IWantedItem> wantedItems = new ArrayList<>();
+            wantedItems.add(new WantedItem((item) -> recipe.getIngredients()
                     .stream()
                     .anyMatch(ingredient -> ingredient.test(item)), target, minimum));
+
+            ItemOrTagMatcher fuelMatcher = CompatRegistry.getRecipeManager()
+                    .getFuelItems(recipe)
+                    .orElse(null);
+            if (fuelMatcher != null) {
+                wantedItems.add(new WantedItem(fuelMatcher::matches, 3, 0));
+            }
+
+            return wantedItems;
         }
     };
 

@@ -1,0 +1,6 @@
+{
+  "recipe_type": "minecraft:smithing",
+  "blocks": [
+    "minecraft:smithing_table"
+  ]
+}

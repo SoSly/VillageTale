@@ -16,11 +16,14 @@ import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.compat.ICompat;
+import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.RecipeManager;
 
 @JeiPlugin
 public class JEICompat implements ICompat, IModPlugin, IRecipeManager {
     public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "jei_plugin");
     private static IJeiRuntime runtime;
+    private final RecipeManager fallbackRecipeManager = new RecipeManager();
 
     @Override
     public void setup() {
@@ -72,5 +75,15 @@ public class JEICompat implements ICompat, IModPlugin, IRecipeManager {
         }
 
         return Optional.of(blockItem.getBlock());
+    }
+
+    @Override
+    public boolean requiresFuel(Recipe<?> recipe) {
+        return fallbackRecipeManager.requiresFuel(recipe);
+    }
+
+    @Override
+    public Optional<ItemOrTagMatcher> getFuelItems(Recipe<?> recipe) {
+        return fallbackRecipeManager.getFuelItems(recipe);
     }
 }

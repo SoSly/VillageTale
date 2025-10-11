@@ -1,0 +1,7 @@
+{
+  "recipe_type": "minecraft:campfire_cooking",
+  "blocks": [
+    "minecraft:campfire",
+    "minecraft:soul_campfire"
+  ]
+}

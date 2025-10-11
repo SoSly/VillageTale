@@ -1,0 +1,6 @@
+{
+  "recipe_type": "minecraft:brewing",
+  "blocks": [
+    "minecraft:brewing_stand"
+  ]
+}

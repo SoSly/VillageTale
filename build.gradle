@@ -113,11 +113,12 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // required dependencies
-    implementation fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
     implementation "com.ibm.icu:icu4j:${icu4j_version}"
 
     // these mods are included only for the purpose of testing
     runtimeOnly fg.deobf("curse.maven:betteradvancements-${advancements_projectId}:${advancements_fileId}")
+    compileOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
+//    runtimeOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
 }
 
 

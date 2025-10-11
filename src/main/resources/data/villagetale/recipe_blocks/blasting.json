@@ -1,0 +1,11 @@
+{
+  "recipe_type": "minecraft:blasting",
+  "blocks": [
+    "minecraft:blast_furnace"
+  ],
+  "fuel": [
+    "#minecraft:coals",
+    "#minecraft:logs_that_burn",
+    "minecraft:lava_bucket"
+  ]
+}
