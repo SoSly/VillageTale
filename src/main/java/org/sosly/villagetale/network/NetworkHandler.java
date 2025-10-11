@@ -12,6 +12,7 @@ import org.sosly.villagetale.network.packets.clientbound.SyncVillageCapability;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
 import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSync;
+import org.sosly.villagetale.network.packets.clientbound.VillagerRecipesSync;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 import org.sosly.villagetale.network.packets.serverbound.ConvertVillager;
 import org.sosly.villagetale.network.packets.serverbound.CreateZone;
@@ -39,6 +40,9 @@ public class NetworkHandler {
         CHANNEL.registerMessage(packetId++, VillagerEquipmentSync.class,
                 VillagerEquipmentSync::encode, VillagerEquipmentSync::decode, VillagerEquipmentSync::handle
         );
+
+        CHANNEL.registerMessage(packetId++, VillagerRecipesSync.class,
+                VillagerRecipesSync::encode, VillagerRecipesSync::decode, VillagerRecipesSync::handle);
 
         CHANNEL.registerMessage(packetId++, VillageBoundary.class,
                 VillageBoundary::encode, VillageBoundary::decode, VillageBoundary::handle);

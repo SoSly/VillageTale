@@ -18,6 +18,7 @@ import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.ServerPacketHandler;
+import org.sosly.villagetale.network.packets.clientbound.VillagerRecipesSync;
 
 public class UpdateVillagerRecipes extends BasePacket {
     private final int villagerEntityId;
@@ -119,6 +120,8 @@ public class UpdateVillagerRecipes extends BasePacket {
                     knowledge.learn(level, recipeId);
                 }
             }
+
+            VillagerRecipesSync.sendToPlayer(villager, new HashSet<>(knowledge.known()), player);
         });
     }
 }

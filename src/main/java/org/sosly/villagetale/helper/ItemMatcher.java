@@ -1,9 +1,12 @@
 package org.sosly.villagetale.helper;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
@@ -11,7 +14,12 @@ import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public enum ItemMatcher {
     PROFESSION_TOOL {
@@ -90,16 +98,61 @@ public enum ItemMatcher {
                 return List.of();
             }
 
-            int ingredientCount = (int) recipe.getIngredients().stream()
-                    .filter(ingredient -> !ingredient.isEmpty())
-                    .count();
+            Map<String, Pair<Ingredient, Integer>> ingredientMap = new HashMap<>();
 
-            int minimum = Math.max(0, ingredientCount - 1);
-            int target = Math.max(ingredientCount * 3, 9);
+            for (Ingredient ingredient : recipe.getIngredients()) {
+                if (ingredient.isEmpty()) {
+                    continue;
+                }
 
-            return List.of(new WantedItem((item) -> recipe.getIngredients()
-                    .stream()
-                    .anyMatch(ingredient -> ingredient.test(item)), target, minimum));
+                ItemStack[] items = ingredient.getItems();
+                if (items.length == 0) {
+                    continue;
+                }
+
+                String key = Arrays.stream(items)
+                        .map(stack -> stack.getItem().toString())
+                        .sorted()
+                        .collect(Collectors.joining(","));
+
+                if (key.isEmpty()) {
+                    continue;
+                }
+
+                if (ingredientMap.containsKey(key)) {
+                    Pair<Ingredient, Integer> pair = ingredientMap.get(key);
+                    ingredientMap.put(key, Pair.of(pair.getFirst(), pair.getSecond() + 1));
+                } else {
+                    ingredientMap.put(key, Pair.of(ingredient, 1));
+                }
+            }
+
+            List<IWantedItem> wantedItems = new ArrayList<>();
+            SimpleContainer inventory = villager.getInventory();
+
+            for (Pair<Ingredient, Integer> pair : ingredientMap.values()) {
+                Ingredient ingredient = pair.getFirst();
+                int neededCount = pair.getSecond();
+
+                int inventoryCount = countIngredientInInventory(inventory, ingredient);
+
+                if (inventoryCount < neededCount) {
+                    wantedItems.add(new WantedItem(ingredient::test, neededCount, 0));
+                }
+            }
+
+            return wantedItems;
+        }
+
+        private int countIngredientInInventory(SimpleContainer inventory, Ingredient ingredient) {
+            int count = 0;
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                ItemStack stack = inventory.getItem(i);
+                if (!stack.isEmpty() && ingredient.test(stack)) {
+                    count += stack.getCount();
+                }
+            }
+            return count;
         }
     };
 

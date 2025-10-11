@@ -80,6 +80,12 @@ public class CraftRecipeItem extends Behavior<Villager> {
         this.workstation = pos;
         this.workplace = zone;
         this.craftingMethod = RecipeManager.getInstance().getCraftingMethod(recipe);
+
+        SimpleContainer inventory = villager.getInventory();
+        if (!hasAllIngredients(inventory)) {
+            return false;
+        }
+
         return true;
     }
 
