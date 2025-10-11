@@ -1,17 +1,17 @@
 package org.sosly.villagetale.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.authlib.GameProfile;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import com.mojang.authlib.GameProfile;
-import java.util.UUID;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -20,6 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.api.IVillageZone;
@@ -185,24 +187,28 @@ public class CraftRecipeItem extends Behavior<Villager> {
 
         ContainerHelper.openContainer(level, workstation);
 
-        for (int slot : inputSlots) {
-            for (Ingredient ingredient : recipe.getIngredients()) {
-                if (ingredient.isEmpty()) {
-                    continue;
-                }
+        List<Ingredient> nonEmptyIngredients = new ArrayList<>();
+        for (Ingredient ingredient : recipe.getIngredients()) {
+            if (!ingredient.isEmpty()) {
+                nonEmptyIngredients.add(ingredient);
+            }
+        }
 
-                ItemStack ingredientStack = findIngredientInInventory(inventory, ingredient);
-                if (ingredientStack.isEmpty()) {
-                    continue;
-                }
+        int maxSlots = Math.min(inputSlots.length, nonEmptyIngredients.size());
+        for (int i = 0; i < maxSlots; i++) {
+            Ingredient ingredient = nonEmptyIngredients.get(i);
+            int slot = inputSlots[i];
 
-                ItemStack toPlace = ingredientStack.copy();
-                toPlace.setCount(1);
+            ItemStack ingredientStack = findIngredientInInventory(inventory, ingredient);
+            if (ingredientStack.isEmpty()) {
+                continue;
+            }
 
-                if (ContainerHelper.placeItemInSlot(level, workstation, slot, toPlace)) {
-                    ingredientStack.shrink(1);
-                    break;
-                }
+            ItemStack toPlace = ingredientStack.copy();
+            toPlace.setCount(1);
+
+            if (ContainerHelper.placeItemInSlot(level, workstation, slot, toPlace)) {
+                ingredientStack.shrink(1);
             }
         }
 
