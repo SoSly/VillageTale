@@ -2,5 +2,12 @@
   "recipe_type": "minecraft:brewing",
   "blocks": [
     "minecraft:brewing_stand"
+  ],
+  "crafting_method": "container",
+  "input_slots": [0, 1, 2],
+  "fuel_slot": 4,
+  "output_slots": [0, 1, 2],
+  "fuel": [
+    "minecraft:blaze_powder"
   ]
 }

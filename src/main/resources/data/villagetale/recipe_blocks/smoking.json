@@ -3,6 +3,10 @@
   "blocks": [
     "minecraft:smoker"
   ],
+  "crafting_method": "container",
+  "input_slots": [0],
+  "fuel_slot": 1,
+  "output_slots": [2],
   "fuel": [
     "#minecraft:coals",
     "#minecraft:logs_that_burn",

@@ -2,5 +2,7 @@
   "recipe_type": "minecraft:crafting",
   "blocks": [
     "minecraft:crafting_table"
-  ]
+  ],
+  "crafting_method": "fake",
+  "crafting_sound": "minecraft:block.wood.hit"
 }

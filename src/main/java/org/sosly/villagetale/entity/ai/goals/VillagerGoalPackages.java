@@ -28,6 +28,7 @@ import org.sosly.villagetale.entity.ai.behavior.GoToAssignedBed;
 import org.sosly.villagetale.entity.ai.behavior.GoToNearestStorage;
 import org.sosly.villagetale.entity.ai.behavior.GoToWorkZone;
 import org.sosly.villagetale.entity.ai.behavior.InteractWithGate;
+import org.sosly.villagetale.entity.ai.behavior.PickUpItems;
 import org.sosly.villagetale.entity.ai.behavior.PutInContainer;
 import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
@@ -49,6 +50,7 @@ public class VillagerGoalPackages {
             Pair.of(1, new MoveToTargetSink()),
             Pair.of(1, new WakeUp()),
             Pair.of(2, new EatFood()),
+            Pair.of(3, new PickUpItems()),
             Pair.of(3, new PutInContainer()),
             Pair.of(4, new GetFromContainer()),
             Pair.of(99, UpdateActivityFromSchedule.create())

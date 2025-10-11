@@ -6,12 +6,14 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.entity.ai.sensor.DoesWorkstationNeedFuel;
 import org.sosly.villagetale.entity.ai.sensor.HasBed;
 import org.sosly.villagetale.entity.ai.sensor.HasFood;
 import org.sosly.villagetale.entity.ai.sensor.HasItemsToDeposit;
 import org.sosly.villagetale.entity.ai.sensor.HasResources;
 import org.sosly.villagetale.entity.ai.sensor.HasTool;
 import org.sosly.villagetale.entity.ai.sensor.HasWorkZone;
+import org.sosly.villagetale.entity.ai.sensor.HasWorkstationOutput;
 import org.sosly.villagetale.entity.ai.sensor.IsFarmland;
 import org.sosly.villagetale.entity.ai.sensor.IsForest;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
@@ -65,6 +67,12 @@ public class SensorTypes {
 
     public static final RegistryObject<SensorType<WhichAnimalsNeedTending>> WHICH_ANIMALS_NEED_TENDING =
             SENSOR_TYPES.register("which_animals_need_tending", () -> new SensorType<>(WhichAnimalsNeedTending::new));
+
+    public static final RegistryObject<SensorType<HasWorkstationOutput>> HAS_WORKSTATION_OUTPUT =
+            SENSOR_TYPES.register("has_workstation_output", () -> new SensorType<>(HasWorkstationOutput::new));
+
+    public static final RegistryObject<SensorType<DoesWorkstationNeedFuel>> DOES_WORKSTATION_NEED_FUEL =
+            SENSOR_TYPES.register("does_workstation_need_fuel", () -> new SensorType<>(DoesWorkstationNeedFuel::new));
 
 
     public static void register(IEventBus eventBus) {

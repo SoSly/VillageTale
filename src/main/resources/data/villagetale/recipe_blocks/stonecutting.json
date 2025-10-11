@@ -2,5 +2,7 @@
   "recipe_type": "minecraft:stonecutting",
   "blocks": [
     "minecraft:stonecutter"
-  ]
+  ],
+  "crafting_method": "fake",
+  "crafting_sound": "minecraft:block.stone.hit"
 }

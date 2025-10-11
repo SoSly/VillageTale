@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.compat.ICompat;
+import org.sosly.villagetale.data.CraftingMethod;
 import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.data.RecipeManager;
 
@@ -85,5 +86,35 @@ public class JEICompat implements ICompat, IModPlugin, IRecipeManager {
     @Override
     public Optional<ItemOrTagMatcher> getFuelItems(Recipe<?> recipe) {
         return fallbackRecipeManager.getFuelItems(recipe);
+    }
+
+    @Override
+    public CraftingMethod getCraftingMethod(Recipe<?> recipe) {
+        return fallbackRecipeManager.getCraftingMethod(recipe);
+    }
+
+    @Override
+    public int[] getInputSlots(Recipe<?> recipe) {
+        return fallbackRecipeManager.getInputSlots(recipe);
+    }
+
+    @Override
+    public Optional<Integer> getFuelSlot(Recipe<?> recipe) {
+        return fallbackRecipeManager.getFuelSlot(recipe);
+    }
+
+    @Override
+    public int[] getOutputSlots(Recipe<?> recipe) {
+        return fallbackRecipeManager.getOutputSlots(recipe);
+    }
+
+    @Override
+    public boolean shouldWaitForDrops(Recipe<?> recipe) {
+        return fallbackRecipeManager.shouldWaitForDrops(recipe);
+    }
+
+    @Override
+    public Optional<ResourceLocation> getCraftingSound(Recipe<?> recipe) {
+        return fallbackRecipeManager.getCraftingSound(recipe);
     }
 }

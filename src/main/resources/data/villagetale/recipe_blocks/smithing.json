@@ -2,5 +2,7 @@
   "recipe_type": "minecraft:smithing",
   "blocks": [
     "minecraft:smithing_table"
-  ]
+  ],
+  "crafting_method": "fake",
+  "crafting_sound": "minecraft:block.anvil.use"
 }

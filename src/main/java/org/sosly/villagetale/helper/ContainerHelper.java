@@ -271,4 +271,73 @@ public class ContainerHelper {
         return remaining;
     }
 
+    public static boolean placeItemInSlot(ServerLevel level, BlockPos containerPos, int slot, ItemStack item) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
+            return false;
+        }
+
+        if (slot < 0 || slot >= container.getContainerSize()) {
+            return false;
+        }
+
+        ItemStack existingStack = container.getItem(slot);
+        if (!existingStack.isEmpty()) {
+            if (!ItemStack.isSameItemSameTags(existingStack, item)) {
+                return false;
+            }
+
+            int spaceAvailable = existingStack.getMaxStackSize() - existingStack.getCount();
+            if (spaceAvailable <= 0) {
+                return false;
+            }
+
+            int toAdd = Math.min(item.getCount(), spaceAvailable);
+            existingStack.grow(toAdd);
+            container.setChanged();
+            return true;
+        }
+
+        ItemStack toPlace = item.copy();
+        toPlace.setCount(Math.min(item.getCount(), item.getMaxStackSize()));
+        container.setItem(slot, toPlace);
+        container.setChanged();
+        return true;
+    }
+
+    public static ItemStack extractFromSlot(ServerLevel level, BlockPos containerPos, int slot) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
+            return ItemStack.EMPTY;
+        }
+
+        if (slot < 0 || slot >= container.getContainerSize()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack stack = container.getItem(slot);
+        if (stack.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack extracted = stack.copy();
+        container.setItem(slot, ItemStack.EMPTY);
+        container.setChanged();
+        return extracted;
+    }
+
+    public static boolean hasItemInSlot(ServerLevel level, BlockPos containerPos, int slot) {
+        Container container = getContainer(level, containerPos);
+        if (container == null) {
+            return false;
+        }
+
+        if (slot < 0 || slot >= container.getContainerSize()) {
+            return false;
+        }
+
+        ItemStack stack = container.getItem(slot);
+        return !stack.isEmpty();
+    }
+
 }

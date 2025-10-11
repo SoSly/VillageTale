@@ -3,5 +3,7 @@
   "blocks": [
     "minecraft:campfire",
     "minecraft:soul_campfire"
-  ]
+  ],
+  "crafting_method": "interaction",
+  "wait_for_drops": true
 }

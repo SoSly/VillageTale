@@ -17,6 +17,7 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
 import org.slf4j.Logger;
+import org.sosly.villagetale.data.CraftingMethod;
 import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.data.RecipeTypeInfo;
 
@@ -82,13 +83,65 @@ public class RecipeBlocksDataLoader extends SimpleJsonResourceReloadListener {
                 }
             }
 
+            CraftingMethod craftingMethod = CraftingMethod.FAKE;
+            if (jsonObject.has("crafting_method")) {
+                String methodString = jsonObject.get("crafting_method").getAsString().toUpperCase();
+                try {
+                    craftingMethod = CraftingMethod.valueOf(methodString);
+                } catch (IllegalArgumentException e) {
+                    LOGGER.warn("Unknown crafting method '{}' in {}, defaulting to FAKE", methodString, entry.getKey());
+                }
+            }
+
+            int[] inputSlots = new int[0];
+            if (jsonObject.has("input_slots")) {
+                JsonArray inputArray = jsonObject.getAsJsonArray("input_slots");
+                inputSlots = new int[inputArray.size()];
+                for (int i = 0; i < inputArray.size(); i++) {
+                    inputSlots[i] = inputArray.get(i).getAsInt();
+                }
+            }
+
+            Integer fuelSlot = null;
+            if (jsonObject.has("fuel_slot")) {
+                fuelSlot = jsonObject.get("fuel_slot").getAsInt();
+            }
+
+            int[] outputSlots = new int[0];
+            if (jsonObject.has("output_slots")) {
+                JsonArray outputArray = jsonObject.getAsJsonArray("output_slots");
+                outputSlots = new int[outputArray.size()];
+                for (int i = 0; i < outputArray.size(); i++) {
+                    outputSlots[i] = outputArray.get(i).getAsInt();
+                }
+            }
+
+            boolean waitForDrops = false;
+            if (jsonObject.has("wait_for_drops")) {
+                waitForDrops = jsonObject.get("wait_for_drops").getAsBoolean();
+            }
+
+            ResourceLocation craftingSound = null;
+            if (jsonObject.has("crafting_sound")) {
+                String soundString = jsonObject.get("crafting_sound").getAsString();
+                craftingSound = new ResourceLocation(soundString);
+            }
+
             if (!blocks.isEmpty()) {
-                RecipeTypeInfo info = new RecipeTypeInfo(blocks, fuelMatcher);
+                RecipeTypeInfo info = new RecipeTypeInfo(blocks, fuelMatcher, craftingMethod,
+                        inputSlots, fuelSlot, outputSlots, waitForDrops, craftingSound);
                 recipeTypeInfo.merge(recipeType, info, (existing, newInfo) -> {
                     List<Block> combinedBlocks = new ArrayList<>(existing.getBlocks());
                     combinedBlocks.addAll(newInfo.getBlocks());
                     ItemOrTagMatcher combinedFuel = newInfo.getFuel().orElse(existing.getFuel().orElse(null));
-                    return new RecipeTypeInfo(combinedBlocks, combinedFuel);
+                    CraftingMethod combinedMethod = newInfo.getCraftingMethod();
+                    int[] combinedInput = newInfo.getInputSlots();
+                    Integer combinedFuelSlot = newInfo.getFuelSlot().orElse(existing.getFuelSlot().orElse(null));
+                    int[] combinedOutput = newInfo.getOutputSlots();
+                    boolean combinedWaitForDrops = newInfo.shouldWaitForDrops() || existing.shouldWaitForDrops();
+                    ResourceLocation combinedSound = newInfo.getCraftingSound().orElse(existing.getCraftingSound().orElse(null));
+                    return new RecipeTypeInfo(combinedBlocks, combinedFuel, combinedMethod,
+                            combinedInput, combinedFuelSlot, combinedOutput, combinedWaitForDrops, combinedSound);
                 });
                 LOGGER.debug("Registered {} blocks for recipe type {}", blocks.size(), recipeType);
             }

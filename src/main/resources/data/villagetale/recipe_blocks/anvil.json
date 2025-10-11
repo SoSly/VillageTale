@@ -1,6 +1,10 @@
 {
   "recipe_type": "minecraft:anvil",
   "blocks": [
-    "minecraft:anvil"
-  ]
+    "minecraft:anvil",
+    "minecraft:chipped_anvil",
+    "minecraft:damaged_anvil"
+  ],
+  "crafting_method": "fake",
+  "crafting_sound": "minecraft:block.anvil.use"
 }

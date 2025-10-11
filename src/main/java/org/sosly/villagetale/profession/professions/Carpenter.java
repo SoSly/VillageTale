@@ -12,6 +12,7 @@ import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.behavior.CraftRecipeItem;
+import org.sosly.villagetale.entity.ai.behavior.TakeFromWorkstation;
 
 public class Carpenter extends AbstractProfession {
     public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "carpenter");
@@ -24,7 +25,9 @@ public class Carpenter extends AbstractProfession {
     public ImmutableList<MemoryModuleType<?>> getMemoryModules() {
         return ImmutableList.of(
             MemoryModuleTypes.CURRENT_RECIPE.get(),
-            MemoryModuleTypes.NEAREST_WORKSTATION.get()
+            MemoryModuleTypes.NEAREST_WORKSTATION.get(),
+            MemoryModuleTypes.WORKSTATION_OUTPUT_READY.get(),
+            MemoryModuleTypes.WORKSTATION_NEEDS_FUEL.get()
         );
     }
 
@@ -33,14 +36,17 @@ public class Carpenter extends AbstractProfession {
         return ImmutableList.of(
             SensorTypes.HAS_WORK_ZONE.get(),
             SensorTypes.WHAT_SHOULD_BE_CRAFTED.get(),
-            SensorTypes.WHERE_SHOULD_I_CRAFT.get()
+            SensorTypes.WHERE_SHOULD_I_CRAFT.get(),
+            SensorTypes.HAS_WORKSTATION_OUTPUT.get(),
+            SensorTypes.DOES_WORKSTATION_NEED_FUEL.get()
         );
     }
 
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-            Pair.of(10, new CraftRecipeItem())
+            Pair.of(10, new CraftRecipeItem()),
+            Pair.of(9, new TakeFromWorkstation())
         );
     }
 }

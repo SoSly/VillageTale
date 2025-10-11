@@ -29,7 +29,6 @@ import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.behavior.BringAnimalsToPen;
 import org.sosly.villagetale.entity.ai.behavior.FeedAnimal;
 import org.sosly.villagetale.entity.ai.behavior.MilkAnimal;
-import org.sosly.villagetale.entity.ai.behavior.PickUpItems;
 import org.sosly.villagetale.entity.ai.behavior.PluckAnimal;
 import org.sosly.villagetale.entity.ai.behavior.ShearAnimal;
 import org.sosly.villagetale.helper.VillagesHelper;
@@ -129,7 +128,6 @@ public class Herder extends AbstractProfession {
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
-                Pair.of(1, new PickUpItems()),
                 Pair.of(9, new BringAnimalsToPen()),
                 Pair.of(10, new MilkAnimal()),
                 Pair.of(10, new PluckAnimal()),
