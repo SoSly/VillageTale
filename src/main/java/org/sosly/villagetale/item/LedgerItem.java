@@ -1,6 +1,8 @@
 package org.sosly.villagetale.item;
 
-import net.minecraft.core.BlockPos;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -8,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -17,13 +20,15 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
-import org.sosly.villagetale.block.TownHallBlock;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
+import org.sosly.villagetale.entity.MemoryModuleTypes;
+import org.sosly.villagetale.entity.Villager;
+import org.sosly.villagetale.event.VillagerInteractionHandler;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillageInfoScreen;
+import org.sosly.villagetale.network.packets.clientbound.OpenVillagerConversionScreen;
+import org.sosly.villagetale.network.packets.clientbound.OpenVillagerManagementScreen;
 import org.sosly.villagetale.network.packets.clientbound.SyncVillageCapability;
-
-import java.util.UUID;
 
 public class LedgerItem extends Item {
     private static final String VILLAGE_UUID_KEY = "VillageUUID";
@@ -80,10 +85,6 @@ public class LedgerItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        if (context.getLevel().getBlockState(context.getClickedPos()).getBlock() instanceof TownHallBlock) {
-            return InteractionResult.PASS;
-        }
-
         if (!(context.getLevel() instanceof ServerLevel serverLevel)) {
             return InteractionResult.FAIL;
         }
@@ -93,6 +94,86 @@ public class LedgerItem extends Item {
         }
 
         return openVillageInfoScreen(context.getItemInHand(), serverLevel, serverPlayer);
+    }
+
+    @Override
+    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
+        if (player.level().isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return InteractionResult.FAIL;
+        }
+
+        if (target instanceof net.minecraft.world.entity.npc.Villager vanillaVillager) {
+            vanillaVillager.getNavigation().stop();
+            vanillaVillager.lookAt(player, 180.0F, 180.0F);
+            VillagerInteractionHandler.addVillagerToConversation(target.getId());
+            OpenVillagerConversionScreen.send(serverPlayer, target.getId());
+            return InteractionResult.CONSUME;
+        }
+
+        if (!(target instanceof Villager villager)) {
+            return InteractionResult.PASS;
+        }
+
+        villager.getNavigation().stop();
+        villager.lookAt(player, 180.0F, 180.0F);
+        VillagerInteractionHandler.addVillagerToConversation(target.getId());
+
+        if (villager.getVillage().isEmpty()) {
+            return InteractionResult.FAIL;
+        }
+
+        if (!(player.level() instanceof ServerLevel serverLevel)) {
+            return InteractionResult.FAIL;
+        }
+
+        IVillagesCapability villagesCapability = serverLevel.getCapability(Capabilities.VILLAGES_CAPABILITY).orElse(null);
+        if (villagesCapability == null) {
+            return InteractionResult.FAIL;
+        }
+
+        VillageInfo village = villagesCapability.getVillageById(villager.getVillage().get());
+        if (village == null) {
+            return InteractionResult.FAIL;
+        }
+
+        ChunkPos villageChunk = village.getVillageStartingChunk();
+        IVillageCapability villageCapability = serverLevel.getChunk(villageChunk.x, villageChunk.z)
+            .getCapability(Capabilities.VILLAGE_CAPABILITY).orElse(null);
+
+        if (villageCapability == null) {
+            return InteractionResult.FAIL;
+        }
+
+        UUID homeZoneId = villager.getBrain().getMemory(MemoryModuleTypes.HOME_ZONE.get()).orElse(null);
+        UUID workZoneId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).orElse(null);
+
+        List<ItemStack> inventory = new ArrayList<>();
+        for (int i = 0; i < villager.getInventory().getContainerSize(); i++) {
+            inventory.add(villager.getInventory().getItem(i));
+        }
+
+        for (ItemStack equipmentStack : villager.getHandSlots()) {
+            if (!equipmentStack.isEmpty()) {
+                inventory.add(equipmentStack);
+            }
+        }
+
+        for (ItemStack armorStack : villager.getArmorSlots()) {
+            if (!armorStack.isEmpty()) {
+                inventory.add(armorStack);
+            }
+        }
+
+        float health = villager.getHealth();
+        int hunger = villager.getFoodData().getFoodLevel();
+
+        SyncVillageCapability.send(serverPlayer, villageCapability, serverLevel.getServer());
+        OpenVillagerManagementScreen.send(serverPlayer, target.getId(), villager.getVillage().get(), homeZoneId, workZoneId, inventory, health, hunger);
+        return InteractionResult.CONSUME;
     }
 
     @Override

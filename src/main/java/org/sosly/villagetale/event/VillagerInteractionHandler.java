@@ -1,9 +1,10 @@
 package org.sosly.villagetale.event;
 
+import java.util.HashSet;
+import java.util.Set;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
@@ -11,11 +12,9 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.sosly.villagetale.VillageTale;
+import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.item.LedgerItem;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillagerConversionScreen;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class VillagerInteractionHandler {
@@ -23,7 +22,7 @@ public class VillagerInteractionHandler {
 
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (!(event.getTarget() instanceof Villager villager)) {
+        if (!(event.getTarget() instanceof net.minecraft.world.entity.npc.Villager villager)) {
             return;
         }
 
@@ -58,13 +57,21 @@ public class VillagerInteractionHandler {
         villagersInConversation.removeIf(id -> {
             for (var level : event.getServer().getAllLevels()) {
                 Entity entity = level.getEntity(id);
-                if (entity instanceof Villager villager) {
+                if (entity instanceof Villager vtVillager) {
+                    vtVillager.getNavigation().stop();
+                    return false;
+                }
+                if (entity instanceof net.minecraft.world.entity.npc.Villager villager) {
                     villager.getNavigation().stop();
                     return false;
                 }
             }
             return true;
         });
+    }
+
+    public static void addVillagerToConversation(int villagerId) {
+        villagersInConversation.add(villagerId);
     }
 
     public static void releaseVillager(int villagerId) {

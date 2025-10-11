@@ -6,6 +6,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillageInfoScreen;
 import org.sosly.villagetale.network.packets.clientbound.OpenVillagerConversionScreen;
+import org.sosly.villagetale.network.packets.clientbound.OpenVillagerManagementScreen;
 import org.sosly.villagetale.network.packets.clientbound.RemoveZoneBoundary;
 import org.sosly.villagetale.network.packets.clientbound.SyncVillageCapability;
 import org.sosly.villagetale.network.packets.clientbound.VillageBoundary;
@@ -17,6 +18,7 @@ import org.sosly.villagetale.network.packets.serverbound.CreateZone;
 import org.sosly.villagetale.network.packets.serverbound.DeleteZone;
 import org.sosly.villagetale.network.packets.serverbound.SetZoneCreationMode;
 import org.sosly.villagetale.network.packets.serverbound.UpdateVillageInfo;
+import org.sosly.villagetale.network.packets.serverbound.UpdateVillagerAssignment;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneFilters;
 import org.sosly.villagetale.network.packets.serverbound.UpdateZoneName;
 
@@ -75,6 +77,12 @@ public class NetworkHandler {
 
         CHANNEL.registerMessage(packetId++, CreateZone.class,
                 CreateZone::encode, CreateZone::decode, CreateZone::handle);
+
+        CHANNEL.registerMessage(packetId++, OpenVillagerManagementScreen.class,
+                OpenVillagerManagementScreen::encode, OpenVillagerManagementScreen::decode, OpenVillagerManagementScreen::handle);
+
+        CHANNEL.registerMessage(packetId++, UpdateVillagerAssignment.class,
+                UpdateVillagerAssignment::encode, UpdateVillagerAssignment::decode, UpdateVillagerAssignment::handle);
 
         VillageTale.LOGGER.info("VillageTale registered {} network messages", packetId);
     }

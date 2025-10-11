@@ -93,6 +93,7 @@
   "villagetale.command.zone.list_filter_error": "Failed to list filter: %s",
 
   "itemGroup.villagetale": "VillageTale",
+  "entity.villagetale.villager": "Villager",
   "profession.villagetale.carpenter": "Carpenter",
   "villagetale.zone.none": "Zone",
   "villagetale.zone.storage": "Storage",
@@ -178,5 +179,11 @@
   "villagetale.gui.new_zone.shape_route_waypoints": "Waypoints: %d",
   "villagetale.gui.new_zone.shape_route_waypoint": "  %d: (%d, %d, %d)",
   "villagetale.gui.new_zone.save": "Save",
-  "villagetale.gui.new_zone.cancel": "Cancel"
+  "villagetale.gui.new_zone.cancel": "Cancel",
+
+  "villagetale.gui.villager_management.title": "Villager Management",
+  "villagetale.gui.villager_management.profession": "Profession:",
+  "villagetale.gui.villager_management.home_zone": "Home Zone:",
+  "villagetale.gui.villager_management.work_zone": "Work Zone:",
+  "villagetale.gui.villager_management.inventory": "Inventory:"
 }
