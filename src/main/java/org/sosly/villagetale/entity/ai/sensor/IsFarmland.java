@@ -47,26 +47,36 @@ public class IsFarmland extends Sensor<Villager> {
 
         long gameTime = level.getGameTime();
         List<BlockPos> claims = zone.getAvailableClaims(gameTime, Optional.empty());
-        Optional<BlockPos> harvestable = claims
+
+        List<BlockPos> harvestable = claims
             .stream()
             .filter(pos -> Farmland.isHarvestableBlock(level, pos))
-            .findAny();
-        harvestable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), blockPos, 600L));
+            .toList();
+        if (!harvestable.isEmpty()) {
+            BlockPos selected = harvestable.get(villager.getRandom().nextInt(harvestable.size()));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_HARVESTABLE_CROP.get(), selected, 600L);
+        }
 
         ItemStack seeds = InventoryHelper.getItem(villager, stack -> stack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS), zone);
         if (!seeds.isEmpty()) {
-            Optional<BlockPos> plantable = claims
+            List<BlockPos> plantable = claims
                 .stream()
                 .filter(pos -> Farmland.isPlantableBlock(level, pos, seeds))
-                .findAny();
-            plantable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), blockPos, 600L));
+                .toList();
+            if (!plantable.isEmpty()) {
+                BlockPos selected = plantable.get(villager.getRandom().nextInt(plantable.size()));
+                villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_EMPTY_FARMLAND.get(), selected, 600L);
+            }
         }
 
-        Optional<BlockPos> tillable = claims
+        List<BlockPos> tillable = claims
             .stream()
             .filter(pos -> Farmland.isTillableBlock(level, pos))
-            .findAny();
-        tillable.ifPresent(blockPos -> villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get(), blockPos, 600L));
+            .toList();
+        if (!tillable.isEmpty()) {
+            BlockPos selected = tillable.get(villager.getRandom().nextInt(tillable.size()));
+            villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.NEAREST_TILLABLE_SOIL.get(), selected, 600L);
+        }
     }
 
     @Override

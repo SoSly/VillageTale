@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -56,7 +57,9 @@ public class Box implements IZoneShape {
             return Collections.emptyList();
         }
 
-        return BlockPos.betweenClosedStream(bounds)
+        return BlockPos.betweenClosedStream(
+                Mth.floor(bounds.minX), Mth.floor(bounds.minY), Mth.floor(bounds.minZ),
+                Mth.ceil(bounds.maxX) - 1, Mth.ceil(bounds.maxY) - 1, Mth.ceil(bounds.maxZ) - 1)
                 .filter(pos -> isPOI.test(pos))
                 .map(BlockPos::immutable)
                 .toList();

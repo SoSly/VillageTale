@@ -57,9 +57,9 @@ public class Farmer extends AbstractProfession {
     @Override
     public ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> getWorkPackage(float speedModifier) {
         return ImmutableList.of(
+            Pair.of(10, new TillSoil()),
             Pair.of(11, new HarvestCrop()),
-            Pair.of(12, new PlantCrops()),
-            Pair.of(13, new TillSoil())
+            Pair.of(12, new PlantCrops())
         );
     }
 }
