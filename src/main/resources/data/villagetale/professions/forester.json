@@ -1,6 +1,8 @@
 {
   "tools": [
-    "#minecraft:axes"
+    {
+      "items": ["#minecraft:axes"]
+    }
   ],
   "work": [
     "villagetale:forest"

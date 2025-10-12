@@ -1,6 +1,7 @@
 package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.Tree;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -55,8 +57,12 @@ public class IsForest extends Sensor<Villager> {
     }
 
     private void findNearestTree(ServerLevel level, Villager villager) {
-        ItemStack tool = InventoryHelper.getItem(villager, stack -> villager.getProfession()
-                .getTool().get().getMatcher().test(stack));
+        List<IWantedItem> tools = villager.getProfession().getTools();
+        if (tools.isEmpty()) {
+            return;
+        }
+
+        ItemStack tool = InventoryHelper.getItem(villager, stack -> tools.get(0).getMatcher().test(stack));
         if (tool.isEmpty()) {
             return;
         }

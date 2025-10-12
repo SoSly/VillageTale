@@ -25,11 +25,7 @@ public enum ItemMatcher {
     PROFESSION_TOOL {
         @Override
         public List<IWantedItem> getFor(Villager villager) {
-            IWantedItem tool = villager.getProfession().getTool().orElse(null);
-            if (tool != null) {
-                return List.of(tool);
-            }
-            return List.of();
+            return villager.getProfession().getTools();
         }
     },
     FOOD {

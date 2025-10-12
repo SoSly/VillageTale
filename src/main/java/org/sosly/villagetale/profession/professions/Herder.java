@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -79,15 +78,6 @@ public class Herder extends AbstractProfession {
         }
 
         return result;
-    }
-
-
-
-    @Override
-    public Optional<IWantedItem> getTool() {
-        return Optional.of(
-            new WantedItem((stack) -> stack.is(Items.LEAD), 1, 1)
-        );
     }
 
     @Override

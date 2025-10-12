@@ -29,14 +29,14 @@ public class ZoneTypeDataLoader extends SimpleJsonResourceReloadListener {
         for (Map.Entry<ResourceLocation, JsonElement> entry : resourceMap.entrySet()) {
             if (!(entry.getValue() instanceof JsonObject jsonObject)) {
                 LOGGER.error("Zone type data {} is not a JSON object", entry.getKey());
-                return;
+                continue;
             }
 
             ResourceLocation zoneTypeId = new ResourceLocation(entry.getKey().getNamespace(), entry.getKey().getPath());
             IZoneType type = ZoneRegistry.INSTANCE.type(zoneTypeId);
             if (type == null) {
                 LOGGER.warn("No registered zone type found for data: {}", zoneTypeId);
-                return;
+                continue;
             }
 
             type.onDatapackReload(jsonObject);

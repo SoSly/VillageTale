@@ -1,6 +1,8 @@
 {
   "tools": [
-    "#minecraft:hoes"
+    {
+      "items": ["#minecraft:hoes"]
+    }
   ],
   "work": [
     "villagetale:farmland"

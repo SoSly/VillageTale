@@ -17,7 +17,7 @@ import java.util.EnumSet;
 public class FollowWhenLeashed extends Goal {
     private static final double FOLLOW_DISTANCE_MIN = 2.0;
     private static final double FOLLOW_DISTANCE_MAX = 4.0;
-    private static final double STOP_DISTANCE = 1.5;
+    private static final double STOP_DISTANCE = 0.5;
     
     private final PathfinderMob animal;
     private Entity leashHolder;
@@ -88,9 +88,9 @@ public class FollowWhenLeashed extends Goal {
     @Override
     public void tick() {
         animal.getLookControl().setLookAt(leashHolder, 10.0F, (float)animal.getMaxHeadXRot());
-        
+
         if (--timeToRecalcPath <= 0) {
-            timeToRecalcPath = adjustedTickDelay(10);
+            timeToRecalcPath = adjustedTickDelay(5);
             
             if (animal.distanceToSqr(leashHolder) >= 144.0D) {
                 tryToTeleportNearLeashHolder();

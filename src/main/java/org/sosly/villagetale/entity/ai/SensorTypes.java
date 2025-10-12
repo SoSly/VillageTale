@@ -15,6 +15,7 @@ import org.sosly.villagetale.entity.ai.sensor.HasResources;
 import org.sosly.villagetale.entity.ai.sensor.HasTool;
 import org.sosly.villagetale.entity.ai.sensor.HasWorkZone;
 import org.sosly.villagetale.entity.ai.sensor.HasWorkstationOutput;
+import org.sosly.villagetale.entity.ai.sensor.IsEntityInPen;
 import org.sosly.villagetale.entity.ai.sensor.IsFarmland;
 import org.sosly.villagetale.entity.ai.sensor.IsForest;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
@@ -22,6 +23,7 @@ import org.sosly.villagetale.entity.ai.sensor.IsItemInStorage;
 import org.sosly.villagetale.entity.ai.sensor.IsWanderingAnimal;
 import org.sosly.villagetale.entity.ai.sensor.WhatShouldBeCrafted;
 import org.sosly.villagetale.entity.ai.sensor.WhereShouldICraft;
+import org.sosly.villagetale.entity.ai.sensor.WhichAnimalsNeedSlaughtering;
 import org.sosly.villagetale.entity.ai.sensor.WhichAnimalsNeedTending;
 
 public class SensorTypes {
@@ -77,6 +79,12 @@ public class SensorTypes {
 
     public static final RegistryObject<SensorType<HasFuel>> HAS_FUEL =
             SENSOR_TYPES.register("has_fuel", () -> new SensorType<>(HasFuel::new));
+
+    public static final RegistryObject<SensorType<IsEntityInPen>> IS_ENTITY_IN_PEN =
+            SENSOR_TYPES.register("is_entity_in_pen", () -> new SensorType<>(IsEntityInPen::new));
+
+    public static final RegistryObject<SensorType<WhichAnimalsNeedSlaughtering>> WHICH_ANIMALS_NEED_SLAUGHTERING =
+            SENSOR_TYPES.register("which_animals_need_slaughtering", () -> new SensorType<>(WhichAnimalsNeedSlaughtering::new));
 
     public static void register(IEventBus eventBus) {
         SENSOR_TYPES.register(eventBus);

@@ -11,6 +11,7 @@ import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
 import org.sosly.villagetale.zone.shape.Route;
+import org.sosly.villagetale.zone.type.Butchery;
 import org.sosly.villagetale.zone.type.Farmland;
 import org.sosly.villagetale.zone.type.Forest;
 import org.sosly.villagetale.zone.type.Home;
@@ -55,6 +56,7 @@ public class ZoneRegistry {
 
     {
         // todo: this is a hack because the events are not working for some reason.
+        TYPES.put(Butchery.ID, new Butchery());
         TYPES.put(Farmland.ID, new Farmland());
         TYPES.put(Forest.ID, new Forest());
         TYPES.put(Home.ID, new Home());

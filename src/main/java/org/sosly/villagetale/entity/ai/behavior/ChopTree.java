@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
+import org.sosly.villagetale.api.IWantedItem;
 import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.data.Tree;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
@@ -46,8 +47,12 @@ public class ChopTree extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(@NotNull ServerLevel level, @NotNull Villager villager) {
-        ItemStack tool = InventoryHelper.getItem(villager, stack -> villager.getProfession()
-                .getTool().get().getMatcher().test(stack));
+        List<IWantedItem> tools = villager.getProfession().getTools();
+        if (tools.isEmpty()) {
+            return false;
+        }
+
+        ItemStack tool = InventoryHelper.getItem(villager, stack -> tools.get(0).getMatcher().test(stack));
         if (tool.isEmpty()) {
             return false;
         }

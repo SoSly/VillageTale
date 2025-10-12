@@ -2,6 +2,7 @@ package org.sosly.villagetale.profession;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.sosly.villagetale.event.RegisterProfessionsEvent;
+import org.sosly.villagetale.profession.professions.Butcher;
 import org.sosly.villagetale.profession.professions.Carpenter;
 import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.professions.Cook;
@@ -13,6 +14,7 @@ import org.sosly.villagetale.profession.professions.Herder;
 public class Professions {
     @SubscribeEvent
     public static void onRegisterProfessions(RegisterProfessionsEvent event) {
+        event.register(new Butcher());
         event.register(new Carpenter());
         event.register(new Commoner());
         event.register(new Cook());

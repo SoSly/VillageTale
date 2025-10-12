@@ -8,6 +8,7 @@ import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
+import org.sosly.villagetale.profession.professions.Butcher;
 import org.sosly.villagetale.profession.professions.Carpenter;
 import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.professions.Cook;
@@ -42,6 +43,7 @@ public class ProfessionRegistry {
     }
 
     {
+        professions.put(Butcher.ID, new Butcher());
         professions.put(Carpenter.ID, new Carpenter());
         professions.put(Commoner.ID, new Commoner());
         professions.put(Cook.ID, new Cook());

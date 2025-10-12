@@ -27,6 +27,10 @@ public class MemoryModuleTypes {
         DeferredRegister.create(ForgeRegistries.MEMORY_MODULE_TYPES, VillageTale.MOD_ID);
 
     // Shared Memories
+    public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_PENS =
+        MEMORY_MODULE_TYPES.register("already_scanned_pens",
+                () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID))));
+
     public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
         MEMORY_MODULE_TYPES.register("already_scanned_storages",
                 () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID))));
@@ -38,6 +42,10 @@ public class MemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<List<TimedWantedItem>>> COULD_NOT_FIND_ITEM =
         MEMORY_MODULE_TYPES.register("could_not_find_item",
                 () -> new MemoryModuleType<>(Optional.empty()));
+
+    public static final RegistryObject<MemoryModuleType<Entity>> FOUND_ENTITY =
+            MEMORY_MODULE_TYPES.register("found_entity",
+                    () -> new MemoryModuleType<>(Optional.empty()));
 
     public static final RegistryObject<MemoryModuleType<FoundItem>> FOUND_ITEM =
             MEMORY_MODULE_TYPES.register("found_item",
@@ -142,6 +150,11 @@ public class MemoryModuleTypes {
                     () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<Entity>> WANDERING_ANIMAL =
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_wander_animal",
+                    () -> new MemoryModuleType<>(Optional.empty()));
+
+    // Butcher Memories
+    public static final RegistryObject<MemoryModuleType<Entity>> SLAUGHTERABLE_ENTITY =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("slaughterable_entity",
                     () -> new MemoryModuleType<>(Optional.empty()));
 
     public static void register(IEventBus eventBus) {

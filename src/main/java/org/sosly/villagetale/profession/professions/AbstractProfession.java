@@ -23,7 +23,7 @@ public abstract class AbstractProfession implements IProfession {
     private final ResourceLocation id;
     private final ItemOrTagMatcher learnableItems = new ItemOrTagMatcher();
     private final List<ResourceLocation> workZones = new ArrayList<>();
-    private final ItemOrTagMatcher tools = new ItemOrTagMatcher();
+    private final List<IWantedItem> tools = new ArrayList<>();
     private final List<IWantedItem> wantedItems = new ArrayList<>();
 
     protected AbstractProfession(ResourceLocation id) {
@@ -46,16 +46,8 @@ public abstract class AbstractProfession implements IProfession {
     }
 
     @Override
-    public Optional<IWantedItem> getTool() {
-        if (tools.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new WantedItem(
-            tools::matches,
-            1,
-            1
-        ));
+    public List<IWantedItem> getTools() {
+        return tools;
     }
 
     @Override
@@ -66,10 +58,6 @@ public abstract class AbstractProfession implements IProfession {
                 .changeActivityAt(12000, Activities.EVENING_IDLE.get())     // 6 PM - 10 PM
                 .changeActivityAt(16000, Activity.REST)                     // 10 PM - 6 AM
                 .build();
-    }
-
-    public ItemOrTagMatcher getTools() {
-        return tools;
     }
 
     @Override
@@ -92,7 +80,7 @@ public abstract class AbstractProfession implements IProfession {
         }
 
         if (data.has("tools")) {
-            tools.loadFromJson(data.getAsJsonArray("tools"));
+            loadToolItems(data.getAsJsonArray("tools"));
         }
 
         if (data.has("wanted")) {
@@ -107,11 +95,26 @@ public abstract class AbstractProfession implements IProfession {
         }
     }
 
+    private void loadToolItems(JsonArray toolArray) {
+        tools.clear();
+        for (JsonElement element : toolArray) {
+            tools.add(parseToolItem(element.getAsJsonObject()));
+        }
+    }
+
     private void loadWantedItems(JsonArray wanted) {
         wantedItems.clear();
         for (JsonElement element : wanted) {
             wantedItems.add(parseWantedItem(element.getAsJsonObject()));
         }
+    }
+
+    private IWantedItem parseToolItem(JsonObject toolObj) {
+        ItemOrTagMatcher matcher = new ItemOrTagMatcher();
+        matcher.loadFromJson(toolObj.getAsJsonArray("items"));
+        int min = toolObj.has("min") ? toolObj.get("min").getAsInt() : 1;
+        int amount = toolObj.has("amount") ? toolObj.get("amount").getAsInt() : 1;
+        return new WantedItem(matcher::matches, amount, min);
     }
 
     private IWantedItem parseWantedItem(JsonObject wantedObj) {

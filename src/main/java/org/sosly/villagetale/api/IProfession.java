@@ -33,10 +33,10 @@ public interface IProfession {
     public List<IWantedItem> getAlwaysWantedItems(Villager villager);
 
     /**
-     * Gets the tool requirement for this profession.
-     * @return Optional containing the wanted tool specification, or empty if no tools required
+     * Gets the tool requirements for this profession.
+     * @return List of wanted tool specifications, or empty list if no tools required
      */
-    public Optional<IWantedItem> getTool();
+    public List<IWantedItem> getTools();
 
     /**
      * Gets the items this profession can learn recipes for.

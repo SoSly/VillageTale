@@ -1,0 +1,10 @@
+{
+  "filters": [
+    {
+      "type": "entity",
+      "values": [
+        "#villagetale:herdable"
+      ]
+    }
+  ]
+}
