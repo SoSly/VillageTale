@@ -23,6 +23,7 @@ apply plugin: 'maven-publish'
 apply plugin: "com.matthewprenger.cursegradle"
 apply plugin: "com.modrinth.minotaur"
 apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'checkstyle'
 
 version = "${minecraft_version}-${api_name}-${mod_version}"
 group = "${mod_group}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -139,6 +140,14 @@ tasks.withType(ProcessResources).configureEach {
 
 mixin {
     add sourceSets.main, "villagetale.refmap.json"
+}
+
+checkstyle {
+    toolVersion = '10.12.5'
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxWarnings = 0
+    maxErrors = 0
 }
 
 tasks.named('jar', Jar).configure {
