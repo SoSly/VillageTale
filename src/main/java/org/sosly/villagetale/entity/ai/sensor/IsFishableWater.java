@@ -28,7 +28,7 @@ import org.sosly.villagetale.zone.type.Dock;
 
 public class IsFishableWater extends Sensor<Villager> {
     public IsFishableWater() {
-        super(100);
+        super(300);
     }
 
     @Override

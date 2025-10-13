@@ -30,8 +30,8 @@ import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.network.packets.clientbound.VillagerEquipmentSync;
 
 public class CatchFish extends Behavior<Villager> {
-    private static final int MINIMUM_DURATION = 300;
-    private static final int MAXIMUM_DURATION = 300;
+    private static final int MINIMUM_DURATION = 200;
+    private static final int MAXIMUM_DURATION = 400;
     private static final int BEHAVIOR_DURATION = 600;
     private static final float WORK_EXHAUSTION = 0.5f;
 
@@ -89,7 +89,7 @@ public class CatchFish extends Behavior<Villager> {
     @Override
     protected void start(@NotNull ServerLevel level, Villager villager, long gameTime) {
         int range = MAXIMUM_DURATION - MINIMUM_DURATION;
-        this.fishDuration = range > 0 ? MINIMUM_DURATION + level.random.nextInt(range) : MINIMUM_DURATION;
+        this.fishDuration = MINIMUM_DURATION + level.random.nextInt(range);
         this.finished = false;
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
@@ -206,7 +206,7 @@ public class CatchFish extends Behavior<Villager> {
 
         for (int xOffset = -searchRadius; xOffset <= searchRadius; xOffset++) {
             for (int zOffset = -searchRadius; zOffset <= searchRadius; zOffset++) {
-                for (int yOffset = -searchRadius; yOffset <= searchRadius; yOffset++) {
+                for (int yOffset = -2; yOffset <= 2; yOffset++) {
                     BlockPos candidate = fishingSpot.offset(xOffset, yOffset, zOffset);
                     if (!level.getBlockState(candidate.below()).isSolid()) {
                         continue;
