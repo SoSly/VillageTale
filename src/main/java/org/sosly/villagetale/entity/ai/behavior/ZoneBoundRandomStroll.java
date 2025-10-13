@@ -23,55 +23,56 @@ public class ZoneBoundRandomStroll extends Behavior<Villager> {
     private final float speedModifier;
     private final int maxHorizontalDistance;
     private final int maxVerticalDistance;
-    
+
     public ZoneBoundRandomStroll(float speedModifier) {
         this(speedModifier, STROLL_DISTANCE, 3);
     }
-    
+
     public ZoneBoundRandomStroll(float speedModifier, int maxHorizontalDistance, int maxVerticalDistance) {
         super(ImmutableMap.of(
                 MemoryModuleTypes.VILLAGE.get(), MemoryStatus.VALUE_PRESENT,
                 MemoryModuleTypes.WORK_ZONE.get(), MemoryStatus.VALUE_PRESENT,
-                MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT
+                MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT,
+                MemoryModuleTypes.BUSY.get(), MemoryStatus.VALUE_ABSENT
         ), BEHAVIOR_DURATION);
         this.speedModifier = speedModifier;
         this.maxHorizontalDistance = maxHorizontalDistance;
         this.maxVerticalDistance = maxVerticalDistance;
     }
-    
+
     public static ZoneBoundRandomStroll create(float speedModifier) {
         return new ZoneBoundRandomStroll(speedModifier);
     }
-    
+
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Villager villager) {
         Optional<UUID> villageId = villager.getVillage();
         Optional<UUID> workZoneId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get());
-        
+
         if (villageId.isEmpty() || workZoneId.isEmpty()) {
             return false;
         }
-        
+
         IVillageZone zone = VillagesHelper.getZoneById(level, villageId.get(), workZoneId.get());
         if (zone == null) {
             return false;
         }
-        
+
         return zone.containsPosition(villager.blockPosition());
     }
-    
+
     @Override
     protected void start(ServerLevel level, Villager villager, long gameTime) {
         UUID villageId = villager.getVillage().get();
         UUID workZoneId = villager.getBrain().getMemory(MemoryModuleTypes.WORK_ZONE.get()).get();
-        
+
         IVillageZone zone = VillagesHelper.getZoneById(level, villageId, workZoneId);
         if (zone == null) {
             return;
         }
-        
+
         Optional<BlockPos> targetPos = findValidStrollPosition(villager, zone);
-        
+
         if (targetPos.isPresent()) {
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(targetPos.get(), this.speedModifier, 0), 200L);
@@ -83,7 +84,7 @@ public class ZoneBoundRandomStroll extends Behavior<Villager> {
             }
         }
     }
-    
+
     private Optional<BlockPos> findValidStrollPosition(Villager villager, IVillageZone zone) {
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
             Vec3 randomPos = LandRandomPos.getPos(villager, maxHorizontalDistance, maxVerticalDistance);

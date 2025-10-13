@@ -74,6 +74,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 
 public class Villager extends PathfinderMob implements InventoryCarrier {
     private static final EntityDataAccessor<Byte> DATA_VILLAGER_ARM_POSE = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Optional<BlockPos>> DATA_FISHING_POS = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
 
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
@@ -113,6 +114,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_VILLAGER_ARM_POSE, (byte) VillagerArmPose.NEUTRAL.ordinal());
+        this.entityData.define(DATA_FISHING_POS, Optional.empty());
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -222,6 +224,14 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (!this.level().isClientSide()) {
             this.entityData.set(DATA_VILLAGER_ARM_POSE, (byte) pose.ordinal());
         }
+    }
+
+    public Optional<BlockPos> getFishingPos() {
+        return this.entityData.get(DATA_FISHING_POS);
+    }
+
+    public void setFishingPos(@Nullable BlockPos pos) {
+        this.entityData.set(DATA_FISHING_POS, Optional.ofNullable(pos));
     }
 
     @Override

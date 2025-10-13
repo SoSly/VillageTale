@@ -7,6 +7,7 @@ import org.sosly.villagetale.profession.professions.Carpenter;
 import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.professions.Cook;
 import org.sosly.villagetale.profession.professions.Farmer;
+import org.sosly.villagetale.profession.professions.Fisher;
 import org.sosly.villagetale.profession.professions.Forester;
 import org.sosly.villagetale.profession.professions.Herder;
 import org.sosly.villagetale.profession.professions.Tanner;
@@ -20,6 +21,7 @@ public class Professions {
         event.register(new Commoner());
         event.register(new Cook());
         event.register(new Farmer());
+        event.register(new Fisher());
         event.register(new Forester());
         event.register(new Herder());
         event.register(new Tanner());

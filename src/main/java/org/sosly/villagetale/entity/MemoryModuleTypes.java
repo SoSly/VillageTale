@@ -157,6 +157,11 @@ public class MemoryModuleTypes {
             MemoryModuleTypes.MEMORY_MODULE_TYPES.register("slaughterable_entity",
                     () -> new MemoryModuleType<>(Optional.empty()));
 
+    // Fisher Memories
+    public static final RegistryObject<MemoryModuleType<BlockPos>> NEAREST_FISHING_SPOT =
+            MemoryModuleTypes.MEMORY_MODULE_TYPES.register("nearest_fishing_spot",
+                    () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
+
     public static void register(IEventBus eventBus) {
         MEMORY_MODULE_TYPES.register(eventBus);
     }

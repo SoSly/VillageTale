@@ -1,0 +1,10 @@
+{
+  "tools": [
+    {
+      "items": ["minecraft:fishing_rod"]
+    }
+  ],
+  "work": [
+    "villagetale:dock"
+  ]
+}

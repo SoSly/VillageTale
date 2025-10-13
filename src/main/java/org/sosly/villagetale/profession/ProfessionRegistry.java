@@ -13,6 +13,7 @@ import org.sosly.villagetale.profession.professions.Carpenter;
 import org.sosly.villagetale.profession.professions.Commoner;
 import org.sosly.villagetale.profession.professions.Cook;
 import org.sosly.villagetale.profession.professions.Farmer;
+import org.sosly.villagetale.profession.professions.Fisher;
 import org.sosly.villagetale.profession.professions.Forester;
 import org.sosly.villagetale.profession.professions.Herder;
 import org.sosly.villagetale.profession.professions.Tanner;
@@ -49,6 +50,7 @@ public class ProfessionRegistry {
         professions.put(Commoner.ID, new Commoner());
         professions.put(Cook.ID, new Cook());
         professions.put(Farmer.ID, new Farmer());
+        professions.put(Fisher.ID, new Fisher());
         professions.put(Forester.ID, new Forester());
         professions.put(Herder.ID, new Herder());
         professions.put(Tanner.ID, new Tanner());

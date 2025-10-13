@@ -5,6 +5,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.event.RegisterZoneTypesEvent;
 import org.sosly.villagetale.zone.type.Butchery;
+import org.sosly.villagetale.zone.type.Dock;
 import org.sosly.villagetale.zone.type.Farmland;
 import org.sosly.villagetale.zone.type.Forest;
 import org.sosly.villagetale.zone.type.Home;
@@ -20,6 +21,7 @@ public class Types {
     @SubscribeEvent
     public static void onRegisterZoneTypes(RegisterZoneTypesEvent event) {
         event.register(Butchery.ID, new Butchery());
+        event.register(Dock.ID, new Dock());
         event.register(Farmland.ID, new Farmland());
         event.register(Forest.ID, new Forest());
         event.register(Home.ID, new Home());

@@ -18,6 +18,13 @@ public class EntityTypes {
             .clientTrackingRange(10)
             .build("villager"));
 
+    public static final RegistryObject<EntityType<FishingBobber>> FISHING_BOBBER =
+        ENTITY_TYPES.register("fishing_bobber", () -> EntityType.Builder.<FishingBobber>of(FishingBobber::new, MobCategory.MISC)
+            .sized(0.25F, 0.25F)
+            .clientTrackingRange(4)
+            .updateInterval(5)
+            .build("fishing_bobber"));
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }

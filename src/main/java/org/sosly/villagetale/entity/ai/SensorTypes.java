@@ -17,6 +17,7 @@ import org.sosly.villagetale.entity.ai.sensor.HasWorkZone;
 import org.sosly.villagetale.entity.ai.sensor.HasWorkstationOutput;
 import org.sosly.villagetale.entity.ai.sensor.IsEntityInPen;
 import org.sosly.villagetale.entity.ai.sensor.IsFarmland;
+import org.sosly.villagetale.entity.ai.sensor.IsFishableWater;
 import org.sosly.villagetale.entity.ai.sensor.IsForest;
 import org.sosly.villagetale.entity.ai.sensor.IsHungry;
 import org.sosly.villagetale.entity.ai.sensor.IsItemInStorage;
@@ -85,6 +86,9 @@ public class SensorTypes {
 
     public static final RegistryObject<SensorType<WhichAnimalsNeedSlaughtering>> WHICH_ANIMALS_NEED_SLAUGHTERING =
             SENSOR_TYPES.register("which_animals_need_slaughtering", () -> new SensorType<>(WhichAnimalsNeedSlaughtering::new));
+
+    public static final RegistryObject<SensorType<IsFishableWater>> IS_FISHABLE_WATER =
+            SENSOR_TYPES.register("is_fishable_water", () -> new SensorType<>(IsFishableWater::new));
 
     public static void register(IEventBus eventBus) {
         SENSOR_TYPES.register(eventBus);
