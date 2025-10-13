@@ -29,14 +29,14 @@ public class ProfessionDataLoader extends SimpleJsonResourceReloadListener {
         for (Map.Entry<ResourceLocation, JsonElement> entry : resourceMap.entrySet()) {
             if (!(entry.getValue() instanceof JsonObject jsonObject)) {
                 LOGGER.error("Profession data {} is not a JSON object", entry.getKey());
-                return;
+                continue;
             }
 
             ResourceLocation professionId = new ResourceLocation(entry.getKey().getNamespace(), entry.getKey().getPath());
             IProfession profession = ProfessionRegistry.INSTANCE.getProfession(professionId).orElse(null);
             if (profession == null) {
                 LOGGER.warn("No registered profession found for data: {}", professionId);
-                return;
+                continue;
             }
             profession.onDatapackReload(jsonObject);
             LOGGER.debug("Loaded data for profession: {}", professionId);

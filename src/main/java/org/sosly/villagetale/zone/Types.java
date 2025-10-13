@@ -11,6 +11,7 @@ import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.Kitchen;
 import org.sosly.villagetale.zone.type.Pen;
 import org.sosly.villagetale.zone.type.Storage;
+import org.sosly.villagetale.zone.type.Tannery;
 import org.sosly.villagetale.zone.type.TownHall;
 import org.sosly.villagetale.zone.type.Woodshop;
 
@@ -25,6 +26,7 @@ public class Types {
         event.register(Kitchen.ID, new Kitchen());
         event.register(Pen.ID, new Pen());
         event.register(Storage.ID, new Storage());
+        event.register(Tannery.ID, new Tannery());
         event.register(TownHall.ID, new TownHall());
         event.register(Woodshop.ID, new Woodshop());
     }

@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:leather_helmet",
+    "minecraft:leather_chestplate",
+    "minecraft:leather_leggings",
+    "minecraft:leather_boots",
+    "minecraft:leather_horse_armor",
+    "minecraft:book",
+    "minecraft:item_frame",
+    "minecraft:glow_item_frame",
+    "minecraft:lead",
+    "minecraft:painting",
+    "minecraft:leather",
+    "minecraft:bundle",
+    "minecraft:saddle"
+  ]
+}

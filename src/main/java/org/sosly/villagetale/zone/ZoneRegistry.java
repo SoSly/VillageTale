@@ -18,6 +18,7 @@ import org.sosly.villagetale.zone.type.Home;
 import org.sosly.villagetale.zone.type.Kitchen;
 import org.sosly.villagetale.zone.type.Pen;
 import org.sosly.villagetale.zone.type.Storage;
+import org.sosly.villagetale.zone.type.Tannery;
 import org.sosly.villagetale.zone.type.TownHall;
 import org.sosly.villagetale.zone.type.Woodshop;
 
@@ -63,6 +64,7 @@ public class ZoneRegistry {
         types.put(Kitchen.ID, new Kitchen());
         types.put(Pen.ID, new Pen());
         types.put(Storage.ID, new Storage());
+        types.put(Tannery.ID, new Tannery());
         types.put(TownHall.ID, new TownHall());
         types.put(Woodshop.ID, new Woodshop());
         // end todo
