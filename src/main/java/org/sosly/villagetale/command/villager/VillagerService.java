@@ -274,7 +274,7 @@ public class VillagerService {
         sender.accept(Component.literal(String.format("Current Activity: %s",
                 villager.getBrain().getActiveNonCoreActivity().orElse(null))));
         sender.accept(Component.literal(String.format("Schedule Activity: %s at time %d",
-                villager.getBrain().getSchedule().getActivityAt((int)(level.getDayTime() % 24000)),
+                villager.getBrain().getSchedule().getActivityAt((int) (level.getDayTime() % 24000)),
                 level.getDayTime() % 24000)));
 
         String runningBehaviors = villager.getBrain().getRunningBehaviors().stream()

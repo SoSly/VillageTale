@@ -19,6 +19,7 @@ import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
 import org.sosly.villagetale.zone.shape.Route;
 import org.sosly.villagetale.zone.type.TownHall;
+import net.minecraft.core.BlockPos;
 
 public class NewZonePage extends AbstractLedgerPage {
     private final IZoneShape shape;
@@ -54,28 +55,28 @@ public class NewZonePage extends AbstractLedgerPage {
         name.setValue(Component.translatable("villagetale.gui.new_zone.default_name").getString());
         addRenderableWidget(name);
 
-        addRenderableWidget(LedgerIconButton.ArrowLeft(
+        addRenderableWidget(LedgerIconButton.arrowLeft(
                 uStart + 25,
                 vStart + 28,
                 button -> cycleTypePrevious(),
                 Component.translatable("villagetale.gui.new_zone.type")
         ));
 
-        addRenderableWidget(LedgerIconButton.ArrowRight(
+        addRenderableWidget(LedgerIconButton.arrowRight(
                 uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.ARROW_RIGHT.width(),
                 vStart + 28,
                 button -> cycleTypeNext(),
                 Component.translatable("villagetale.gui.new_zone.type")
         ));
 
-        addRenderableWidget(LedgerIconButton.Commit(
+        addRenderableWidget(LedgerIconButton.commit(
                 uStart + (LedgerScreen.CONTENT_WIDTH / 2) - (LedgerIconButton.COMMIT.width() * 2),
                 vStart + 153,
                 button -> saveZone(),
                 Component.translatable("villagetale.gui.new_zone.save")
         ));
 
-        addRenderableWidget(LedgerIconButton.Cancel(
+        addRenderableWidget(LedgerIconButton.cancel(
                 uStart + (LedgerScreen.CONTENT_WIDTH / 2) + (LedgerIconButton.COMMIT.width() * 2),
                 vStart + 153,
                 button -> screen.setRightPage(new ZoneListPage(screen, villageId)),
@@ -195,7 +196,7 @@ public class NewZonePage extends AbstractLedgerPage {
         currentY += 10;
 
         for (int i = 0; i < route.getPath().size(); i++) {
-            net.minecraft.core.BlockPos waypoint = route.getPath().get(i);
+            BlockPos waypoint = route.getPath().get(i);
             guiGraphics.drawString(this.font, Component.translatable("villagetale.gui.new_zone.shape_route_waypoint", i + 1, waypoint.getX(), waypoint.getY(), waypoint.getZ()), uStart, currentY, 0x3F3F3F, false);
             currentY += 10;
         }

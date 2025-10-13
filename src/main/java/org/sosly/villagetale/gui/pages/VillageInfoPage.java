@@ -30,7 +30,7 @@ public class VillageInfoPage extends AbstractLedgerPage {
 
         this.village = VillageDataManager.getInstance().getVillageData(villageId);
 
-        addRenderableWidget(LedgerIconButton.Edit(
+        addRenderableWidget(LedgerIconButton.edit(
             uStart + LedgerScreen.CONTENT_WIDTH - EDIT_ICON_SIZE,
             vStart + TEXT_Y_OFFSET - 1,
             button -> toggleNameEditing(),

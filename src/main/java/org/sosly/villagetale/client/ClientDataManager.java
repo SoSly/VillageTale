@@ -11,28 +11,28 @@ import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientDataManager {
-    private static final Map<Integer, ResourceLocation> professionCache = new HashMap<>();
-    private static final Map<Integer, Set<ResourceLocation>> recipesCache = new HashMap<>();
+    private static final Map<Integer, ResourceLocation> PROFESSION_CACHE = new HashMap<>();
+    private static final Map<Integer, Set<ResourceLocation>> RECIPES_CACHE = new HashMap<>();
 
     public static ResourceLocation getCachedProfession(int entityId) {
-        return professionCache.get(entityId);
+        return PROFESSION_CACHE.get(entityId);
     }
 
     public static void cacheProfession(int entityId, ResourceLocation professionId) {
-        professionCache.put(entityId, professionId);
+        PROFESSION_CACHE.put(entityId, professionId);
     }
 
     public static Set<ResourceLocation> getCachedRecipes(int entityId) {
-        return recipesCache.get(entityId);
+        return RECIPES_CACHE.get(entityId);
     }
 
     public static void cacheRecipes(int entityId, Set<ResourceLocation> recipes) {
-        recipesCache.put(entityId, new HashSet<>(recipes));
+        RECIPES_CACHE.put(entityId, new HashSet<>(recipes));
     }
 
     public static void clearAll() {
-        professionCache.clear();
-        recipesCache.clear();
+        PROFESSION_CACHE.clear();
+        RECIPES_CACHE.clear();
         BoundaryDataStorage.getInstance().clearAll();
         VillageDataManager.getInstance().clear();
         ZoneCreationManager.getInstance().cancel();

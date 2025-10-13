@@ -109,7 +109,7 @@ public class FilterConfigurationPage extends AbstractLedgerPage {
         this.filterList.setLeftPos(uStart);
         addWidget(this.filterList);
 
-        this.clearAllButton = LedgerIconButton.Delete(
+        this.clearAllButton = LedgerIconButton.delete(
             uStart + LedgerScreen.CONTENT_WIDTH - CLEAR_BUTTON_SIZE,
             vStart + 16,
             button -> clearAllFilters(),
@@ -117,7 +117,7 @@ public class FilterConfigurationPage extends AbstractLedgerPage {
         );
         addRenderableWidget(this.clearAllButton);
 
-        this.backButton = LedgerIconButton.Back(
+        this.backButton = LedgerIconButton.back(
             uStart + (LedgerScreen.CONTENT_WIDTH - 14) / 2,
             vStart + 153,
             button -> closeFilters(),
@@ -188,7 +188,7 @@ public class FilterConfigurationPage extends AbstractLedgerPage {
     private class FilterList extends ObjectSelectionList<FilterList.Entry> {
         private final List<FilterEntry> filterEntries;
 
-        public FilterList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<FilterEntry> entries) {
+        FilterList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<FilterEntry> entries) {
             super(minecraft, width, height, y, bottom, itemHeight);
             this.filterEntries = entries;
             this.setRenderBackground(false);
@@ -213,11 +213,11 @@ public class FilterConfigurationPage extends AbstractLedgerPage {
             this.children().forEach(Entry::updateCheckboxState);
         }
 
-        public class Entry extends ObjectSelectionList.Entry<Entry> {
+        class Entry extends ObjectSelectionList.Entry<Entry> {
             private final FilterEntry filterEntry;
             private CompactCheckbox checkbox;
 
-            public Entry(FilterEntry filterEntry) {
+            Entry(FilterEntry filterEntry) {
                 this.filterEntry = filterEntry;
                 this.checkbox = new CompactCheckbox(
                     0,

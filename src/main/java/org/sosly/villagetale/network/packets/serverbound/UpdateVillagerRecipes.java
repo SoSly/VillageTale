@@ -19,6 +19,7 @@ import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.NetworkHandler;
 import org.sosly.villagetale.network.ServerPacketHandler;
 import org.sosly.villagetale.network.packets.clientbound.VillagerRecipesSync;
+import net.minecraft.world.item.ItemStack;
 
 public class UpdateVillagerRecipes extends BasePacket {
     private final int villagerEntityId;
@@ -101,7 +102,7 @@ public class UpdateVillagerRecipes extends BasePacket {
                         villager.getProfession().getLearnableItems().matches(
                             level.getRecipeManager().byKey(recipeId)
                                 .map(r -> r.getResultItem(level.registryAccess()))
-                                .orElse(net.minecraft.world.item.ItemStack.EMPTY)
+                                .orElse(ItemStack.EMPTY)
                         )) {
                         validatedRecipes.add(recipeId);
                     }

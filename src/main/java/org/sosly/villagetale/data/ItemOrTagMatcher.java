@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemOrTagMatcher {
@@ -29,7 +30,7 @@ public class ItemOrTagMatcher {
             } else {
                 ResourceLocation itemId = new ResourceLocation(value);
                 Item item = BuiltInRegistries.ITEM.get(itemId);
-                if (item != null && item != net.minecraft.world.item.Items.AIR) {
+                if (item != null && item != Items.AIR) {
                     items.add(item);
                 }
             }

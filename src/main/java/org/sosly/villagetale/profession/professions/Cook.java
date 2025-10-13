@@ -20,7 +20,7 @@ import org.sosly.villagetale.entity.ai.behavior.RefuelWorkstation;
 import org.sosly.villagetale.entity.ai.behavior.TakeFromWorkstation;
 
 public class Cook extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "cook");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "cook");
 
     public Cook() {
         super(ID);

@@ -100,6 +100,7 @@ public abstract class AbstractZoneType implements IZoneType {
         switch (claimType) {
             case "block" -> blockMatcher.loadFromJson(claims.getAsJsonArray("values"));
             case "entity" -> entityTypeMatcher.loadFromJson(claims.getAsJsonArray("values"));
+            default -> { }
         }
     }
 
@@ -123,6 +124,7 @@ public abstract class AbstractZoneType implements IZoneType {
                 entityFilter.loadFromJson(values.getAsJsonArray());
                 supportsEntityFilters = true;
             }
+            default -> { }
         }
     }
 

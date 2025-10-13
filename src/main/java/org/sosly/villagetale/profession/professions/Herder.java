@@ -34,7 +34,7 @@ import org.sosly.villagetale.helper.VillagesHelper;
 import org.sosly.villagetale.zone.type.Pen;
 
 public class Herder extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "herder");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "herder");
 
 
     public Herder() {

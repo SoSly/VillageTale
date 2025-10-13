@@ -153,6 +153,7 @@ public class BringAnimalToButchery extends Behavior<Villager> {
             case LEASHING -> tickLeashing(level, villager);
             case LEADING -> tickLeading(level, villager);
             case RELEASING -> tickReleasing(level, villager);
+            default -> { }
         }
     }
 

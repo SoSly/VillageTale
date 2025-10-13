@@ -7,7 +7,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.capability.Capabilities;
 
@@ -23,7 +22,7 @@ public class VillageProvider implements ICapabilitySerializable<CompoundTag> {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap != Capabilities.VILLAGE_CAPABILITY){
+        if (cap != Capabilities.VILLAGE_CAPABILITY) {
             return LazyOptional.empty();
         }
 

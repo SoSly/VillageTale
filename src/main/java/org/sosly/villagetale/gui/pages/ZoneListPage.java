@@ -49,7 +49,7 @@ public class ZoneListPage extends AbstractLedgerPage {
         }
 
         int rightMargin = uStart + LedgerScreen.CONTENT_WIDTH;
-        addRenderableWidget(LedgerIconButton.New(
+        addRenderableWidget(LedgerIconButton.newButton(
                 rightMargin - LedgerIconButton.NEW.width(),
                 vStart + 15,
                 button -> screen.setRightPage(new AddZonePage(screen, villageId)),
@@ -108,7 +108,7 @@ public class ZoneListPage extends AbstractLedgerPage {
     private class ZoneList extends ObjectSelectionList<ZoneList.Entry> {
         private List<IVillageZone> zones;
 
-        public ZoneList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<IVillageZone> zones) {
+        ZoneList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight, List<IVillageZone> zones) {
             super(minecraft, width, height, y, bottom, itemHeight);
 
             this.zones = new ArrayList<>(zones);
@@ -146,7 +146,7 @@ public class ZoneListPage extends AbstractLedgerPage {
             return this.getRowLeft() + this.getRowWidth() - 6;
         }
 
-        public class Entry extends ObjectSelectionList.Entry<Entry> {
+        class Entry extends ObjectSelectionList.Entry<Entry> {
             private final IVillageZone zone;
             private final int zoneIndex;
             private LedgerIconButton deleteButton;
@@ -154,7 +154,7 @@ public class ZoneListPage extends AbstractLedgerPage {
             private int nameX;
             private int nameY;
 
-            public Entry(IVillageZone zone, int zoneIndex) {
+            Entry(IVillageZone zone, int zoneIndex) {
                 this.zone = zone;
                 this.zoneIndex = zoneIndex;
             }
@@ -178,7 +178,7 @@ public class ZoneListPage extends AbstractLedgerPage {
 
                 if (!isTownHall) {
                     if (this.deleteButton == null) {
-                        this.deleteButton = LedgerIconButton.Delete(
+                        this.deleteButton = LedgerIconButton.delete(
                             left + LedgerScreen.CONTENT_WIDTH - DELETE_BUTTON_SIZE,
                             top,
                             button -> confirmDeleteZone(zone),

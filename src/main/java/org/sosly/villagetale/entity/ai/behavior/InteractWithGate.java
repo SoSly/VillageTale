@@ -92,7 +92,7 @@ public class InteractWithGate {
     public static void closeGatesThatIHaveOpenedOrPassedThrough(ServerLevel level, LivingEntity entity, @Nullable Node previous, @Nullable Node next, Set<GlobalPos> gatePositions, Optional<List<LivingEntity>> nearestLivingEntities) {
         Iterator<GlobalPos> iterator = gatePositions.iterator();
 
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             GlobalPos globalpos = iterator.next();
             BlockPos blockpos = globalpos.pos();
             

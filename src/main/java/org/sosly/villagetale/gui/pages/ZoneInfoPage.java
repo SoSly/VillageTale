@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.AABB;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.capability.IVillageCapability;
@@ -44,7 +45,7 @@ public class ZoneInfoPage extends AbstractLedgerPage {
             }
         }
 
-        addRenderableWidget(LedgerIconButton.Edit(
+        addRenderableWidget(LedgerIconButton.edit(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.EDIT.width(),
             vStart + TEXT_Y_OFFSET - 1,
             button -> toggleNameEditing(),
@@ -91,7 +92,7 @@ public class ZoneInfoPage extends AbstractLedgerPage {
             return;
         }
 
-        addRenderableWidget(LedgerIconButton.Edit(
+        addRenderableWidget(LedgerIconButton.edit(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.EDIT.width(),
             vStart + TEXT_Y_OFFSET + 24,
             button -> openFilterConfig(),
@@ -172,8 +173,8 @@ public class ZoneInfoPage extends AbstractLedgerPage {
     private void renderShapeDetails(GuiGraphics guiGraphics, int currentY, IVillageZone zone) {
         if (zone.getShape() instanceof Box box) {
             AABB bounds = box.getBounds();
-            currentY = renderWrappedText(guiGraphics, Component.translatable("villagetale.gui.zone_detail.shape_box_start", (int)bounds.minX, (int)bounds.minY, (int)bounds.minZ), currentY);
-            renderWrappedText(guiGraphics, Component.translatable("villagetale.gui.zone_detail.shape_box_end", (int)bounds.maxX, (int)bounds.maxY, (int)bounds.maxZ), currentY);
+            currentY = renderWrappedText(guiGraphics, Component.translatable("villagetale.gui.zone_detail.shape_box_start", (int) bounds.minX, (int) bounds.minY, (int) bounds.minZ), currentY);
+            renderWrappedText(guiGraphics, Component.translatable("villagetale.gui.zone_detail.shape_box_end", (int) bounds.maxX, (int) bounds.maxY, (int) bounds.maxZ), currentY);
         }
 
         if (zone.getShape() instanceof Cylinder cylinder) {
@@ -204,7 +205,7 @@ public class ZoneInfoPage extends AbstractLedgerPage {
     }
 
     private int renderWrappedText(GuiGraphics guiGraphics, Component text, int y) {
-        List<net.minecraft.util.FormattedCharSequence> lines = font.split(text, LedgerScreen.CONTENT_WIDTH);
+        List<FormattedCharSequence> lines = font.split(text, LedgerScreen.CONTENT_WIDTH);
         for (int i = 0; i < lines.size(); i++) {
             int lineX = uStart;
             if (i > 0) {
@@ -261,7 +262,7 @@ public class ZoneInfoPage extends AbstractLedgerPage {
         int zoneCount = zones.size();
 
         if (zoneIndex > 0) {
-            addRenderableWidget(LedgerIconButton.PagePrev(
+            addRenderableWidget(LedgerIconButton.pagePrev(
                 uStart,
                 vStart + LedgerScreen.CONTENT_HEIGHT - LedgerIconButton.PAGE_NEXT.height(),
                 button -> navigateToZone(zoneIndex - 1),
@@ -273,7 +274,7 @@ public class ZoneInfoPage extends AbstractLedgerPage {
             int guiLeft = uStart - LedgerScreen.CONTENT_LEFT_START;
             int guiRight = guiLeft + LedgerScreen.GUI_WIDTH;
             int rightOffset = LedgerScreen.CONTENT_LEFT_START + LedgerIconButton.PAGE_NEXT.width();
-            addRenderableWidget(LedgerIconButton.PageNext(
+            addRenderableWidget(LedgerIconButton.pageNext(
                 guiRight - rightOffset,
                 vStart + LedgerScreen.CONTENT_HEIGHT - LedgerIconButton.PAGE_NEXT.height(),
                 button -> navigateToZone(zoneIndex + 1),
@@ -288,7 +289,7 @@ public class ZoneInfoPage extends AbstractLedgerPage {
     }
 
     private void addBackButton() {
-        addRenderableWidget(LedgerIconButton.Back(
+        addRenderableWidget(LedgerIconButton.back(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.BACK.width(),
             vStart + LedgerScreen.CONTENT_HEIGHT - LedgerIconButton.BACK.height(),
             button -> {

@@ -8,7 +8,19 @@
     <property name="severity" value="error"/>
     <property name="fileExtensions" value="java"/>
 
+    <!-- Suppression filter for CHECKSTYLE comments -->
+    <module name="SuppressWithPlainTextCommentFilter">
+        <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
+        <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
+    </module>
+
     <module name="TreeWalker">
+        <!-- Suppression filter for TreeWalker checks -->
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
+            <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
+        </module>
+
         <!-- Import checks -->
         <module name="UnusedImports">
             <property name="processJavadoc" value="false"/>
@@ -89,7 +101,7 @@
 
     <!-- Custom regex checks -->
     <module name="RegexpSingleline">
-        <property name="format" value="(^|[^a-zA-Z0-9.])(net|com|org)\.[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)+\.[A-Z][a-zA-Z0-9]*"/>
+        <property name="format" value="^(?!import\s)(?!.*CHECKSTYLE).*[^a-zA-Z0-9.](net|com|org)\.[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)+\.[A-Z][a-zA-Z0-9]*"/>
         <property name="message" value="Avoid using fully qualified class names. Import the class instead."/>
     </module>
 

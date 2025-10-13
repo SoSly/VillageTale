@@ -35,43 +35,43 @@ public class LedgerIconButton extends Button {
         this.hoverShift = hoverShift;
     }
 
-    public static LedgerIconButton ArrowLeft(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton arrowLeft(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, ARROW_LEFT.u, ARROW_LEFT.v, ARROW_LEFT.width, ARROW_LEFT.height, ARROW_LEFT.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton ArrowRight(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton arrowRight(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, ARROW_RIGHT.u, ARROW_RIGHT.v, ARROW_RIGHT.width, ARROW_RIGHT.height, ARROW_RIGHT.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton Back(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton back(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, BACK.u, BACK.v, BACK.width, BACK.height, BACK.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton Commit(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton commit(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, COMMIT.u, COMMIT.v, COMMIT.width, COMMIT.height, COMMIT.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton Cancel(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton cancel(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, CANCEL.u, CANCEL.v, CANCEL.width, CANCEL.height, CANCEL.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton Delete(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton delete(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, DELETE.u, DELETE.v, DELETE.width, DELETE.height, DELETE.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton Edit(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton edit(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, EDIT.u, EDIT.v, EDIT.width, EDIT.height, EDIT.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton New(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton newButton(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, NEW.u, NEW.v, NEW.width, NEW.height, NEW.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton PageNext(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton pageNext(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, PAGE_NEXT.u, PAGE_NEXT.v, PAGE_NEXT.width, PAGE_NEXT.height, PAGE_NEXT.hoverShift, onPress, message);
     }
 
-    public static LedgerIconButton PagePrev(int x, int y, OnPress onPress, Component message) {
+    public static LedgerIconButton pagePrev(int x, int y, OnPress onPress, Component message) {
         return new LedgerIconButton(x, y, PAGE_PREV.u, PAGE_PREV.v, PAGE_PREV.width, PAGE_PREV.height, PAGE_PREV.hoverShift, onPress, message);
     }
 

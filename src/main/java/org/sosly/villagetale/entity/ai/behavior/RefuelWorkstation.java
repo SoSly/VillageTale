@@ -79,7 +79,7 @@ public class RefuelWorkstation extends Behavior<Villager> {
         this.claimedZone = null;
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
-        int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
+        int closeEnoughDistance = (int) (CommonConfig.interactionDistance / 2);
         villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
             new WalkTarget(this.targetWorkstation, 0.5F, closeEnoughDistance), 200L);
 
@@ -111,7 +111,7 @@ public class RefuelWorkstation extends Behavior<Villager> {
         this.searchTicks++;
 
         if (this.searchTicks < SEARCH_DURATION) {
-            int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
+            int closeEnoughDistance = (int) (CommonConfig.interactionDistance / 2);
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(this.targetWorkstation, 0.5F, closeEnoughDistance), 20L);
 

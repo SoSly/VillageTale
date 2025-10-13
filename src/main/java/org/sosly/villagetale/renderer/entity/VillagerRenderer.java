@@ -1,17 +1,12 @@
 package org.sosly.villagetale.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.IProfession;
 import org.sosly.villagetale.client.ClientDataManager;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.profession.ProfessionRegistry;

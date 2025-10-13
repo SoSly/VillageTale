@@ -121,7 +121,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         currentY += LINE_HEIGHT;
         currentY += LINE_HEIGHT;
 
-        this.professionLeftButton = LedgerIconButton.ArrowLeft(
+        this.professionLeftButton = LedgerIconButton.arrowLeft(
             uStart,
             currentY - 3,
             button -> cycleProfessionPrevious(),
@@ -129,7 +129,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         );
         addRenderableWidget(this.professionLeftButton);
 
-        this.professionRightButton = LedgerIconButton.ArrowRight(
+        this.professionRightButton = LedgerIconButton.arrowRight(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.ARROW_RIGHT.width(),
             currentY - 3,
             button -> cycleProfessionNext(),
@@ -140,7 +140,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         currentY += LINE_HEIGHT;
         currentY += LINE_HEIGHT;
 
-        this.workZoneLeftButton = LedgerIconButton.ArrowLeft(
+        this.workZoneLeftButton = LedgerIconButton.arrowLeft(
             uStart,
             currentY - 3,
             button -> cycleWorkZonePrevious(),
@@ -149,7 +149,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         this.workZoneLeftButton.visible = !workZones.isEmpty();
         addRenderableWidget(this.workZoneLeftButton);
 
-        this.workZoneRightButton = LedgerIconButton.ArrowRight(
+        this.workZoneRightButton = LedgerIconButton.arrowRight(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.ARROW_RIGHT.width(),
             currentY - 3,
             button -> cycleWorkZoneNext(),
@@ -161,7 +161,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         currentY += LINE_HEIGHT;
         currentY += LINE_HEIGHT;
 
-        this.homeZoneLeftButton = LedgerIconButton.ArrowLeft(
+        this.homeZoneLeftButton = LedgerIconButton.arrowLeft(
             uStart,
             currentY - 3,
             button -> cycleHomeZonePrevious(),
@@ -170,7 +170,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         this.homeZoneLeftButton.visible = !homeZones.isEmpty();
         addRenderableWidget(this.homeZoneLeftButton);
 
-        this.homeZoneRightButton = LedgerIconButton.ArrowRight(
+        this.homeZoneRightButton = LedgerIconButton.arrowRight(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.ARROW_RIGHT.width(),
             currentY - 3,
             button -> cycleHomeZoneNext(),
@@ -182,7 +182,7 @@ public class VillagerManagementPage extends AbstractLedgerPage {
         currentY += LINE_HEIGHT;
         currentY += LINE_HEIGHT;
 
-        this.recipeEditButton = LedgerIconButton.Edit(
+        this.recipeEditButton = LedgerIconButton.edit(
             uStart + LedgerScreen.CONTENT_WIDTH - LedgerIconButton.EDIT.width(),
             currentY - 1,
             button -> openRecipeConfig(),

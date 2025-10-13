@@ -19,6 +19,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -144,6 +145,7 @@ public class CraftRecipeItem extends Behavior<Villager> {
             case FAKE -> handleFakeCrafting(level, villager);
             case CONTAINER -> handleContainerCrafting(level, villager);
             case INTERACTION -> handleInteractionCrafting(level, villager);
+            default -> { }
         }
     }
 
@@ -243,11 +245,11 @@ public class CraftRecipeItem extends Behavior<Villager> {
 
             BlockState state = level.getBlockState(workstation);
             state.use(level, fakePlayer, InteractionHand.MAIN_HAND,
-                level.clip(new net.minecraft.world.level.ClipContext(
+                level.clip(new ClipContext(
                     fakePlayer.getEyePosition(),
                     workstation.getCenter(),
-                    net.minecraft.world.level.ClipContext.Block.OUTLINE,
-                    net.minecraft.world.level.ClipContext.Fluid.NONE,
+                    ClipContext.Block.OUTLINE,
+                    ClipContext.Fluid.NONE,
                     fakePlayer
                 )));
 

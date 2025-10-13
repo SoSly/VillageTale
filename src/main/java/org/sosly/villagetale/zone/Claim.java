@@ -49,8 +49,12 @@ public class Claim {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         Claim claim = (Claim) obj;
         return expirationTime == claim.expirationTime && Objects.equals(villagerUUID, claim.villagerUUID);
     }

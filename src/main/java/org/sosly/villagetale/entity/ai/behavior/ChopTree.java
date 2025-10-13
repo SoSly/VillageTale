@@ -87,7 +87,7 @@ public class ChopTree extends Behavior<Villager> {
 
         double normalized = Math.min(logs.size() / 20.0, 1.0);
         double curved = Math.pow(normalized, 0.7);
-        this.chopDuration = MINIMUM_DURATION + (int)((BEHAVIOR_DURATION - MINIMUM_DURATION) * curved);
+        this.chopDuration = MINIMUM_DURATION + (int) ((BEHAVIOR_DURATION - MINIMUM_DURATION) * curved);
 
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
         villager.setItemInHand(InteractionHand.MAIN_HAND, axe);
@@ -149,7 +149,7 @@ public class ChopTree extends Behavior<Villager> {
                 level.playSound(null, tree.getBase(), SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
 
-            int progress = (int)((chopTicks / (float) chopDuration) * 10);
+            int progress = (int) ((chopTicks / (float) chopDuration) * 10);
             level.destroyBlockProgress(villager.getId(), tree.getBase(), progress);
             return;
         }

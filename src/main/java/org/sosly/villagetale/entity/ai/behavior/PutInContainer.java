@@ -9,6 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -76,7 +77,7 @@ public class PutInContainer extends Behavior<Villager> {
         villager.getBrain().setMemoryWithExpiry(MemoryModuleTypes.BUSY.get(), true, BEHAVIOR_DURATION);
 
         if (this.targetContainer != null) {
-            int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
+            int closeEnoughDistance = (int) (CommonConfig.interactionDistance / 2);
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(this.targetContainer, 0.5F, closeEnoughDistance), 200L);
 
@@ -109,7 +110,7 @@ public class PutInContainer extends Behavior<Villager> {
         this.searchTicks++;
 
         if (this.searchTicks < SEARCH_DURATION) {
-            int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
+            int closeEnoughDistance = (int) (CommonConfig.interactionDistance / 2);
             villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
                 new WalkTarget(this.targetContainer, 0.5F, closeEnoughDistance), 20L);
 
@@ -190,7 +191,7 @@ public class PutInContainer extends Behavior<Villager> {
             }
 
             for (ResourceLocation itemId : itemsToDeposit.keySet()) {
-                net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(itemId);
+                Item item = BuiltInRegistries.ITEM.get(itemId);
 
                 if (ContainerHelper.hasAvailableSpace(level, containerPos, item)) {
                     return containerPos;
@@ -280,7 +281,7 @@ public class PutInContainer extends Behavior<Villager> {
         this.searchTicks = 0;
         this.claimedZone = null;
 
-        int closeEnoughDistance = (int)(CommonConfig.interactionDistance / 2);
+        int closeEnoughDistance = (int) (CommonConfig.interactionDistance / 2);
         villager.getBrain().setMemoryWithExpiry(MemoryModuleType.WALK_TARGET,
             new WalkTarget(this.targetContainer, 0.5F, closeEnoughDistance), 200L);
     }

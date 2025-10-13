@@ -69,14 +69,14 @@ public class Box implements IZoneShape {
     public BlockPos getStartPosition() {
         Vec3 center = bounds.getCenter();
         BlockPos centerPos = BlockPos.containing(center);
-        return new BlockPos(centerPos.getX(), (int)bounds.minY, centerPos.getZ());
+        return new BlockPos(centerPos.getX(), (int) bounds.minY, centerPos.getZ());
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        BlockPos min = new BlockPos((int)bounds.minX, (int)bounds.minY, (int)bounds.minZ);
-        BlockPos max = new BlockPos((int)bounds.maxX, (int)bounds.maxY, (int)bounds.maxZ);
+        BlockPos min = new BlockPos((int) bounds.minX, (int) bounds.minY, (int) bounds.minZ);
+        BlockPos max = new BlockPos((int) bounds.maxX, (int) bounds.maxY, (int) bounds.maxZ);
         tag.putLong("min", min.asLong());
         tag.putLong("max", max.asLong());
         return tag;

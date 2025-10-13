@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -19,7 +18,6 @@ import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.entity.ai.goal.FollowWhenLeashed;
-import org.sosly.villagetale.config.CommonConfig;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.InventoryHelper;
@@ -156,6 +154,7 @@ public class BringAnimalsToPen extends Behavior<Villager> {
             case LEASHING -> tickLeashing(level, villager);
             case LEADING -> tickLeading(level, villager);
             case RELEASING -> tickReleasing(level, villager);
+            default -> { }
         }
     }
     
@@ -275,8 +274,8 @@ public class BringAnimalsToPen extends Behavior<Villager> {
         }
         
         double ratio = Math.sqrt(16 / distance);
-        int targetX = from.getX() + (int)((penCenter.getX() - from.getX()) * ratio);
-        int targetZ = from.getZ() + (int)((penCenter.getZ() - from.getZ()) * ratio);
+        int targetX = from.getX() + (int) ((penCenter.getX() - from.getX()) * ratio);
+        int targetZ = from.getZ() + (int) ((penCenter.getZ() - from.getZ()) * ratio);
         
         return new BlockPos(targetX, from.getY(), targetZ);
     }

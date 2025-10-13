@@ -3,6 +3,7 @@ package org.sosly.villagetale.entity.ai.behavior;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
@@ -56,9 +57,9 @@ public class EatFood extends Behavior<Villager> {
     protected void start(ServerLevel level, Villager villager, long gameTime) {
         this.eatingTime = 0;
         ItemStack foodCopy = this.foodToEat.copy();
-        villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, foodCopy);
-        VillagerEquipmentSync.sendToNearbyPlayers(villager, net.minecraft.world.InteractionHand.MAIN_HAND, foodCopy);
-        villager.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
+        villager.setItemInHand(InteractionHand.MAIN_HAND, foodCopy);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, foodCopy);
+        villager.startUsingItem(InteractionHand.MAIN_HAND);
         playEatingSound(level, villager);
     }
 
@@ -79,8 +80,8 @@ public class EatFood extends Behavior<Villager> {
     @Override
     protected void stop(ServerLevel level, Villager villager, long gameTime) {
         villager.stopUsingItem();
-        villager.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        VillagerEquipmentSync.sendToNearbyPlayers(villager, net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        villager.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        VillagerEquipmentSync.sendToNearbyPlayers(villager, InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
         if (this.foodToEat.isEmpty()) {
             this.foodToEat = ItemStack.EMPTY;

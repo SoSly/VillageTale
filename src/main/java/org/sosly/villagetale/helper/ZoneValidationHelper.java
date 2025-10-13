@@ -21,8 +21,8 @@ public class ZoneValidationHelper {
             return false;
         }
 
-        BlockPos min = new BlockPos((int)bounds.minX, (int)bounds.minY, (int)bounds.minZ);
-        BlockPos max = new BlockPos((int)bounds.maxX - 1, (int)bounds.maxY - 1, (int)bounds.maxZ - 1);
+        BlockPos min = new BlockPos((int) bounds.minX, (int) bounds.minY, (int) bounds.minZ);
+        BlockPos max = new BlockPos((int) bounds.maxX - 1, (int) bounds.maxY - 1, (int) bounds.maxZ - 1);
 
         if (!isPositionWithinBoundary(village, min)) {
             return false;

@@ -14,6 +14,7 @@ import org.sosly.villagetale.network.ClientPacketHandler;
 import org.sosly.villagetale.network.NetworkHandler;
 
 import java.util.function.Supplier;
+import org.sosly.villagetale.capability.village.VillageCapability;
 
 public class SyncVillageCapability extends BasePacket {
     private final CompoundTag villageData;
@@ -23,12 +24,12 @@ public class SyncVillageCapability extends BasePacket {
     }
 
     public static void send(ServerPlayer player, IVillageCapability capability, MinecraftServer server) {
-        if (!(capability instanceof org.sosly.villagetale.capability.village.VillageCapability)) {
+        if (!(capability instanceof VillageCapability)) {
             return;
         }
 
-        org.sosly.villagetale.capability.village.VillageCapability villageCapability =
-            (org.sosly.villagetale.capability.village.VillageCapability) capability;
+        VillageCapability villageCapability =
+            (VillageCapability) capability;
 
         SyncVillageCapability packet = new SyncVillageCapability(villageCapability.serializeNBT());
         NetworkHandler.CHANNEL.sendTo(packet, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
@@ -60,8 +61,8 @@ public class SyncVillageCapability extends BasePacket {
         }
 
         context.enqueueWork(() -> {
-            org.sosly.villagetale.capability.village.VillageCapability capability =
-                new org.sosly.villagetale.capability.village.VillageCapability();
+            VillageCapability capability =
+                new VillageCapability();
             capability.deserializeNBT(msg.villageData);
             VillageDataManager.getInstance().updateVillageData(capability.getUUID(), capability);
         }).whenComplete((r, e) -> {

@@ -65,7 +65,9 @@ public class ConvertVillager extends BasePacket {
             ServerLevel level = player.serverLevel();
             Entity entity = level.getEntity(msg.villagerEntityId);
 
+            // CHECKSTYLE:OFF RegexpSingleline - legitimate FQCN due to name collision with org.sosly.villagetale.entity.Villager
             if (!(entity instanceof net.minecraft.world.entity.npc.Villager vanillaVillager)) {
+            // CHECKSTYLE:ON
                 player.sendSystemMessage(Component.literal("Invalid villager entity"));
                 return;
             }

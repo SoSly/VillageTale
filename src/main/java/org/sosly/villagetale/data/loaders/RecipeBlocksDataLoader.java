@@ -24,7 +24,7 @@ import org.sosly.villagetale.data.RecipeTypeInfo;
 public class RecipeBlocksDataLoader extends SimpleJsonResourceReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Map<String, RecipeTypeInfo> recipeTypeInfo = new HashMap<>();
+    private static final Map<String, RecipeTypeInfo> RECIPE_TYPE_INFO = new HashMap<>();
 
     public RecipeBlocksDataLoader() {
         super(GSON, "recipe_blocks");
@@ -32,7 +32,7 @@ public class RecipeBlocksDataLoader extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> resourceMap, ResourceManager resourceManager, ProfilerFiller profiler) {
-        recipeTypeInfo.clear();
+        RECIPE_TYPE_INFO.clear();
         LOGGER.info("Loading {} recipe block mapping files", resourceMap.size());
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : resourceMap.entrySet()) {
@@ -130,7 +130,7 @@ public class RecipeBlocksDataLoader extends SimpleJsonResourceReloadListener {
             if (!blocks.isEmpty()) {
                 RecipeTypeInfo info = new RecipeTypeInfo(blocks, fuelMatcher, craftingMethod,
                         inputSlots, fuelSlot, outputSlots, waitForDrops, craftingSound);
-                recipeTypeInfo.merge(recipeType, info, (existing, newInfo) -> {
+                RECIPE_TYPE_INFO.merge(recipeType, info, (existing, newInfo) -> {
                     List<Block> combinedBlocks = new ArrayList<>(existing.getBlocks());
                     combinedBlocks.addAll(newInfo.getBlocks());
                     ItemOrTagMatcher combinedFuel = newInfo.getFuel().orElse(existing.getFuel().orElse(null));
@@ -147,10 +147,10 @@ public class RecipeBlocksDataLoader extends SimpleJsonResourceReloadListener {
             }
         }
 
-        LOGGER.info("Loaded recipe block mappings for {} recipe types", recipeTypeInfo.size());
+        LOGGER.info("Loaded recipe block mappings for {} recipe types", RECIPE_TYPE_INFO.size());
     }
 
     public static Map<String, RecipeTypeInfo> getRecipeTypeInfo() {
-        return recipeTypeInfo;
+        return RECIPE_TYPE_INFO;
     }
 }

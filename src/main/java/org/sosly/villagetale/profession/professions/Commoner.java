@@ -11,7 +11,7 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.entity.Villager;
 
 public class Commoner extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "commoner");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "commoner");
     public Commoner() {
         super(ID);
     }

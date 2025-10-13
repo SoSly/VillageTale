@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -282,8 +283,8 @@ public class ZoneService {
             if (shape instanceof Box rect) {
                 AABB bounds = rect.getBounds();
                 sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_box", VillageTale.MOD_ID),
-                        (int)bounds.minX, (int)bounds.minY, (int)bounds.minZ,
-                        (int)(bounds.maxX-1), (int)(bounds.maxY-1), (int)(bounds.maxZ-1)));
+                        (int) bounds.minX, (int) bounds.minY, (int) bounds.minZ,
+                        (int) (bounds.maxX - 1), (int) (bounds.maxY - 1), (int) (bounds.maxZ - 1)));
             } else if (shape instanceof Cylinder cylinder) {
                 sender.accept(Component.translatable(String.format("%s.command.zone.info_shape_cylinder", VillageTale.MOD_ID),
                         cylinder.getStartPosition().toShortString(), cylinder.getRadius(), cylinder.getHeight()));
@@ -389,8 +390,8 @@ public class ZoneService {
 
                 if (zone.getType().getID().equals(Home.ID)) {
                     // Clear any existing home-related memories before setting new one
-                    villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
-                    villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.LAST_SLEPT);
+                    villager.getBrain().eraseMemory(MemoryModuleType.HOME);
+                    villager.getBrain().eraseMemory(MemoryModuleType.LAST_SLEPT);
                     villager.getBrain().setMemory(MemoryModuleTypes.HOME_ZONE.get(), zoneId);
                 } else if (villager.getProfession().isValidWorkZone(zone)) {
                     // Clear any existing work-related memories before setting new one
@@ -428,8 +429,8 @@ public class ZoneService {
                 if (zone.getType().getID().equals(Home.ID)) {
                     // Clear all home-related memories
                     villager.getBrain().eraseMemory(MemoryModuleTypes.HOME_ZONE.get());
-                    villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
-                    villager.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.LAST_SLEPT);
+                    villager.getBrain().eraseMemory(MemoryModuleType.HOME);
+                    villager.getBrain().eraseMemory(MemoryModuleType.LAST_SLEPT);
                 } else if (villager.getProfession().isValidWorkZone(zone)) {
                     // Clear all work-related memories
                     villager.getBrain().eraseMemory(MemoryModuleTypes.WORK_ZONE.get());

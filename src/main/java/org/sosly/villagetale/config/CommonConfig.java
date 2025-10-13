@@ -8,52 +8,52 @@ import org.sosly.villagetale.VillageTale;
 
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonConfig {
-    private static final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     static {
-        builder.push("Village Tale Config");
+        BUILDER.push("Village Tale Config");
 
-        builder.push("General Village Settings");
+        BUILDER.push("General Village Settings");
     }
 
-    private static final ForgeConfigSpec.IntValue DEFAULT_SQUADIUS = builder
+    private static final ForgeConfigSpec.IntValue DEFAULT_SQUADIUS = BUILDER
             .comment("Default village squadius (radius in chunks). Village boundary = (2 * squadius + 1)^2 chunks")
             .defineInRange("defaultSquadius", 3, 1, 16);
 
-    private static final ForgeConfigSpec.IntValue MIN_VILLAGE_DISTANCE = builder
+    private static final ForgeConfigSpec.IntValue MIN_VILLAGE_DISTANCE = BUILDER
             .comment("Minimum distance between villages in chunks")
             .defineInRange("minVillageDistance", 32, 32, Integer.MAX_VALUE);
 
     static {
-        builder.pop();
-        builder.push("Villager Settings");
+        BUILDER.pop();
+        BUILDER.push("Villager Settings");
     }
 
-    private static final ForgeConfigSpec.DoubleValue COLLECTION_DISTANCE = builder
+    private static final ForgeConfigSpec.DoubleValue COLLECTION_DISTANCE = BUILDER
             .comment("The range at which villagers can collect items off the ground")
             .defineInRange("collectionDistance", 2.5d, 1, 16);
-    private static final ForgeConfigSpec.DoubleValue INTERACTION_DISTANCE = builder
+    private static final ForgeConfigSpec.DoubleValue INTERACTION_DISTANCE = BUILDER
             .comment("The range at which villagers can interact with blocks.")
             .defineInRange("interactionDistance", 4.5d, 2, 10);
-    private static final ForgeConfigSpec.DoubleValue SCAN_RADIUS = builder
+    private static final ForgeConfigSpec.DoubleValue SCAN_RADIUS = BUILDER
             .comment("The range villagers will scan for dropped items or in storage containers")
             .defineInRange("scanRadius", 16d, 4, 32);
 
-    private static final ForgeConfigSpec.IntValue MILK_COOLDOWN_TICKS = builder
+    private static final ForgeConfigSpec.IntValue MILK_COOLDOWN_TICKS = BUILDER
             .comment("Cooldown in ticks before a cow can be milked again (20 ticks = 1 second)")
             .defineInRange("milkCooldownTicks", 12000, 1200, 48000);
 
-    private static final ForgeConfigSpec.IntValue PLUCK_COOLDOWN_TICKS = builder
+    private static final ForgeConfigSpec.IntValue PLUCK_COOLDOWN_TICKS = BUILDER
             .comment("Cooldown in ticks before a chicken can be plucked again (20 ticks = 1 second)")
             .defineInRange("pluckCooldownTicks", 12000, 1200, 48000);
 
     static {
-        builder.pop();
-        builder.pop();
+        BUILDER.pop();
+        BUILDER.pop();
     }
 
     public static ForgeConfigSpec build() {
-        return builder.build();
+        return BUILDER.build();
     }
 
     // Runtime Values

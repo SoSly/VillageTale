@@ -70,6 +70,7 @@ import org.sosly.villagetale.helper.InventoryHelper;
 import org.sosly.villagetale.network.packets.clientbound.VillagerProfessionSync;
 import org.sosly.villagetale.profession.ProfessionRegistry;
 import org.sosly.villagetale.profession.professions.Commoner;
+import net.minecraft.world.entity.EquipmentSlot;
 
 public class Villager extends PathfinderMob implements InventoryCarrier {
     private static final EntityDataAccessor<Byte> DATA_VILLAGER_ARM_POSE = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.BYTE);
@@ -81,7 +82,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes;
     private VillagerArmPose armPose = VillagerArmPose.NEUTRAL;
 
-    public static enum VillagerArmPose {
+    public enum VillagerArmPose {
         CROSSED,
         ATTACKING,
         SPELLCASTING,
@@ -111,7 +112,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(DATA_VILLAGER_ARM_POSE, (byte)VillagerArmPose.NEUTRAL.ordinal());
+        this.entityData.define(DATA_VILLAGER_ARM_POSE, (byte) VillagerArmPose.NEUTRAL.ordinal());
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -160,7 +161,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         NbtOps nbtops = NbtOps.INSTANCE;
         this.brain = this.makeBrain(new Dynamic<>(nbtops, nbtops.createMap(ImmutableMap.of(nbtops.createString("memories"), nbtops.emptyMap()))));
 
-        for(Map.Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : savedMemories.entrySet()) {
+        for (Map.Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : savedMemories.entrySet()) {
             if (entry.getValue().isPresent() && this.brain.getMemories().containsKey(entry.getKey())) {
                 this.brain.getMemories().put(entry.getKey(), entry.getValue());
             }
@@ -219,7 +220,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     public void setArmPose(VillagerArmPose pose) {
         this.armPose = pose;
         if (!this.level().isClientSide()) {
-            this.entityData.set(DATA_VILLAGER_ARM_POSE, (byte)pose.ordinal());
+            this.entityData.set(DATA_VILLAGER_ARM_POSE, (byte) pose.ordinal());
         }
     }
 
@@ -475,7 +476,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.brain.eraseMemory(MemoryModuleTypes.HOME_ZONE.get());
         this.brain.eraseMemory(MemoryModuleTypes.WORK_ZONE.get());
         this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
-        this.brain.eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 
         this.brain.setMemory(MemoryModuleTypes.VILLAGE.get(), villageId);
         VillageTale.LOGGER.info("Villager {} assigned to village {}", this.getUUID(), villageId);
@@ -492,7 +493,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.brain.eraseMemory(MemoryModuleTypes.HOME_ZONE.get());
         this.brain.eraseMemory(MemoryModuleTypes.WORK_ZONE.get());
         this.brain.eraseMemory(MemoryModuleTypes.WORK_POS.get());
-        this.brain.eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME);
+            this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
@@ -588,7 +589,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
     @Override
     public @NotNull Vec3 getRopeHoldPosition(float partialTicks) {
-        float f = Mth.lerp(partialTicks, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180F);
+        float f = Mth.lerp(partialTicks, this.yBodyRotO, this.yBodyRot) * ((float) Math.PI / 180F);
         Vec3 vec3 = new Vec3(0.0D, this.getBoundingBox().getYsize() - 1.0D, 0.2D);
         return this.getPosition(partialTicks).add(vec3.yRot(-f));
     }

@@ -34,6 +34,7 @@ import org.sosly.villagetale.entity.ai.behavior.SetWalkTargetFromBlockMemory;
 import org.sosly.villagetale.entity.ai.behavior.VillagerPanicTrigger;
 import org.sosly.villagetale.entity.ai.behavior.WakeUp;
 import org.sosly.villagetale.entity.ai.behavior.ZoneBoundRandomStroll;
+import net.minecraft.world.entity.EntityType;
 
 public class VillagerGoalPackages {
 
@@ -112,7 +113,7 @@ public class VillagerGoalPackages {
     @SuppressWarnings("unchecked")
     private static Pair<Integer, BehaviorControl<? super Villager>> getMinimalLookBehavior() {
         return Pair.of(5, new RunOne<>(ImmutableList.of(
-            Pair.of(SetEntityLookTarget.create(net.minecraft.world.entity.EntityType.PLAYER, 8.0F), 2),
+            Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 8.0F), 2),
             Pair.of(new DoNothing(30, 60), 8)
         )));
     }

@@ -2,24 +2,22 @@ package org.sosly.villagetale.helper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.authlib.GameProfile;
 import net.minecraftforge.common.util.FakePlayer;
-
-import java.util.UUID;
 
 public class ContainerHelper {
 
@@ -207,7 +205,7 @@ public class ContainerHelper {
         return false;
     }
 
-    public static boolean hasAvailableSpace(ServerLevel level, BlockPos containerPos, net.minecraft.world.item.Item item) {
+    public static boolean hasAvailableSpace(ServerLevel level, BlockPos containerPos, Item item) {
         Container container = getContainer(level, containerPos);
         if (container == null) {
             return false;

@@ -20,7 +20,7 @@ import org.sosly.villagetale.entity.ai.behavior.PlantCrops;
 import org.sosly.villagetale.entity.ai.behavior.TillSoil;
 
 public class Farmer extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "farmer");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "farmer");
 
     public Farmer() {
         super(ID);

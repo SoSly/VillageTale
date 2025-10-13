@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -24,7 +25,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkDirection;
 import org.jetbrains.annotations.Nullable;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.capability.IVillageCapability;
@@ -34,11 +34,10 @@ import net.minecraft.world.level.ChunkPos;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.item.LedgerItem;
+import org.sosly.villagetale.zone.shape.Point;
 import org.sosly.villagetale.zone.type.TownHall;
 import org.sosly.villagetale.entity.Villager;
 import net.minecraft.world.phys.AABB;
-
-import java.util.List;
 
 public class TownHallBlock extends Block {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -170,7 +169,7 @@ public class TownHallBlock extends Block {
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
 
         if (level.isClientSide || !(placer instanceof Player player)) {
@@ -284,7 +283,7 @@ public class TownHallBlock extends Block {
             return;
         }
 
-        IVillageZone townHallZone = org.sosly.villagetale.zone.shape.Point.builder(level, village, zones.size())
+        IVillageZone townHallZone = Point.builder(level, village, zones.size())
             .setPos(townHallPos)
             .setType(TownHall.ID)
             .build();

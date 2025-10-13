@@ -28,7 +28,7 @@ public interface IVillageCapability {
             }
         };
 
-        abstract public String toString();
+        public abstract String toString();
         public static Permission fromString(String string) {
             return Permission.valueOf(string.toUpperCase());
         }

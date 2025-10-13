@@ -20,7 +20,7 @@ import org.sosly.villagetale.entity.ai.behavior.GoToNearestPen;
 import org.sosly.villagetale.entity.ai.behavior.SlaughterAnimal;
 
 public class Butcher extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "butcher");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "butcher");
 
     public Butcher() {
         super(ID);

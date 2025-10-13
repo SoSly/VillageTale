@@ -15,7 +15,7 @@ import org.sosly.villagetale.entity.ai.behavior.ChopTree;
 import org.sosly.villagetale.entity.ai.behavior.PlantSapling;
 
 public class Forester extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "forester");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "forester");
 
     public Forester() {
         super(ID);

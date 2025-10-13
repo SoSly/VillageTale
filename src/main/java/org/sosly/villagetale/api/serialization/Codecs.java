@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public class Codecs {
-    public static Codec<java.util.UUID> UUID = Codec.BYTE_BUFFER.xmap(
+    public static final Codec<java.util.UUID> UUID_CODEC = Codec.BYTE_BUFFER.xmap(
         buffer -> {
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);

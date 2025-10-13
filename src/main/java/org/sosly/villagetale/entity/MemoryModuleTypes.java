@@ -29,11 +29,11 @@ public class MemoryModuleTypes {
     // Shared Memories
     public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_PENS =
         MEMORY_MODULE_TYPES.register("already_scanned_pens",
-                () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID))));
+                () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID_CODEC))));
 
     public static final RegistryObject<MemoryModuleType<List<UUID>>> ALREADY_SCANNED_STORAGES =
         MEMORY_MODULE_TYPES.register("already_scanned_storages",
-                () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID))));
+                () -> new MemoryModuleType<>(Optional.of(Codec.list(Codecs.UUID_CODEC))));
 
     public static final RegistryObject<MemoryModuleType<Boolean>> CAN_EAT =
         MEMORY_MODULE_TYPES.register("can_eat",
@@ -72,7 +72,7 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<UUID>> VILLAGE =
         MEMORY_MODULE_TYPES.register("village",
-                () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+                () -> new MemoryModuleType<>(Optional.of(Codecs.UUID_CODEC)));
 
     public static final RegistryObject<MemoryModuleType<IWantedItem>> WANTED_ITEM =
         MEMORY_MODULE_TYPES.register("wanted_item",
@@ -80,7 +80,7 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<UUID>> WORK_ZONE =
             MEMORY_MODULE_TYPES.register("work_zone",
-                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID_CODEC)));
 
     public static final RegistryObject<MemoryModuleType<GlobalPos>> WORK_POS =
             MEMORY_MODULE_TYPES.register("work_pos",
@@ -88,11 +88,11 @@ public class MemoryModuleTypes {
 
     public static final RegistryObject<MemoryModuleType<UUID>> HOME_ZONE =
             MEMORY_MODULE_TYPES.register("home_zone",
-                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID_CODEC)));
 
     public static final RegistryObject<MemoryModuleType<UUID>> FOLLOWING_PLAYER =
             MEMORY_MODULE_TYPES.register("following_player",
-                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID)));
+                    () -> new MemoryModuleType<>(Optional.of(Codecs.UUID_CODEC)));
 
     public static final RegistryObject<MemoryModuleType<Boolean>> BUSY =
             MEMORY_MODULE_TYPES.register("busy",

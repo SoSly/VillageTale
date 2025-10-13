@@ -34,8 +34,8 @@ public class FollowWhenLeashed extends Goal {
         this.level = animal.level();
         this.speedModifier = speedModifier;
         this.navigation = animal.getNavigation();
-        this.minDistance = (float)FOLLOW_DISTANCE_MIN;
-        this.maxDistance = (float)FOLLOW_DISTANCE_MAX;
+        this.minDistance = (float) FOLLOW_DISTANCE_MIN;
+        this.maxDistance = (float) FOLLOW_DISTANCE_MAX;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
     
@@ -50,7 +50,7 @@ public class FollowWhenLeashed extends Goal {
             return false;
         }
         
-        if (animal.distanceToSqr(holder) < (double)(minDistance * minDistance)) {
+        if (animal.distanceToSqr(holder) < (double) (minDistance * minDistance)) {
             return false;
         }
         
@@ -68,7 +68,7 @@ public class FollowWhenLeashed extends Goal {
             return false;
         }
         
-        return animal.distanceToSqr(leashHolder) > (double)(STOP_DISTANCE * STOP_DISTANCE);
+        return animal.distanceToSqr(leashHolder) > (double) (STOP_DISTANCE * STOP_DISTANCE);
     }
     
     @Override
@@ -87,7 +87,7 @@ public class FollowWhenLeashed extends Goal {
     
     @Override
     public void tick() {
-        animal.getLookControl().setLookAt(leashHolder, 10.0F, (float)animal.getMaxHeadXRot());
+        animal.getLookControl().setLookAt(leashHolder, 10.0F, (float) animal.getMaxHeadXRot());
 
         if (--timeToRecalcPath <= 0) {
             timeToRecalcPath = adjustedTickDelay(5);
@@ -102,8 +102,8 @@ public class FollowWhenLeashed extends Goal {
     
     private void tryToTeleportNearLeashHolder() {
         var blockPos = leashHolder.blockPosition();
-        
-        for(int i = 0; i < 10; ++i) {
+
+        for (int i = 0; i < 10; ++i) {
             int xOffset = randomIntInclusive(-3, 3);
             int yOffset = randomIntInclusive(-1, 1);
             int zOffset = randomIntInclusive(-3, 3);

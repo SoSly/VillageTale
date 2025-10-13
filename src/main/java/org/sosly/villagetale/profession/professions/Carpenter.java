@@ -16,7 +16,7 @@ import org.sosly.villagetale.entity.ai.behavior.RefuelWorkstation;
 import org.sosly.villagetale.entity.ai.behavior.TakeFromWorkstation;
 
 public class Carpenter extends AbstractProfession {
-    public final static ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "carpenter");
+    public static final ResourceLocation ID = new ResourceLocation(VillageTale.MOD_ID, "carpenter");
 
     public Carpenter() {
         super(ID);

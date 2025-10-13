@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,7 +28,7 @@ public class NoShadowEditBox extends EditBox {
     @Nullable
     private Component hint;
     private BiFunction<String, Integer, FormattedCharSequence> formatter = (text, pos) ->
-        FormattedCharSequence.forward(text, net.minecraft.network.chat.Style.EMPTY);
+        FormattedCharSequence.forward(text, Style.EMPTY);
 
     public NoShadowEditBox(Font pFont, int pX, int pY, int pWidth, int pHeight, Component pMessage) {
         super(pFont, pX, pY, pWidth, pHeight, pMessage);

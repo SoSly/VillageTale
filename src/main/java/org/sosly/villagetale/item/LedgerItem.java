@@ -107,7 +107,9 @@ public class LedgerItem extends Item {
             return InteractionResult.FAIL;
         }
 
+        // CHECKSTYLE:OFF RegexpSingleline - legitimate FQCN due to name collision with org.sosly.villagetale.entity.Villager
         if (target instanceof net.minecraft.world.entity.npc.Villager vanillaVillager) {
+        // CHECKSTYLE:ON
             vanillaVillager.getNavigation().stop();
             vanillaVillager.lookAt(player, 180.0F, 180.0F);
             VillagerInteractionHandler.addVillagerToConversation(target.getId());

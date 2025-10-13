@@ -111,24 +111,24 @@ public class VillagerModel<T extends Villager> extends EntityModel<T> implements
 
     @Override
     public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
-        this.head.yRot = pNetHeadYaw * ((float)Math.PI / 180F);
-        this.head.xRot = pHeadPitch * ((float)Math.PI / 180F);
-        
+        this.head.yRot = pNetHeadYaw * ((float) Math.PI / 180F);
+        this.head.xRot = pHeadPitch * ((float) Math.PI / 180F);
+
         if (this.riding) {
-            this.rightArm.xRot = (-(float)Math.PI / 5F);
+            this.rightArm.xRot = (-(float) Math.PI / 5F);
             this.rightArm.yRot = 0.0F;
             this.rightArm.zRot = 0.0F;
-            this.leftArm.xRot = (-(float)Math.PI / 5F);
+            this.leftArm.xRot = (-(float) Math.PI / 5F);
             this.leftArm.yRot = 0.0F;
             this.leftArm.zRot = 0.0F;
             this.rightLeg.xRot = -1.4137167F;
-            this.rightLeg.yRot = ((float)Math.PI / 10F);
+            this.rightLeg.yRot = ((float) Math.PI / 10F);
             this.rightLeg.zRot = 0.07853982F;
             this.leftLeg.xRot = -1.4137167F;
-            this.leftLeg.yRot = (-(float)Math.PI / 10F);
+            this.leftLeg.yRot = (-(float) Math.PI / 10F);
             this.leftLeg.zRot = -0.07853982F;
         } else {
-            this.rightArm.xRot = Mth.cos(pLimbSwing * 0.6662F + (float)Math.PI) * 2.0F * pLimbSwingAmount * 0.5F;
+            this.rightArm.xRot = Mth.cos(pLimbSwing * 0.6662F + (float) Math.PI) * 2.0F * pLimbSwingAmount * 0.5F;
             this.rightArm.yRot = 0.0F;
             this.rightArm.zRot = 0.0F;
             this.leftArm.xRot = Mth.cos(pLimbSwing * 0.6662F) * 2.0F * pLimbSwingAmount * 0.5F;
@@ -137,7 +137,7 @@ public class VillagerModel<T extends Villager> extends EntityModel<T> implements
             this.rightLeg.xRot = Mth.cos(pLimbSwing * 0.6662F) * 1.4F * pLimbSwingAmount * 0.5F;
             this.rightLeg.yRot = 0.0F;
             this.rightLeg.zRot = 0.0F;
-            this.leftLeg.xRot = Mth.cos(pLimbSwing * 0.6662F + (float)Math.PI) * 1.4F * pLimbSwingAmount * 0.5F;
+            this.leftLeg.xRot = Mth.cos(pLimbSwing * 0.6662F + (float) Math.PI) * 1.4F * pLimbSwingAmount * 0.5F;
             this.leftLeg.yRot = 0.0F;
             this.leftLeg.zRot = 0.0F;
         }
@@ -162,10 +162,10 @@ public class VillagerModel<T extends Villager> extends EntityModel<T> implements
             this.leftArm.yRot = 0.0F;
         } else if (villagerArmPose == Villager.VillagerArmPose.BOW_AND_ARROW) {
             this.rightArm.yRot = -0.1F + this.head.yRot;
-            this.rightArm.xRot = (-(float)Math.PI / 2F) + this.head.xRot;
+            this.rightArm.xRot = (-(float) Math.PI / 2F) + this.head.xRot;
             this.leftArm.xRot = -0.9424779F + this.head.xRot;
             this.leftArm.yRot = this.head.yRot - 0.4F;
-            this.leftArm.zRot = ((float)Math.PI / 2F);
+            this.leftArm.zRot = ((float) Math.PI / 2F);
         } else if (villagerArmPose == Villager.VillagerArmPose.CROSSBOW_HOLD) {
             AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
         } else if (villagerArmPose == Villager.VillagerArmPose.CROSSBOW_CHARGE) {

@@ -13,25 +13,25 @@ public interface IWantedItem {
      * An empty wanted item that matches nothing and wants zero quantity.
      * Used as a default value when no specific item is needed.
      */
-    public static final IWantedItem EMPTY = new WantedItem(stack -> false, 0, 0);
+    IWantedItem EMPTY = new WantedItem(stack -> false, 0, 0);
 
 
     /**
      * Gets the desired quantity of this item to fetch from storage.
      * @return The amount to fetch when needed
      */
-    public int getAmount();
+    int getAmount();
 
     /**
      * Gets the minimum threshold that triggers fetching this item.
      * @return The minimum count below which fetching is triggered
      */
-    public int getMinimum();
+    int getMinimum();
 
     /**
      * Gets the predicate used to match desired items.
      * @return The item matching predicate
      */
-    public Predicate<ItemStack> getMatcher();
+    Predicate<ItemStack> getMatcher();
 
 }

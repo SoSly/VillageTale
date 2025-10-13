@@ -1,22 +1,16 @@
 package org.sosly.villagetale.entity.ai.sensor;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import org.sosly.villagetale.api.IWantedItem;
-import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.helper.ItemMatcher;
-import org.sosly.villagetale.helper.VillagerHelper;
 
 public class HasResources extends Sensor<Villager> {
 

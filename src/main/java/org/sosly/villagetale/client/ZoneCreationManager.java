@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -98,7 +99,7 @@ public class ZoneCreationManager {
 
             Minecraft mc = Minecraft.getInstance();
             if (mc != null) {
-                LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+                LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.new_zone.title"));
                 screen.setLeftPage(new VillageInfoPage(screen, villageId));
                 screen.setRightPage(new NewZonePage(screen, villageId, shape));
                 mc.setScreen(screen);
@@ -115,7 +116,7 @@ public class ZoneCreationManager {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc != null) {
-            LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+            LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.new_zone.title"));
             screen.setLeftPage(new VillageInfoPage(screen, villageId));
             screen.setRightPage(new NewZonePage(screen, villageId, shape));
             mc.setScreen(screen);
@@ -150,7 +151,7 @@ public class ZoneCreationManager {
 
             Minecraft mc = Minecraft.getInstance();
             if (mc != null) {
-                LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+                LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.new_zone.title"));
                 screen.setLeftPage(new VillageInfoPage(screen, villageId));
                 screen.setRightPage(new NewZonePage(screen, villageId, shape));
                 mc.setScreen(screen);
@@ -184,7 +185,7 @@ public class ZoneCreationManager {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc != null) {
-            LedgerScreen screen = new LedgerScreen(net.minecraft.network.chat.Component.translatable("villagetale.gui.new_zone.title"));
+            LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.new_zone.title"));
             screen.setLeftPage(new VillageInfoPage(screen, villageId));
             screen.setRightPage(new NewZonePage(screen, villageId, shape));
             mc.setScreen(screen);

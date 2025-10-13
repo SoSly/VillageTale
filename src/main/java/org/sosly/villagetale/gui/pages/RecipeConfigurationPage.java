@@ -98,7 +98,7 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
         this.recipeList.setLeftPos(uStart);
         addWidget(this.recipeList);
 
-        this.backButton = LedgerIconButton.Back(
+        this.backButton = LedgerIconButton.back(
             uStart + (LedgerScreen.CONTENT_WIDTH - 14) / 2,
             vStart + 153,
             button -> closeRecipes(),
@@ -198,8 +198,8 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
 
     private class RecipeList extends ObjectSelectionList<RecipeList.Entry> {
 
-        public RecipeList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight,
-                          Map<String, List<RecipeEntry>> recipesByType, List<String> sortedTypes) {
+        RecipeList(Minecraft minecraft, int width, int height, int y, int bottom, int itemHeight,
+                   Map<String, List<RecipeEntry>> recipesByType, List<String> sortedTypes) {
             super(minecraft, width, height, y, bottom, itemHeight);
             this.setRenderBackground(false);
             this.setRenderTopAndBottom(false);
@@ -230,13 +230,13 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
             return this.getRowLeft() + this.getRowWidth() - 6;
         }
 
-        public class Entry extends ObjectSelectionList.Entry<Entry> {
+        class Entry extends ObjectSelectionList.Entry<Entry> {
             private final RecipeEntry recipeEntry;
             private final String headerText;
             private final boolean isSpacer;
             private CompactCheckbox checkbox;
 
-            public Entry(RecipeEntry recipeEntry) {
+            Entry(RecipeEntry recipeEntry) {
                 this.recipeEntry = recipeEntry;
                 this.headerText = null;
                 this.isSpacer = false;
@@ -255,7 +255,7 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
                 };
             }
 
-            public Entry(String headerText) {
+            Entry(String headerText) {
                 this.recipeEntry = null;
                 this.headerText = headerText;
                 this.isSpacer = false;

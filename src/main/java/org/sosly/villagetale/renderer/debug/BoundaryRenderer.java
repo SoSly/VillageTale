@@ -1,11 +1,12 @@
 package org.sosly.villagetale.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -21,6 +22,7 @@ import org.sosly.villagetale.data.ZoneBoundaryData;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
+import org.sosly.villagetale.zone.shape.Route;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, value = Dist.CLIENT)
@@ -83,8 +85,8 @@ public class BoundaryRenderer {
             return null;
         }
 
-        if (mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
-            net.minecraft.world.phys.BlockHitResult blockHit = (net.minecraft.world.phys.BlockHitResult) mc.hitResult;
+        if (mc.hitResult.getType() == HitResult.Type.BLOCK) {
+            BlockHitResult blockHit = (BlockHitResult) mc.hitResult;
             return Vec3.atCenterOf(blockHit.getBlockPos());
         }
 
@@ -114,12 +116,12 @@ public class BoundaryRenderer {
         }
 
         if (shape instanceof Point point) {
-            BoundaryOutline outline = new BoundaryOutline(new net.minecraft.world.phys.AABB(point.getPos()), red, green, blue, alpha);
+            BoundaryOutline outline = new BoundaryOutline(new AABB(point.getPos()), red, green, blue, alpha);
             outline.render(poseStack, consumer, cameraPos);
             return;
         }
 
-        if (shape instanceof org.sosly.villagetale.zone.shape.Route route) {
+        if (shape instanceof Route route) {
             if (route.getPath() == null || route.getPath().isEmpty()) {
                 return;
             }

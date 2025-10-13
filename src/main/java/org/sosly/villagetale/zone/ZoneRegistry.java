@@ -24,30 +24,30 @@ import org.sosly.villagetale.zone.type.Woodshop;
 public class ZoneRegistry {
     public static final ZoneRegistry INSTANCE = new ZoneRegistry();
 
-    private final Map<ResourceLocation, Supplier<IZoneShape>> SHAPES = new HashMap<>();
-    private final Map<ResourceLocation, IZoneType> TYPES = new HashMap<>();
+    private final Map<ResourceLocation, Supplier<IZoneShape>> shapes = new HashMap<>();
+    private final Map<ResourceLocation, IZoneType> types = new HashMap<>();
     private ZoneRegistry() {}
 
     public void register(ResourceLocation id, IZoneType type) {
-        TYPES.put(id, type);
-        VillageTale.LOGGER.info("Registered zone type: {} (total: {})", id, TYPES.size());
+        types.put(id, type);
+        VillageTale.LOGGER.info("Registered zone type: {} (total: {})", id, types.size());
     }
 
     public IZoneType type(ResourceLocation id) {
-        IZoneType type = TYPES.get(id);
+        IZoneType type = types.get(id);
         if (type == null) {
-            VillageTale.LOGGER.warn("Failed to find zone type: {} (available: {})", id, TYPES.keySet());
+            VillageTale.LOGGER.warn("Failed to find zone type: {} (available: {})", id, types.keySet());
             return null;
         }
         return type;
     }
 
     public Iterable<ResourceLocation> getZoneTypeIDs() {
-        return TYPES.keySet();
+        return types.keySet();
     }
 
     public IZoneShape shape(ResourceLocation id) {
-        Supplier<IZoneShape> supplier = SHAPES.get(id);
+        Supplier<IZoneShape> supplier = shapes.get(id);
         if (supplier == null) {
             return null;
         }
@@ -56,20 +56,20 @@ public class ZoneRegistry {
 
     {
         // todo: this is a hack because the events are not working for some reason.
-        TYPES.put(Butchery.ID, new Butchery());
-        TYPES.put(Farmland.ID, new Farmland());
-        TYPES.put(Forest.ID, new Forest());
-        TYPES.put(Home.ID, new Home());
-        TYPES.put(Kitchen.ID, new Kitchen());
-        TYPES.put(Pen.ID, new Pen());
-        TYPES.put(Storage.ID, new Storage());
-        TYPES.put(TownHall.ID, new TownHall());
-        TYPES.put(Woodshop.ID, new Woodshop());
+        types.put(Butchery.ID, new Butchery());
+        types.put(Farmland.ID, new Farmland());
+        types.put(Forest.ID, new Forest());
+        types.put(Home.ID, new Home());
+        types.put(Kitchen.ID, new Kitchen());
+        types.put(Pen.ID, new Pen());
+        types.put(Storage.ID, new Storage());
+        types.put(TownHall.ID, new TownHall());
+        types.put(Woodshop.ID, new Woodshop());
         // end todo
 
-        SHAPES.put(Point.ID, Point::new);
-        SHAPES.put(Box.ID, Box::new);
-        SHAPES.put(Route.ID, Route::new);
-        SHAPES.put(Cylinder.ID, Cylinder::new);
+        shapes.put(Point.ID, Point::new);
+        shapes.put(Box.ID, Box::new);
+        shapes.put(Route.ID, Route::new);
+        shapes.put(Cylinder.ID, Cylinder::new);
     }
 }

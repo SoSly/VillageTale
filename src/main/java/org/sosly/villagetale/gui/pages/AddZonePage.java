@@ -51,7 +51,7 @@ public class AddZonePage extends AbstractLedgerPage {
             b -> createRouteZone()
         ).bounds(buttonX, currentY, BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
-        addRenderableWidget(LedgerIconButton.Back(
+        addRenderableWidget(LedgerIconButton.back(
             uStart,
             vStart + LedgerScreen.CONTENT_HEIGHT - LedgerIconButton.BACK.height(),
             b -> screen.setRightPage(new ZoneListPage(screen, villageId)),

@@ -2,7 +2,6 @@ package org.sosly.villagetale.entity.ai.behavior;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
@@ -37,7 +36,7 @@ public class CloseOpenedGates {
                     }
                     
                     Iterator<GlobalPos> iterator = gates.iterator();
-                    while(iterator.hasNext()) {
+                    while (iterator.hasNext()) {
                         GlobalPos globalpos = iterator.next();
                         BlockPos blockpos = globalpos.pos();
                         
