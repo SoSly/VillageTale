@@ -170,6 +170,8 @@ public class UpdateVillagerAssignment extends BasePacket {
 
                 villager.getBrain().setMemory(MemoryModuleTypes.WORK_ZONE.get(), msg.workZoneId);
             }
+
+            villager.refreshBrain(level);
         });
     }
 }
