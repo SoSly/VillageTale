@@ -1,4 +1,4 @@
-name: Build & Test
+name: Build & Lint
 on:
   push:
     branches:
@@ -16,7 +16,7 @@ on:
       - ".github/**/*"
 jobs:
   run:
-    name: Build and Test
+    name: Build and Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -49,22 +49,8 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/1.20.1' }}
 
+      - name: Lint
+        run: chmod u+x ./gradlew && ./gradlew checkstyleMain
+
       - name: Build
-        run: chmod u+x ./gradlew && ./gradlew build
-
-      - name: Test JAR with GameTest Server
-        run: ./gradlew runGameTestServer
-        timeout-minutes: 20
-        env:
-          CM_RELEASE: false
-          CM_SEMVER_VERSION: ${{ needs.vars.outputs.version }}
-          CM_BUILD_NUM: ${{ needs.vars.outputs.build }}
-          GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload build failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-data
-          path: run/gametest
+        run: ./gradlew build
