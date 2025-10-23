@@ -1,4 +1,4 @@
-package org.sosly.villagetale.data;
+package org.sosly.villagetale.data.matchers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

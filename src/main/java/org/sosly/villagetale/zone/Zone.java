@@ -535,7 +535,7 @@ public class Zone implements IVillageZone {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(currentShape.getPOIs(currentVillage.getChunk().getLevel(),
+        return Optional.ofNullable(currentShape.getPOIs(
                 (pos) -> currentType.isPOI(currentVillage.getChunk().getLevel(), pos)));
     }
 

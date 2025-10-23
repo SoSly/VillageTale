@@ -1,7 +1,6 @@
 package org.sosly.villagetale.zone.shape;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -49,10 +48,7 @@ public class Route implements IZoneShape {
     }
 
     @Override
-    public List<BlockPos> getPOIs(Level level, Predicate<BlockPos> isPOI) {
-        if (level == null) {
-            return Collections.emptyList();
-        }
+    public List<BlockPos> getPOIs(Predicate<BlockPos> isPOI) {
         return points.stream()
                 .filter(pos -> isPOI.test(pos))
                 .toList();
@@ -78,9 +74,9 @@ public class Route implements IZoneShape {
     @Override
     public void deserializeNBT(CompoundTag tag) {
         this.points.clear();
-        ListTag points = tag.getList("points", 10);
+        ListTag points = tag.getList("points", 4);
         for (int i = 0; i < points.size(); ++i) {
-            long point = points.getInt(i);
+            long point = ((LongTag) points.get(i)).getAsLong();
             this.points.add(BlockPos.of(point));
         }
     }

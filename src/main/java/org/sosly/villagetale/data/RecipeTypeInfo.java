@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 
 public class RecipeTypeInfo {
     private final List<Block> blocks;

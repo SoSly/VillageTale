@@ -1,4 +1,4 @@
-package org.sosly.villagetale.data;
+package org.sosly.villagetale.data.matchers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -14,12 +14,12 @@ import net.minecraft.world.item.ItemStack;
 public class ItemOrTagMatcher {
     private final List<Item> items = new ArrayList<>();
     private final List<TagKey<Item>> tags = new ArrayList<>();
-    
+
     public void clear() {
         items.clear();
         tags.clear();
     }
-    
+
     public void loadFromJson(JsonArray array) {
         clear();
         for (JsonElement element : array) {
@@ -36,7 +36,7 @@ public class ItemOrTagMatcher {
             }
         }
     }
-    
+
     public boolean matches(Item item) {
         if (items.contains(item)) {
             return true;
@@ -48,19 +48,19 @@ public class ItemOrTagMatcher {
         }
         return false;
     }
-    
+
     public boolean matches(ItemStack stack) {
         return matches(stack.getItem());
     }
-    
+
     public boolean isEmpty() {
         return items.isEmpty() && tags.isEmpty();
     }
-    
+
     public List<Item> getItems() {
         return items;
     }
-    
+
     public List<TagKey<Item>> getTags() {
         return tags;
     }

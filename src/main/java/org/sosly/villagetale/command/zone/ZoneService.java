@@ -25,7 +25,7 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.command.Result;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
@@ -481,26 +481,26 @@ public class ZoneService {
         if (!(zone.getType() instanceof AbstractZoneType abstractZoneType)) {
             ItemStack newStack = new ItemStack(item);
             List<ItemStack> currentItems = zone.getFilter();
-            
+
             for (ItemStack existing : currentItems) {
                 if (ItemStack.isSameItem(existing, newStack)) {
                     return Result.failure(Component.translatable(
                             String.format("%s.command.zone.filter_item_already_exists", VillageTale.MOD_ID), itemId));
                 }
             }
-            
+
             List<ItemStack> updatedItems = new ArrayList<>(currentItems);
             updatedItems.add(newStack);
             zone.setFilter(updatedItems);
-            
+
             return Result.success(Component.translatable(
                     String.format("%s.command.zone.filter_item_added", VillageTale.MOD_ID), itemId, zone.getName()));
         }
-        
+
         ItemOrTagMatcher validFilter = abstractZoneType.getItemFilter();
         if (!validFilter.isEmpty() && !validFilter.matches(item)) {
             return Result.failure(Component.translatable(
-                    String.format("%s.command.zone.invalid_filter_for_zone_type", VillageTale.MOD_ID), 
+                    String.format("%s.command.zone.invalid_filter_for_zone_type", VillageTale.MOD_ID),
                     itemId, zone.getType().getID()));
         }
 
@@ -660,19 +660,19 @@ public class ZoneService {
                 return Result.failure(Component.translatable(
                         String.format("%s.command.zone.entity_type_already_exists", VillageTale.MOD_ID), entityTypeId));
             }
-            
+
             Set<ResourceLocation> updatedTypes = new HashSet<>(currentTypes);
             updatedTypes.add(entityTypeId);
             zone.setEntityTypeFilter(updatedTypes);
-            
+
             return Result.success(Component.translatable(
                     String.format("%s.command.zone.entity_type_added", VillageTale.MOD_ID), entityTypeId, zone.getName()));
         }
-        
+
         Set<ResourceLocation> validFilter = abstractZoneType.getEntityFilter();
         if (!validFilter.isEmpty() && !validFilter.contains(entityTypeId)) {
             return Result.failure(Component.translatable(
-                    String.format("%s.command.zone.invalid_entity_type_for_zone", VillageTale.MOD_ID), 
+                    String.format("%s.command.zone.invalid_entity_type_for_zone", VillageTale.MOD_ID),
                     entityTypeId, zone.getType().getID()));
         }
 

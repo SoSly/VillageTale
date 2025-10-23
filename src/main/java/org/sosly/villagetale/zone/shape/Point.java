@@ -44,8 +44,8 @@ public class Point implements IZoneShape {
     }
 
     @Override
-    public List<BlockPos> getPOIs(Level level, Predicate<BlockPos> isPOI) {
-        if (level == null || !isPOI.test(pos)) {
+    public List<BlockPos> getPOIs(Predicate<BlockPos> isPOI) {
+        if (!isPOI.test(pos)) {
             return Collections.emptyList();
         }
 

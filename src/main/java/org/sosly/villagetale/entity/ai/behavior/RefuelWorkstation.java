@@ -22,7 +22,7 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.config.CommonConfig;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;

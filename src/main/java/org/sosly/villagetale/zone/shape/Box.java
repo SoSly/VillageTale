@@ -1,6 +1,5 @@
 package org.sosly.villagetale.zone.shape;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -52,11 +51,7 @@ public class Box implements IZoneShape {
     }
 
     @Override
-    public List<BlockPos> getPOIs(Level level, Predicate<BlockPos> isPOI) {
-        if (level == null) {
-            return Collections.emptyList();
-        }
-
+    public List<BlockPos> getPOIs(Predicate<BlockPos> isPOI) {
         return BlockPos.betweenClosedStream(
                 Mth.floor(bounds.minX), Mth.floor(bounds.minY), Mth.floor(bounds.minZ),
                 Mth.ceil(bounds.maxX) - 1, Mth.ceil(bounds.maxY) - 1, Mth.ceil(bounds.maxZ) - 1)

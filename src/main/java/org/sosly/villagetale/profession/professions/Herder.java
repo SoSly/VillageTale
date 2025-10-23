@@ -18,7 +18,7 @@ import net.minecraft.world.item.Items;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.data.loaders.EntityDataLoader;
 import org.sosly.villagetale.entity.Activities;

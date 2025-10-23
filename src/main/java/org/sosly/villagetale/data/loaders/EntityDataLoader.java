@@ -12,7 +12,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 
 public class EntityDataLoader extends SimpleJsonResourceReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();

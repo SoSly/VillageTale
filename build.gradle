@@ -24,6 +24,7 @@ apply plugin: "com.matthewprenger.cursegradle"
 apply plugin: "com.modrinth.minotaur"
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
 
 version = "${minecraft_version}-${api_name}-${mod_version}"
 group = "${mod_group}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -116,8 +117,14 @@ dependencies {
     // required dependencies
     implementation "com.ibm.icu:icu4j:${icu4j_version}"
 
+    // testing dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
+
     // these mods are included only for the purpose of testing
-    runtimeOnly fg.deobf("curse.maven:betteradvancements-${advancements_projectId}:${advancements_fileId}")
+    runtimeOnly fg.deobf("curse.maven:betteadvancements-${advancements_projectId}:${advancements_fileId}")
     runtimeOnly fg.deobf("curse.maven:jei-${jei_projectId}:${jei_fileId}")
 }
 
@@ -183,6 +190,45 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+
+    exclude '**/*GameTest*.class'
+    exclude '**/*IntegrationTest*.class'
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+
+    finalizedBy jacocoTestReport
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/mixin/**',
+                '**/*Mixin.class',
+                '**/data/loaders/**'
+            ])
+        }))
+    }
 }
 
 // CurseForge deployment configuration

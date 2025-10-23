@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Block;
 import org.sosly.villagetale.data.CraftingMethod;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 
 public interface IRecipeManager {
     Optional<Block> getCraftingBlock(Recipe<?> recipe);

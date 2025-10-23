@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.sosly.villagetale.api.IRecipeManager;
 import org.sosly.villagetale.data.loaders.RecipeBlocksDataLoader;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 
 public class RecipeManager implements IRecipeManager {
     private static final RecipeManager INSTANCE = new RecipeManager();

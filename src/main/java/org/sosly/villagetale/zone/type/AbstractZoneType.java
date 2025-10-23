@@ -10,9 +10,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
-import org.sosly.villagetale.data.BlockOrTagMatcher;
-import org.sosly.villagetale.data.EntityTypeOrTagMatcher;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.BlockOrTagMatcher;
+import org.sosly.villagetale.data.matchers.EntityTypeOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 
 public abstract class AbstractZoneType implements IZoneType {
     private String claimType;

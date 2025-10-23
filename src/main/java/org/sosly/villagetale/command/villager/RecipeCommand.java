@@ -20,11 +20,11 @@ import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.command.Result;
 import org.sosly.villagetale.data.RecipeKnowledge;
 import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import org.sosly.villagetale.entity.Villager;
 
 public class RecipeCommand {
-    
+
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("recipes")
                 .then(Commands.literal("list")
@@ -38,7 +38,7 @@ public class RecipeCommand {
                                 .suggests(KNOWN_RECIPE_SUGGESTIONS)
                                 .executes(RecipeCommand::removeRecipeCommand)));
     }
-    
+
     private static int listRecipesCommand(CommandContext<CommandSourceStack> ctx) {
         try {
             Villager villager = VillagerCommand.getTargetVillager(ctx);
@@ -51,7 +51,7 @@ public class RecipeCommand {
                     .send(ctx.getSource());
         }
     }
-    
+
     private static int addRecipeCommand(CommandContext<CommandSourceStack> ctx) {
         try {
             Villager villager = VillagerCommand.getTargetVillager(ctx);
@@ -65,7 +65,7 @@ public class RecipeCommand {
                     .send(ctx.getSource());
         }
     }
-    
+
     private static int removeRecipeCommand(CommandContext<CommandSourceStack> ctx) {
         try {
             Villager villager = VillagerCommand.getTargetVillager(ctx);
@@ -79,8 +79,8 @@ public class RecipeCommand {
                     .send(ctx.getSource());
         }
     }
-    
-    public static final SuggestionProvider<CommandSourceStack> RECIPE_SUGGESTIONS = 
+
+    public static final SuggestionProvider<CommandSourceStack> RECIPE_SUGGESTIONS =
             (context, builder) -> {
                 ServerLevel level = context.getSource().getLevel();
                 RecipeManager recipeManager = level.getRecipeManager();
@@ -88,7 +88,7 @@ public class RecipeCommand {
                         .map(Recipe::getId);
                 return SharedSuggestionProvider.suggestResource(recipes, builder);
             };
-    
+
     public static final SuggestionProvider<CommandSourceStack> KNOWN_RECIPE_SUGGESTIONS =
             (CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) -> {
                 try {
@@ -101,21 +101,21 @@ public class RecipeCommand {
                     return Suggestions.empty();
                 }
             };
-    
+
     public static Result listRecipes(ServerLevel level, Villager villager) {
         RecipeKnowledge knowledge = villager.getRecipeKnowledge();
 
         ImmutableSet<ResourceLocation> knownRecipes = knowledge.known();
-        
+
         if (knownRecipes.isEmpty()) {
             return Result.success(Component.literal(String.format(
                     "%s knows no recipes", villager.getDisplayName().getString())));
         }
-        
+
         StringBuilder message = new StringBuilder();
-        message.append(String.format("%s knows %d recipe(s):\n", 
+        message.append(String.format("%s knows %d recipe(s):\n",
                 villager.getDisplayName().getString(), knownRecipes.size()));
-        
+
         RecipeManager recipeManager = level.getRecipeManager();
         for (ResourceLocation recipeId : knownRecipes) {
             recipeManager.byKey(recipeId).ifPresentOrElse(
@@ -126,10 +126,10 @@ public class RecipeCommand {
                     () -> message.append(String.format("- %s (invalid recipe)\n", recipeId))
             );
         }
-        
+
         return Result.success(Component.literal(message.toString().trim()));
     }
-    
+
     public static Result addRecipe(ServerLevel level, Villager villager, ResourceLocation recipeId) {
         RecipeKnowledge knowledge = villager.getRecipeKnowledge();
 
@@ -138,13 +138,13 @@ public class RecipeCommand {
             return Result.failure(Component.translatable(
                     String.format("%s.command.villager.recipes.unknown_recipe", VillageTale.MOD_ID), recipeId));
         }
-        
+
         if (knowledge.knows(level, recipeId)) {
             return Result.failure(Component.translatable(
-                    String.format("%s.command.villager.recipes.already_knows", VillageTale.MOD_ID), 
+                    String.format("%s.command.villager.recipes.already_knows", VillageTale.MOD_ID),
                     villager.getDisplayName().getString(), recipeId));
         }
-        
+
         Recipe<?> recipe = recipeManager.byKey(recipeId).orElse(null);
         if (recipe != null && villager.getProfession() != null) {
             ItemOrTagMatcher learnableItems = villager.getProfession().getLearnableItems();
@@ -154,17 +154,17 @@ public class RecipeCommand {
                     villager.getDisplayName().getString(), recipeId));
             }
         }
-        
+
         if (!knowledge.learn(level, recipeId)) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.villager.recipes.learn_failed", VillageTale.MOD_ID), recipeId));
         }
-        
+
         return Result.success(Component.translatable(
-                String.format("%s.command.villager.recipes.learned", VillageTale.MOD_ID), 
+                String.format("%s.command.villager.recipes.learned", VillageTale.MOD_ID),
                 villager.getDisplayName().getString(), recipeId));
     }
-    
+
     public static Result removeRecipe(ServerLevel level, Villager villager, ResourceLocation recipeId) {
         RecipeKnowledge knowledge = villager.getRecipeKnowledge();
 

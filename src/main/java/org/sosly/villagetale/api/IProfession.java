@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;

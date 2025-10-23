@@ -1,4 +1,4 @@
-name: Build & Lint
+name: Build & Test
 on:
   push:
     branches:
@@ -51,6 +51,9 @@ jobs:
 
       - name: Lint
         run: chmod u+x ./gradlew && ./gradlew checkstyleMain
+
+      - name: Unit Tests
+        run: ./gradlew test
 
       - name: Build
         run: ./gradlew build

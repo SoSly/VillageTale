@@ -18,7 +18,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
 import org.slf4j.Logger;
 import org.sosly.villagetale.data.CraftingMethod;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import org.sosly.villagetale.data.RecipeTypeInfo;
 
 public class RecipeBlocksDataLoader extends SimpleJsonResourceReloadListener {

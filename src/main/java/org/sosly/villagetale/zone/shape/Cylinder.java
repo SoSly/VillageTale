@@ -1,6 +1,5 @@
 package org.sosly.villagetale.zone.shape;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -72,11 +71,7 @@ public class Cylinder implements IZoneShape {
     }
 
     @Override
-    public List<BlockPos> getPOIs(Level level, Predicate<BlockPos> isPOI) {
-        if (level == null) {
-            return Collections.emptyList();
-        }
-
+    public List<BlockPos> getPOIs(Predicate<BlockPos> isPOI) {
         double radiusSq = radius * radius;
 
         return BlockPos.betweenClosedStream(

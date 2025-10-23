@@ -6,7 +6,6 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import org.sosly.villagetale.network.packets.clientbound.ZoneBoundary;
 
 public interface IZoneShape {
@@ -18,7 +17,7 @@ public interface IZoneShape {
 
     ResourceLocation getID();
 
-    List<BlockPos> getPOIs(Level level, Predicate<BlockPos> isPOI);
+    List<BlockPos> getPOIs(Predicate<BlockPos> isPOI);
 
     BlockPos getStartPosition();
 

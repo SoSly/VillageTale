@@ -1,4 +1,4 @@
-package org.sosly.villagetale.data;
+package org.sosly.villagetale.data.matchers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,12 +13,12 @@ import net.minecraft.world.entity.EntityType;
 public class EntityTypeOrTagMatcher {
     private final List<EntityType<?>> entityTypes = new ArrayList<>();
     private final List<TagKey<EntityType<?>>> tags = new ArrayList<>();
-    
+
     public void clear() {
         entityTypes.clear();
         tags.clear();
     }
-    
+
     public void loadFromJson(JsonArray array) {
         clear();
         for (JsonElement element : array) {
@@ -35,7 +35,7 @@ public class EntityTypeOrTagMatcher {
             }
         }
     }
-    
+
     public boolean matches(EntityType<?> entityType) {
         if (entityTypes.contains(entityType)) {
             return true;
@@ -47,23 +47,23 @@ public class EntityTypeOrTagMatcher {
         }
         return false;
     }
-    
+
     public boolean matches(Entity entity) {
         return matches(entity.getType());
     }
-    
+
     public boolean isEmpty() {
         return entityTypes.isEmpty() && tags.isEmpty();
     }
-    
+
     public List<EntityType<?>> getEntityTypes() {
         return entityTypes;
     }
-    
+
     public List<TagKey<EntityType<?>>> getTags() {
         return tags;
     }
-    
+
     public List<ResourceLocation> getAllEntityTypeIds() {
         List<ResourceLocation> ids = new ArrayList<>();
         for (EntityType<?> type : entityTypes) {

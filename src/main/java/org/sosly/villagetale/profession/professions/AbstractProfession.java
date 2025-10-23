@@ -13,7 +13,7 @@ import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import org.sosly.villagetale.api.IProfession;
 import org.sosly.villagetale.api.IVillageZone;
 import org.sosly.villagetale.api.IWantedItem;
-import org.sosly.villagetale.data.ItemOrTagMatcher;
+import org.sosly.villagetale.data.matchers.ItemOrTagMatcher;
 import org.sosly.villagetale.data.WantedItem;
 import org.sosly.villagetale.entity.Activities;
 import org.sosly.villagetale.entity.Villager;
