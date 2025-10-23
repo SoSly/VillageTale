@@ -119,9 +119,12 @@ public class RecipeConfigurationPage extends AbstractLedgerPage {
         Villager villager = getVillager();
         float health = villager != null ? villager.getHealth() : 0;
         int hunger = villager != null ? villager.getFoodData().getFoodLevel() : 0;
+        int physique = villager != null ? villager.getStats().getPhysique() : 0;
+        int endurance = villager != null ? villager.getStats().getEndurance() : 0;
+        int intellect = villager != null ? villager.getStats().getIntellect() : 0;
 
         screen.setLeftPage(new VillagerManagementPage(screen, villagerEntityId, villageId, null, null));
-        screen.setRightPage(new VillagerStatsPage(screen, villagerEntityId, villageId, health, hunger));
+        screen.setRightPage(new VillagerStatsPage(screen, villagerEntityId, villageId, health, hunger, physique, endurance, intellect));
     }
 
     @Override

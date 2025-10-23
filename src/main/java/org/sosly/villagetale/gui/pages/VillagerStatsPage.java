@@ -12,12 +12,18 @@ public class VillagerStatsPage extends AbstractLedgerPage {
     private final int villagerEntityId;
     private final float health;
     private final int hunger;
+    private final int physique;
+    private final int endurance;
+    private final int intellect;
 
-    public VillagerStatsPage(LedgerScreen screen, int villagerEntityId, UUID villageId, float health, int hunger) {
+    public VillagerStatsPage(LedgerScreen screen, int villagerEntityId, UUID villageId, float health, int hunger, int physique, int endurance, int intellect) {
         super(screen, villageId);
         this.villagerEntityId = villagerEntityId;
         this.health = health;
         this.hunger = hunger;
+        this.physique = physique;
+        this.endurance = endurance;
+        this.intellect = intellect;
     }
 
     @Override
@@ -36,6 +42,16 @@ public class VillagerStatsPage extends AbstractLedgerPage {
         guiGraphics.drawString(font, Component.literal("Hunger:"), uStart, currentY, 0, false);
         currentY += LINE_HEIGHT;
         renderVillagerHunger(guiGraphics, uStart, currentY);
+
+        currentY += LINE_HEIGHT * 2;
+
+        guiGraphics.drawString(font, Component.literal("Physique: " + physique), uStart, currentY, 0, false);
+        currentY += LINE_HEIGHT;
+
+        guiGraphics.drawString(font, Component.literal("Intellect: " + intellect), uStart, currentY, 0, false);
+        currentY += LINE_HEIGHT;
+
+        guiGraphics.drawString(font, Component.literal("Endurance: " + endurance), uStart, currentY, 0, false);
     }
 
     private void renderVillagerHearts(GuiGraphics guiGraphics, int x, int y) {

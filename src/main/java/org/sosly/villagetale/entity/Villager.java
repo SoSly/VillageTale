@@ -64,6 +64,7 @@ import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.LivingEntityFoodData;
 import org.sosly.villagetale.data.RecipeKnowledge;
 import org.sosly.villagetale.data.VillageInfo;
+import org.sosly.villagetale.data.VillagerStats;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
 import org.sosly.villagetale.entity.ai.navigation.VillagerGroundPathNavigation;
@@ -80,6 +81,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
     private final RecipeKnowledge recipeKnowledge;
+    private final VillagerStats stats;
     private ImmutableList<MemoryModuleType<?>> memoryTypes;
 
     private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes;
@@ -101,6 +103,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.foodData = new LivingEntityFoodData();
         this.inventory = new SimpleContainer(5);
         this.recipeKnowledge = new RecipeKnowledge();
+        this.stats = new VillagerStats();
         ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         this.getNavigation().setCanFloat(true);
         this.setCanPickUpLoot(true);
@@ -241,6 +244,10 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         return this.recipeKnowledge;
     }
 
+    public VillagerStats getStats() {
+        return this.stats;
+    }
+
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
@@ -285,6 +292,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         tag.put("RecipeKnowledge", this.recipeKnowledge.serializeNBT());
+        tag.put("Stats", this.stats.serializeNBT());
     }
 
     @Override
@@ -337,6 +345,12 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
             this.recipeKnowledge.deserializeInto(tag.getCompound("RecipeKnowledge"));
         } else if (tag.contains("forge:recipe_knowledge")) {
             this.recipeKnowledge.deserializeInto(tag.getCompound("forge:recipe_knowledge"));
+        }
+
+        if (tag.contains("Stats")) {
+            this.stats.deserializeInto(tag.getCompound("Stats"), this.random);
+        } else {
+            this.stats.deserializeInto(new CompoundTag(), this.random);
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {

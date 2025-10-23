@@ -30,9 +30,12 @@ public class OpenVillagerManagementScreen extends BasePacket {
     private final List<ItemStack> inventory;
     private final float health;
     private final int hunger;
+    private final int physique;
+    private final int endurance;
+    private final int intellect;
     private final List<ResourceLocation> knownRecipes;
 
-    private OpenVillagerManagementScreen(int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger, List<ResourceLocation> knownRecipes) {
+    private OpenVillagerManagementScreen(int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger, int physique, int endurance, int intellect, List<ResourceLocation> knownRecipes) {
         this.villagerEntityId = villagerEntityId;
         this.villageId = villageId;
         this.homeZoneId = homeZoneId;
@@ -40,11 +43,14 @@ public class OpenVillagerManagementScreen extends BasePacket {
         this.inventory = inventory;
         this.health = health;
         this.hunger = hunger;
+        this.physique = physique;
+        this.endurance = endurance;
+        this.intellect = intellect;
         this.knownRecipes = knownRecipes;
     }
 
-    public static void send(ServerPlayer player, int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger, List<ResourceLocation> knownRecipes) {
-        OpenVillagerManagementScreen packet = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger, knownRecipes);
+    public static void send(ServerPlayer player, int villagerEntityId, UUID villageId, UUID homeZoneId, UUID workZoneId, List<ItemStack> inventory, float health, int hunger, int physique, int endurance, int intellect, List<ResourceLocation> knownRecipes) {
+        OpenVillagerManagementScreen packet = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger, physique, endurance, intellect, knownRecipes);
         NetworkHandler.CHANNEL.sendTo(packet, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
@@ -65,6 +71,9 @@ public class OpenVillagerManagementScreen extends BasePacket {
         }
         buffer.writeFloat(msg.health);
         buffer.writeInt(msg.hunger);
+        buffer.writeInt(msg.physique);
+        buffer.writeInt(msg.endurance);
+        buffer.writeInt(msg.intellect);
         buffer.writeInt(msg.knownRecipes.size());
         for (ResourceLocation recipe : msg.knownRecipes) {
             buffer.writeResourceLocation(recipe);
@@ -86,12 +95,15 @@ public class OpenVillagerManagementScreen extends BasePacket {
             }
             float health = buffer.readFloat();
             int hunger = buffer.readInt();
+            int physique = buffer.readInt();
+            int endurance = buffer.readInt();
+            int intellect = buffer.readInt();
             int recipeCount = buffer.readInt();
             List<ResourceLocation> knownRecipes = new ArrayList<>();
             for (int i = 0; i < recipeCount; i++) {
                 knownRecipes.add(buffer.readResourceLocation());
             }
-            msg = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger, knownRecipes);
+            msg = new OpenVillagerManagementScreen(villagerEntityId, villageId, homeZoneId, workZoneId, inventory, health, hunger, physique, endurance, intellect, knownRecipes);
         } catch (IndexOutOfBoundsException | IllegalArgumentException err) {
             VillageTale.LOGGER.error("Exception while reading OpenVillagerManagementScreen: {}", err.toString());
             return null;
@@ -112,7 +124,7 @@ public class OpenVillagerManagementScreen extends BasePacket {
             Minecraft mc = Minecraft.getInstance();
             LedgerScreen screen = new LedgerScreen(Component.translatable("villagetale.gui.villager_management.title"));
             screen.setLeftPage(new VillagerManagementPage(screen, msg.villagerEntityId, msg.villageId, msg.homeZoneId, msg.workZoneId));
-            screen.setRightPage(new VillagerStatsPage(screen, msg.villagerEntityId, msg.villageId, msg.health, msg.hunger));
+            screen.setRightPage(new VillagerStatsPage(screen, msg.villagerEntityId, msg.villageId, msg.health, msg.hunger, msg.physique, msg.endurance, msg.intellect));
             mc.setScreen(screen);
         });
     }

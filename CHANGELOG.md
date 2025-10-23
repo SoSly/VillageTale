@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/SoSly/VillageTale)
 
+### Added
+- Villagers now have three core stats (Physique, Intellect, Endurance) visible in the villager management screen
+
 ### Changed
 - Recipe knowledge storage format updated (legacy saves will migrate automatically)
 
