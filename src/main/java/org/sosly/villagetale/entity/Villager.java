@@ -348,9 +348,9 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         if (tag.contains("Stats")) {
-            this.stats.deserializeInto(tag.getCompound("Stats"), this.random);
+            this.stats.deserializeNBT(tag.getCompound("Stats"), this.random);
         } else {
-            this.stats.deserializeInto(new CompoundTag(), this.random);
+            this.stats.deserializeNBT(new CompoundTag(), this.random);
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {

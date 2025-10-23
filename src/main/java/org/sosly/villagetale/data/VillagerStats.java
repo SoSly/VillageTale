@@ -1,9 +1,14 @@
 package org.sosly.villagetale.data;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 
 public class VillagerStats {
+    private static final int MIN_STAT_VALUE = 1;
+    private static final int MAX_STARTING_STAT_VALUE = 4;
+    private static final int MAX_STAT_VALUE = 20;
+
     private int physique;
     private int endurance;
     private int intellect;
@@ -18,12 +23,24 @@ public class VillagerStats {
         return physique;
     }
 
+    public void setPhysique(int physique) {
+        this.physique = Mth.clamp(physique, MIN_STAT_VALUE, MAX_STAT_VALUE);
+    }
+
     public int getEndurance() {
         return endurance;
     }
 
+    public void setEndurance(int endurance) {
+        this.endurance = Mth.clamp(endurance, MIN_STAT_VALUE, MAX_STAT_VALUE);
+    }
+
     public int getIntellect() {
         return intellect;
+    }
+
+    public void setIntellect(int intellect) {
+        this.intellect = Mth.clamp(intellect, MIN_STAT_VALUE, MAX_STAT_VALUE);
     }
 
     public CompoundTag serializeNBT() {
@@ -34,16 +51,16 @@ public class VillagerStats {
         return tag;
     }
 
-    public void deserializeInto(CompoundTag nbt, RandomSource random) {
-        if (nbt.contains("Physique") && nbt.contains("Endurance") && nbt.contains("Intellect")) {
-            this.physique = nbt.getInt("Physique");
-            this.endurance = nbt.getInt("Endurance");
-            this.intellect = nbt.getInt("Intellect");
+    public void deserializeNBT(CompoundTag nbt, RandomSource random) {
+        if (!nbt.contains("Physique") || !nbt.contains("Endurance") || !nbt.contains("Intellect")) {
+            this.physique = MIN_STAT_VALUE + random.nextInt(MAX_STARTING_STAT_VALUE);
+            this.endurance = MIN_STAT_VALUE + random.nextInt(MAX_STARTING_STAT_VALUE);
+            this.intellect = MIN_STAT_VALUE + random.nextInt(MAX_STARTING_STAT_VALUE);
             return;
         }
 
-        this.physique = 1 + random.nextInt(4);
-        this.endurance = 1 + random.nextInt(4);
-        this.intellect = 1 + random.nextInt(4);
+        this.physique = Mth.clamp(nbt.getInt("Physique"), MIN_STAT_VALUE, MAX_STAT_VALUE);
+        this.endurance = Mth.clamp(nbt.getInt("Endurance"), MIN_STAT_VALUE, MAX_STAT_VALUE);
+        this.intellect = Mth.clamp(nbt.getInt("Intellect"), MIN_STAT_VALUE, MAX_STAT_VALUE);
     }
 }
