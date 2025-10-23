@@ -34,7 +34,7 @@ public class ProfessionRegistry {
             return;
         }
         professions.put(id, profession);
-        VillageTale.LOGGER.info("Registered profession: {} (total: {})", profession.getID(), professions.size());
+        VillageTale.LOGGER.debug("Registered profession: {} (total: {})", profession.getID(), professions.size());
     }
 
     public Optional<IProfession> getProfession(ResourceLocation id) {

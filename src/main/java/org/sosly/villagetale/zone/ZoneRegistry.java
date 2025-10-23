@@ -36,7 +36,7 @@ public class ZoneRegistry {
 
     public void register(ResourceLocation id, IZoneType type) {
         types.put(id, type);
-        VillageTale.LOGGER.info("Registered zone type: {} (total: {})", id, types.size());
+        VillageTale.LOGGER.debug("Registered zone type: {} (total: {})", id, types.size());
     }
 
     public IZoneType type(ResourceLocation id) {

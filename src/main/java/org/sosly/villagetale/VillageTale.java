@@ -60,8 +60,10 @@ public class VillageTale {
         modEventBus.post(new RegisterZoneTypesEvent(ZoneRegistry.INSTANCE));
         modEventBus.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
 
-        NetworkHandler.init();
-        CompatRegistry.registerCompats();
+        event.enqueueWork(() -> {
+            NetworkHandler.init();
+            CompatRegistry.registerCompats();
+        });
     }
 
     private void onLoadComplete(final FMLLoadCompleteEvent event) {
