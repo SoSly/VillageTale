@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 
-public interface IRecipeKnowledgeCapability {
+public interface IRecipeKnowledge {
     ImmutableSet<ResourceLocation> known();
     boolean knows(ServerLevel level, ResourceLocation recipeId);
     boolean learn(ServerLevel level, ResourceLocation recipeId);

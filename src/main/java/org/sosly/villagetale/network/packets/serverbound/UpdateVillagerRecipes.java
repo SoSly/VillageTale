@@ -12,8 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.capability.IRecipeKnowledgeCapability;
-import org.sosly.villagetale.capability.Capabilities;
+import org.sosly.villagetale.data.RecipeKnowledge;
 import org.sosly.villagetale.entity.Villager;
 import org.sosly.villagetale.network.BasePacket;
 import org.sosly.villagetale.network.NetworkHandler;
@@ -82,13 +81,7 @@ public class UpdateVillagerRecipes extends BasePacket {
                 return;
             }
 
-            IRecipeKnowledgeCapability knowledge = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-                .orElse(null);
-
-            if (knowledge == null) {
-                player.sendSystemMessage(Component.literal("Failed to update recipes: capability not found"));
-                return;
-            }
+            RecipeKnowledge knowledge = villager.getRecipeKnowledge();
 
             Set<ResourceLocation> validatedRecipes = new HashSet<>();
             for (ResourceLocation recipeId : msg.recipes) {

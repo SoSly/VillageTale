@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/SoSly/VillageTale)
 
+### Changed
+- Recipe knowledge storage format updated (legacy saves will migrate automatically)
+
 ## [Release 0.1.0-alpha](https://github.com/SoSly/VillageTale/releases/tag/0.1.0-alpha)
 
 ### Added

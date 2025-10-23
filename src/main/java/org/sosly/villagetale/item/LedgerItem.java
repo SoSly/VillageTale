@@ -174,9 +174,7 @@ public class LedgerItem extends Item {
         float health = villager.getHealth();
         int hunger = villager.getFoodData().getFoodLevel();
 
-        List<ResourceLocation> knownRecipes = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-            .map(knowledge -> new ArrayList<>(knowledge.known()))
-            .orElse(new ArrayList<>());
+        List<ResourceLocation> knownRecipes = new ArrayList<>(villager.getRecipeKnowledge().known());
 
         SyncVillageCapability.send(serverPlayer, villageCapability, serverLevel.getServer());
         OpenVillagerManagementScreen.send(serverPlayer, target.getId(), villager.getVillage().get(), homeZoneId, workZoneId, inventory, health, hunger, knownRecipes);

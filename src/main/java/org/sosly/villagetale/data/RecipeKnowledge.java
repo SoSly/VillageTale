@@ -1,4 +1,4 @@
-package org.sosly.villagetale.capability.recipeknowledge;
+package org.sosly.villagetale.data;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
@@ -12,9 +12,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import org.sosly.villagetale.api.capability.IRecipeKnowledgeCapability;
+import org.sosly.villagetale.api.capability.IRecipeKnowledge;
 
-public class RecipeKnowledgeCapability implements IRecipeKnowledgeCapability {
+public class RecipeKnowledge implements IRecipeKnowledge {
     private final Set<ResourceLocation> recipes = new HashSet<>();
 
     @Override
@@ -77,10 +77,18 @@ public class RecipeKnowledgeCapability implements IRecipeKnowledgeCapability {
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag nbt) {
+    public static RecipeKnowledge deserializeNBT(CompoundTag nbt) {
+        RecipeKnowledge knowledge = new RecipeKnowledge();
+
+        if (!nbt.contains("recipes", Tag.TAG_LIST)) {
+            return knowledge;
+        }
+
         ListTag recipeList = nbt.getList("recipes", Tag.TAG_STRING);
         for (Tag tag : recipeList) {
-            recipes.add(new ResourceLocation(tag.getAsString()));
+            knowledge.recipes.add(new ResourceLocation(tag.getAsString()));
         }
+
+        return knowledge;
     }
 }

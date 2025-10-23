@@ -17,9 +17,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.sosly.villagetale.VillageTale;
-import org.sosly.villagetale.api.capability.IRecipeKnowledgeCapability;
-import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.command.Result;
+import org.sosly.villagetale.data.RecipeKnowledge;
 import org.sosly.villagetale.command.arguments.VillagerUUIDArgument;
 import org.sosly.villagetale.data.ItemOrTagMatcher;
 import org.sosly.villagetale.entity.Villager;
@@ -90,17 +89,12 @@ public class RecipeCommand {
                 return SharedSuggestionProvider.suggestResource(recipes, builder);
             };
     
-    public static final SuggestionProvider<CommandSourceStack> KNOWN_RECIPE_SUGGESTIONS = 
+    public static final SuggestionProvider<CommandSourceStack> KNOWN_RECIPE_SUGGESTIONS =
             (CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) -> {
                 try {
                     Villager villager = VillagerUUIDArgument.getVillager(context, "target");
-                    IRecipeKnowledgeCapability knowledge = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-                            .orElse(null);
-                    
-                    if (knowledge == null) {
-                        return Suggestions.empty();
-                    }
-                    
+                    RecipeKnowledge knowledge = villager.getRecipeKnowledge();
+
                     ImmutableSet<ResourceLocation> knownRecipes = knowledge.known();
                     return SharedSuggestionProvider.suggestResource(knownRecipes.stream(), builder);
                 } catch (Exception e) {
@@ -109,14 +103,8 @@ public class RecipeCommand {
             };
     
     public static Result listRecipes(ServerLevel level, Villager villager) {
-        IRecipeKnowledgeCapability knowledge = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-                .orElse(null);
-        
-        if (knowledge == null) {
-            return Result.failure(Component.translatable(
-                    String.format("%s.command.villager.recipes.no_capability", VillageTale.MOD_ID)));
-        }
-        
+        RecipeKnowledge knowledge = villager.getRecipeKnowledge();
+
         ImmutableSet<ResourceLocation> knownRecipes = knowledge.known();
         
         if (knownRecipes.isEmpty()) {
@@ -143,14 +131,8 @@ public class RecipeCommand {
     }
     
     public static Result addRecipe(ServerLevel level, Villager villager, ResourceLocation recipeId) {
-        IRecipeKnowledgeCapability knowledge = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-                .orElse(null);
-        
-        if (knowledge == null) {
-            return Result.failure(Component.translatable(
-                    String.format("%s.command.villager.recipes.no_capability", VillageTale.MOD_ID)));
-        }
-        
+        RecipeKnowledge knowledge = villager.getRecipeKnowledge();
+
         RecipeManager recipeManager = level.getRecipeManager();
         if (recipeManager.byKey(recipeId).isEmpty()) {
             return Result.failure(Component.translatable(
@@ -184,14 +166,8 @@ public class RecipeCommand {
     }
     
     public static Result removeRecipe(ServerLevel level, Villager villager, ResourceLocation recipeId) {
-        IRecipeKnowledgeCapability knowledge = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-                .orElse(null);
-        
-        if (knowledge == null) {
-            return Result.failure(Component.translatable(
-                    String.format("%s.command.villager.recipes.no_capability", VillageTale.MOD_ID)));
-        }
-        
+        RecipeKnowledge knowledge = villager.getRecipeKnowledge();
+
         if (!knowledge.knows(level, recipeId)) {
             return Result.failure(Component.translatable(
                     String.format("%s.command.villager.recipes.doesnt_know", VillageTale.MOD_ID),

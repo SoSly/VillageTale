@@ -73,7 +73,7 @@ This document outlines the development roadmap from Alpha 1 through the 1.0 rele
 - Housing quality affects villager contentment
 - Village atmosphere (decorations, flowers, lighting) improves mood
 - Population balance (overcrowding causes stress)
-- Grief from recent deaths affects entire village (requires gravestones from Alpha 2)
+- Grief from recent deaths affects entire village
 - Happiness impacts work efficiency, movement speed, and family planning
 
 **Grief & Mourning:**

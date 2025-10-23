@@ -5,15 +5,13 @@ import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.Recipe;
-import org.sosly.villagetale.api.capability.IRecipeKnowledgeCapability;
-import org.sosly.villagetale.capability.Capabilities;
+import org.sosly.villagetale.data.RecipeKnowledge;
 import org.sosly.villagetale.entity.MemoryModuleTypes;
 import org.sosly.villagetale.entity.Villager;
 
 public class VillagerHelper {
     public static Optional<ResourceLocation> getRandomRecipe(ServerLevel level, Villager villager) {
-        IRecipeKnowledgeCapability knowledge = villager.getCapability(Capabilities.RECIPE_KNOWLEDGE_CAPABILITY)
-                .orElseThrow(() -> new IllegalStateException("No knowledge capability found"));
+        RecipeKnowledge knowledge = villager.getRecipeKnowledge();
 
         ImmutableSet<ResourceLocation> recipes = knowledge.known();
         if (recipes.isEmpty()) {

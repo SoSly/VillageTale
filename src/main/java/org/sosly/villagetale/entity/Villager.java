@@ -62,6 +62,7 @@ import org.sosly.villagetale.api.capability.IVillageCapability;
 import org.sosly.villagetale.api.capability.IVillagesCapability;
 import org.sosly.villagetale.capability.Capabilities;
 import org.sosly.villagetale.data.LivingEntityFoodData;
+import org.sosly.villagetale.data.RecipeKnowledge;
 import org.sosly.villagetale.data.VillageInfo;
 import org.sosly.villagetale.entity.ai.SensorTypes;
 import org.sosly.villagetale.entity.ai.goals.VillagerGoalPackages;
@@ -78,6 +79,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
 
     private final LivingEntityFoodData foodData;
     private final SimpleContainer inventory;
+    private final RecipeKnowledge recipeKnowledge;
     private ImmutableList<MemoryModuleType<?>> memoryTypes;
 
     private ImmutableList<SensorType<? extends Sensor<? super Villager>>> sensorTypes;
@@ -98,6 +100,7 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         super(entityType, level);
         this.foodData = new LivingEntityFoodData();
         this.inventory = new SimpleContainer(5);
+        this.recipeKnowledge = new RecipeKnowledge();
         ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         this.getNavigation().setCanFloat(true);
         this.setCanPickUpLoot(true);
@@ -234,6 +237,10 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         this.entityData.set(DATA_FISHING_POS, Optional.ofNullable(pos));
     }
 
+    public RecipeKnowledge getRecipeKnowledge() {
+        return this.recipeKnowledge;
+    }
+
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
@@ -276,6 +283,8 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (followingPlayerId.isPresent()) {
             tag.putString("FollowingPlayerId", followingPlayerId.get().toString());
         }
+
+        tag.put("RecipeKnowledge", this.recipeKnowledge.serializeNBT());
     }
 
     @Override
@@ -322,6 +331,19 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         if (tag.contains("FollowingPlayerId")) {
             UUID followingPlayerId = UUID.fromString(tag.getString("FollowingPlayerId"));
             this.brain.setMemory(MemoryModuleTypes.FOLLOWING_PLAYER.get(), followingPlayerId);
+        }
+
+        if (tag.contains("RecipeKnowledge")) {
+            RecipeKnowledge loaded = RecipeKnowledge.deserializeNBT(tag.getCompound("RecipeKnowledge"));
+            for (ResourceLocation recipe : loaded.getRecipes()) {
+                this.recipeKnowledge.addRecipe(recipe);
+            }
+        } else if (tag.contains("forge:recipe_knowledge")) {
+            CompoundTag legacyCapability = tag.getCompound("forge:recipe_knowledge");
+            RecipeKnowledge loaded = RecipeKnowledge.deserializeNBT(legacyCapability);
+            for (ResourceLocation recipe : loaded.getRecipes()) {
+                this.recipeKnowledge.addRecipe(recipe);
+            }
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {
