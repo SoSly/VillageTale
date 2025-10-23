@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import org.sosly.villagetale.api.capability.IRecipeKnowledge;
+import org.sosly.villagetale.api.IRecipeKnowledge;
 
 public class RecipeKnowledge implements IRecipeKnowledge {
     private final Set<ResourceLocation> recipes = new HashSet<>();
@@ -52,14 +52,6 @@ public class RecipeKnowledge implements IRecipeKnowledge {
         return recipes.remove(recipeId);
     }
 
-    public void addRecipe(ResourceLocation recipeId) {
-        recipes.add(recipeId);
-    }
-
-    public Set<ResourceLocation> getRecipes() {
-        return recipes;
-    }
-
     private Optional<? extends Recipe<?>> getRecipe(ServerLevel level, ResourceLocation recipeId) {
         RecipeManager recipeManager = level.getRecipeManager();
         return recipeManager.byKey(recipeId);
@@ -77,18 +69,20 @@ public class RecipeKnowledge implements IRecipeKnowledge {
         return tag;
     }
 
-    public static RecipeKnowledge deserializeNBT(CompoundTag nbt) {
-        RecipeKnowledge knowledge = new RecipeKnowledge();
-
+    public void deserializeInto(CompoundTag nbt) {
         if (!nbt.contains("recipes", Tag.TAG_LIST)) {
-            return knowledge;
+            return;
         }
 
         ListTag recipeList = nbt.getList("recipes", Tag.TAG_STRING);
         for (Tag tag : recipeList) {
-            knowledge.recipes.add(new ResourceLocation(tag.getAsString()));
+            recipes.add(new ResourceLocation(tag.getAsString()));
         }
+    }
 
+    public static RecipeKnowledge deserializeNBT(CompoundTag nbt) {
+        RecipeKnowledge knowledge = new RecipeKnowledge();
+        knowledge.deserializeInto(nbt);
         return knowledge;
     }
 }

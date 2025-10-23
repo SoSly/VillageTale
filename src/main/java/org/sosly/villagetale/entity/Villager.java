@@ -334,16 +334,9 @@ public class Villager extends PathfinderMob implements InventoryCarrier {
         }
 
         if (tag.contains("RecipeKnowledge")) {
-            RecipeKnowledge loaded = RecipeKnowledge.deserializeNBT(tag.getCompound("RecipeKnowledge"));
-            for (ResourceLocation recipe : loaded.getRecipes()) {
-                this.recipeKnowledge.addRecipe(recipe);
-            }
+            this.recipeKnowledge.deserializeInto(tag.getCompound("RecipeKnowledge"));
         } else if (tag.contains("forge:recipe_knowledge")) {
-            CompoundTag legacyCapability = tag.getCompound("forge:recipe_knowledge");
-            RecipeKnowledge loaded = RecipeKnowledge.deserializeNBT(legacyCapability);
-            for (ResourceLocation recipe : loaded.getRecipes()) {
-                this.recipeKnowledge.addRecipe(recipe);
-            }
+            this.recipeKnowledge.deserializeInto(tag.getCompound("forge:recipe_knowledge"));
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {

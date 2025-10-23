@@ -1,4 +1,4 @@
-package org.sosly.villagetale.api.capability;
+package org.sosly.villagetale.api;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.resources.ResourceLocation;
