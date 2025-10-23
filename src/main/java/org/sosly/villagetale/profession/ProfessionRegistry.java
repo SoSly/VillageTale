@@ -6,8 +6,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IProfession;
+import org.sosly.villagetale.event.RegisterProfessionsEvent;
 import org.sosly.villagetale.profession.professions.Butcher;
 import org.sosly.villagetale.profession.professions.Carpenter;
 import org.sosly.villagetale.profession.professions.Commoner;
@@ -18,6 +21,7 @@ import org.sosly.villagetale.profession.professions.Forester;
 import org.sosly.villagetale.profession.professions.Herder;
 import org.sosly.villagetale.profession.professions.Tanner;
 
+@Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ProfessionRegistry {
     public static final ProfessionRegistry INSTANCE = new ProfessionRegistry();
     private final Map<ResourceLocation, IProfession> professions = new HashMap<ResourceLocation, IProfession>();
@@ -30,6 +34,7 @@ public class ProfessionRegistry {
             return;
         }
         professions.put(id, profession);
+        VillageTale.LOGGER.info("Registered profession: {} (total: {})", profession.getID(), professions.size());
     }
 
     public Optional<IProfession> getProfession(ResourceLocation id) {
@@ -44,15 +49,16 @@ public class ProfessionRegistry {
         return professions.keySet();
     }
 
-    {
-        professions.put(Butcher.ID, new Butcher());
-        professions.put(Carpenter.ID, new Carpenter());
-        professions.put(Commoner.ID, new Commoner());
-        professions.put(Cook.ID, new Cook());
-        professions.put(Farmer.ID, new Farmer());
-        professions.put(Fisher.ID, new Fisher());
-        professions.put(Forester.ID, new Forester());
-        professions.put(Herder.ID, new Herder());
-        professions.put(Tanner.ID, new Tanner());
+    @SubscribeEvent
+    public static void onRegisterProfessions(RegisterProfessionsEvent event) {
+        event.register(new Butcher());
+        event.register(new Carpenter());
+        event.register(new Commoner());
+        event.register(new Cook());
+        event.register(new Farmer());
+        event.register(new Fisher());
+        event.register(new Forester());
+        event.register(new Herder());
+        event.register(new Tanner());
     }
 }

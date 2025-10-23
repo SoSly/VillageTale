@@ -4,9 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.sosly.villagetale.VillageTale;
 import org.sosly.villagetale.api.IZoneShape;
 import org.sosly.villagetale.api.IZoneType;
+import org.sosly.villagetale.event.RegisterZoneTypesEvent;
 import org.sosly.villagetale.zone.shape.Box;
 import org.sosly.villagetale.zone.shape.Cylinder;
 import org.sosly.villagetale.zone.shape.Point;
@@ -23,6 +26,7 @@ import org.sosly.villagetale.zone.type.Tannery;
 import org.sosly.villagetale.zone.type.TownHall;
 import org.sosly.villagetale.zone.type.Woodshop;
 
+@Mod.EventBusSubscriber(modid = VillageTale.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ZoneRegistry {
     public static final ZoneRegistry INSTANCE = new ZoneRegistry();
 
@@ -57,23 +61,24 @@ public class ZoneRegistry {
     }
 
     {
-        // todo: this is a hack because the events are not working for some reason.
-        types.put(Butchery.ID, new Butchery());
-        types.put(Dock.ID, new Dock());
-        types.put(Farmland.ID, new Farmland());
-        types.put(Forest.ID, new Forest());
-        types.put(Home.ID, new Home());
-        types.put(Kitchen.ID, new Kitchen());
-        types.put(Pen.ID, new Pen());
-        types.put(Storage.ID, new Storage());
-        types.put(Tannery.ID, new Tannery());
-        types.put(TownHall.ID, new TownHall());
-        types.put(Woodshop.ID, new Woodshop());
-        // end todo
-
         shapes.put(Point.ID, Point::new);
         shapes.put(Box.ID, Box::new);
         shapes.put(Route.ID, Route::new);
         shapes.put(Cylinder.ID, Cylinder::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterZoneTypes(RegisterZoneTypesEvent event) {
+        event.register(Butchery.ID, new Butchery());
+        event.register(Dock.ID, new Dock());
+        event.register(Farmland.ID, new Farmland());
+        event.register(Forest.ID, new Forest());
+        event.register(Home.ID, new Home());
+        event.register(Kitchen.ID, new Kitchen());
+        event.register(Pen.ID, new Pen());
+        event.register(Storage.ID, new Storage());
+        event.register(Tannery.ID, new Tannery());
+        event.register(TownHall.ID, new TownHall());
+        event.register(Woodshop.ID, new Woodshop());
     }
 }

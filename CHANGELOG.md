@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Recipe knowledge storage format updated (legacy saves will migrate automatically)
 
+### Fixed
+- Profession and ZoneType registration now properly fires on the ModBus.
+
 ## [Release 0.1.0-alpha](https://github.com/SoSly/VillageTale/releases/tag/0.1.0-alpha)
 
 ### Added

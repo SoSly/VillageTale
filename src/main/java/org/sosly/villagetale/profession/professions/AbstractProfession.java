@@ -61,6 +61,9 @@ public abstract class AbstractProfession implements IProfession {
 
     @Override
     public boolean isValidWorkZone(IVillageZone zone) {
+        if (zone.getType() == null) {
+            return false;
+        }
         return workZones.stream()
             .anyMatch(wz -> wz.equals(zone.getType().getID()));
     }

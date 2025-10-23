@@ -10,6 +10,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.sosly.villagetale.block.BlockTypes;
@@ -46,6 +47,7 @@ public class VillageTale {
         Activities.register(modEventBus);
 
         modEventBus.addListener(this::setup);
+        modEventBus.addListener(this::onLoadComplete);
         modEventBus.addListener(this::onEntityAttributeCreation);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.build());
@@ -54,16 +56,16 @@ public class VillageTale {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            NetworkHandler.init();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.post(new RegisterZoneTypesEvent(ZoneRegistry.INSTANCE));
+        modEventBus.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
 
-            CompatRegistry.registerCompats();
+        NetworkHandler.init();
+        CompatRegistry.registerCompats();
+    }
 
-            MinecraftForge.EVENT_BUS.post(new RegisterZoneTypesEvent(ZoneRegistry.INSTANCE));
-            MinecraftForge.EVENT_BUS.post(new RegisterProfessionsEvent(ProfessionRegistry.INSTANCE));
-
-            LOGGER.info("VillageTale setup complete");
-        });
+    private void onLoadComplete(final FMLLoadCompleteEvent event) {
+        LOGGER.info("VillageTale loaded");
     }
 
     @SubscribeEvent
