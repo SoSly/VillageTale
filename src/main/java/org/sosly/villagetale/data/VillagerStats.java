@@ -14,9 +14,9 @@ public class VillagerStats {
     private int intellect;
 
     public VillagerStats() {
-        this.physique = 0;
-        this.endurance = 0;
-        this.intellect = 0;
+        this.physique = MIN_STAT_VALUE;
+        this.endurance = MIN_STAT_VALUE;
+        this.intellect = MIN_STAT_VALUE;
     }
 
     public int getPhysique() {
